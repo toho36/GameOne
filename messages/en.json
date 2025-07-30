@@ -1,0 +1,21 @@
+{
+  "HomePage": {
+    "title": "Welcome to BunPlate",
+    "description": "A comprehensive modern web application boilerplate built with Bun runtime and optimized for Vercel deployment.",
+    "getStarted": "Get Started",
+    "learnMore": "Learn More"
+  },
+  "Navigation": {
+    "home": "Home",
+    "about": "About",
+    "contact": "Contact"
+  },
+  "Common": {
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "retry": "Try again",
+    "cancel": "Cancel",
+    "save": "Save",
+    "close": "Close"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "HomePage": {
+    "title": "Vítejte v BunPlate",
+    "description": "Komplexní moderní šablona webové aplikace vytvořená s Bun runtime a optimalizovaná pro nasazení na Vercel.",
+    "getStarted": "Začít",
+    "learnMore": "Zjistit více"
+  },
+  "Navigation": {
+    "home": "Domů",
+    "about": "O nás",
+    "contact": "Kontakt"
+  },
+  "Common": {
+    "loading": "Načítání...",
+    "error": "Něco se pokazilo",
+    "retry": "Zkusit znovu",
+    "cancel": "Zrušit",
+    "save": "Uložit",
+    "close": "Zavřít"
+  }
+}
