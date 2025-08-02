@@ -1,0 +1,939 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ================================
+// CORE USER MANAGEMENT
+// ================================
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  PENDING_VERIFICATION
+}
+
+model Role {
+  id          String  @id @default(cuid())
+  name        String  @unique // "USER", "ADMIN", "EVENT_MANAGER", etc.
+  displayName String // "Event Manager", "Administrator"
+  description String?
+  color       String? // For UI display (#FF5733)
+  priority    Int     @default(0) // Higher number = higher priority
+  isSystem    Boolean @default(false) // System roles can't be deleted
+  isDefault   Boolean @default(false) // Default role for new users
+
+  // Permissions (JSON for flexibility)
+  permissions Json @default("[]") // ["events.create", "users.manage", etc.]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  users     User[]
+  userRoles UserRole[]
+
+  @@index([name])
+  @@index([isDefault])
+  @@map("roles")
+}
+
+model User {
+  id            String     @id @default(cuid())
+  kindeId       String?    @unique // For Kinde Auth integration
+  email         String     @unique
+  name          String?
+  firstName     String?
+  lastName      String?
+  primaryRoleId String? // Primary role for quick access
+  status        UserStatus @default(PENDING_VERIFICATION)
+  phoneNumber   String?
+
+  // Internationalization
+  preferredLocale String @default("en")
+
+  // Timestamps
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  lastLoginAt DateTime?
+
+  // Relations
+  primaryRole                  Role?                 @relation(fields: [primaryRoleId], references: [id])
+  userRoles                    UserRole[] // For multiple roles per user
+  assignedUserRoles            UserRole[]            @relation("UserRoleAssigner") // Roles assigned by this user
+  profile                      Profile?
+  eventRegistrations           Registration[]
+  waitingListEntries           WaitingList[]
+  createdEvents                Event[]               @relation("EventCreator")
+  managedEvents                Event[]               @relation("EventManager")
+  payments                     Payment[]
+  registrationHistory          RegistrationHistory[] @relation("RegistrationHistoryUser")
+  performedRegistrationActions RegistrationHistory[] @relation("RegistrationHistoryPerformedBy")
+  auditLogs                    AuditLog[]
+  notificationLogs             NotificationLog[]
+  eventFeedback                EventFeedback[]
+  uploadedDocuments            EventDocument[]
+  createdVideoClips            VideoClip[]       @relation("VideoClipCreator")
+  videoComments                VideoComment[]    @relation("VideoCommentUser")
+  videoReactions               VideoReaction[]
+  videoViews                   VideoView[]
+
+  // Indexes for performance
+  @@index([email])
+  @@index([primaryRoleId, status])
+  @@index([kindeId])
+  @@index([status, lastLoginAt]) // For user activity reports
+  @@index([preferredLocale]) // For locale-based queries
+  // TODO: Add email validation at application level - format: email ~ '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+  @@map("users")
+}
+
+// Many-to-many relationship for users with multiple roles
+model UserRole {
+  id     String @id @default(cuid())
+  userId String
+  roleId String
+
+  // Role assignment metadata
+  assignedAt DateTime  @default(now())
+  assignedBy String? // User ID who assigned this role
+  expiresAt  DateTime? // Optional role expiration
+  isActive   Boolean   @default(true)
+
+  // Relations
+  user           User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role           Role  @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  assignedByUser User? @relation("UserRoleAssigner", fields: [assignedBy], references: [id])
+
+  // Prevent duplicate role assignments
+  @@unique([userId, roleId])
+  @@index([userId])
+  @@index([roleId])
+  @@map("user_roles")
+}
+
+model Profile {
+  id       String  @id @default(cuid())
+  userId   String  @unique
+  bio      String?
+  avatar   String? // URL to profile image
+  company  String?
+  jobTitle String?
+  website  String?
+  linkedin String?
+  twitter  String?
+
+  // Preferences
+  emailNotifications Boolean @default(true)
+  smsNotifications   Boolean @default(false)
+  marketingEmails    Boolean @default(false)
+
+  // Emergency contact
+  emergencyContactName  String?
+  emergencyContactPhone String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("profiles")
+}
+
+// ================================
+// EVENT MANAGEMENT
+// ================================
+
+enum EventStatus {
+  DRAFT
+  PUBLISHED
+  CANCELLED
+  COMPLETED
+  POSTPONED
+}
+
+enum EventType {
+  WORKSHOP
+  SEMINAR
+  CONFERENCE
+  MEETUP
+  TRAINING
+  SOCIAL
+  OTHER
+}
+
+model Event {
+  id               String  @id @default(cuid())
+  title            String
+  slug             String  @unique
+  description      String?
+  shortDescription String?
+
+  // Event details
+  type     EventType   @default(MEETUP)
+  status   EventStatus @default(DRAFT)
+  capacity Int
+  price    Decimal?    @db.Decimal(10, 2)
+  currency String      @default("EUR")
+
+  // Scheduling
+  startDate DateTime
+  endDate   DateTime?
+  timezone  String    @default("Europe/Bratislava")
+
+  // Location
+  venue     String?
+  address   String?
+  city      String?
+  country   String? @default("Slovakia")
+  isOnline  Boolean @default(false)
+  onlineUrl String?
+
+  // Registration settings
+  registrationStartDate DateTime?
+  registrationEndDate   DateTime?
+  requiresApproval      Boolean   @default(false)
+  allowWaitingList      Boolean   @default(true)
+  maxWaitingList        Int?
+
+  // Payment settings
+  requiresPayment Boolean @default(false)
+  bankAccountId   String?
+
+  // Internationalization - JSON for multiple languages
+  // Example: {"en": {"title": "Event Title", "description": "..."}, "cs": {...}}
+  translations Json?
+
+  // Metadata
+  tags       String[]
+  imageUrl   String?
+  websiteUrl String?
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Foreign keys
+  creatorId  String
+  managerId  String?
+  categoryId String? // Link to event category
+
+  // Relations
+  creator             User                  @relation("EventCreator", fields: [creatorId], references: [id])
+  manager             User?                 @relation("EventManager", fields: [managerId], references: [id])
+  bankAccount         BankAccount?          @relation(fields: [bankAccountId], references: [id])
+  category            EventCategory?        @relation(fields: [categoryId], references: [id])
+  registrations       Registration[]
+  waitingList         WaitingList[]
+  registrationHistory RegistrationHistory[]
+  payments            Payment[]
+  feedback            EventFeedback[]
+  documents           EventDocument[]
+  videoClips          VideoClip[]
+
+  // Performance indexes for complex queries
+  @@index([status, startDate])
+  @@index([creatorId])
+  @@index([slug])
+  @@index([startDate])
+  @@index([type, status, startDate]) // For filtering events by type and status
+  @@index([city, country, startDate]) // For location-based searches
+  @@index([registrationStartDate, registrationEndDate]) // For registration window queries
+  @@index([requiresPayment, price]) // For payment-related filtering
+  @@index([categoryId, status]) // For category-based filtering
+  @@index([tags]) // For tag-based searches using GIN index
+  // TODO: Add validation at application level:
+  // - capacity > 0 AND capacity <= 10000
+  // - price IS NULL OR price >= 0  
+  // - endDate IS NULL OR endDate > startDate
+  // - registrationEndDate IS NULL OR registrationEndDate <= startDate
+  @@map("events")
+}
+
+// ================================
+// EVENT CATEGORIES & FEEDBACK
+// ================================
+
+model EventCategory {
+  id          String  @id @default(cuid())
+  name        String  @unique
+  slug        String  @unique
+  description String?
+  color       String? // Hex color for UI display
+  icon        String? // Icon identifier
+
+  // Category settings
+  isActive  Boolean @default(true)
+  sortOrder Int     @default(0)
+
+  // Internationalization
+  translations Json? // {"en": {"name": "Workshop", "description": "..."}, "cs": {...}}
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  events Event[]
+
+  @@index([isActive, sortOrder])
+  @@index([slug])
+  @@map("event_categories")
+}
+
+model EventFeedback {
+  id      String @id @default(cuid())
+  eventId String
+  userId  String
+
+  // Feedback content
+  rating  Int // 1-5 star rating
+  title   String?
+  comment String?
+
+  // Feedback categories
+  organizationRating Int? // 1-5 rating for organization
+  contentRating      Int? // 1-5 rating for content
+  venueRating        Int? // 1-5 rating for venue
+
+  // Moderation
+  isApproved  Boolean   @default(false)
+  isPublic    Boolean   @default(true)
+  moderatedBy String?
+  moderatedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Prevent duplicate feedback per user per event
+  @@unique([eventId, userId])
+  @@index([eventId, isApproved, isPublic])
+  @@index([rating, createdAt])
+  // TODO: Add rating validation at application level:
+  // - rating >= 1 AND rating <= 5
+  // - organizationRating IS NULL OR (organizationRating >= 1 AND organizationRating <= 5)
+  // - contentRating IS NULL OR (contentRating >= 1 AND contentRating <= 5)
+  // - venueRating IS NULL OR (venueRating >= 1 AND venueRating <= 5)
+  @@map("event_feedback")
+}
+
+model EventDocument {
+  id      String @id @default(cuid())
+  eventId String
+
+  // Document details
+  title       String
+  description String?
+  fileName    String
+  filePath    String
+  fileSize    Int // Size in bytes
+  mimeType    String
+
+  // Document type and access control
+  type                 String  @default("general") // "agenda", "presentation", "handout", "certificate", etc.
+  isPublic             Boolean @default(false) // Public documents can be downloaded by anyone
+  requiresRegistration Boolean @default(true) // Requires event registration to access
+
+  // Upload metadata
+  uploadedBy String
+  uploadedAt DateTime @default(now())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  event    Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  uploader User  @relation(fields: [uploadedBy], references: [id])
+
+  @@index([eventId, type, isPublic])
+  @@index([type, requiresRegistration])
+  @@map("event_documents")
+}
+
+// ================================
+// REGISTRATION SYSTEM  
+// ================================
+
+enum RegistrationStatus {
+  PENDING // Awaiting approval/payment
+  CONFIRMED // Confirmed attendance
+  CANCELLED // User cancelled
+  REJECTED // Admin rejected
+  ATTENDED // Actually attended event
+  NO_SHOW // Didn't show up
+}
+
+model Registration {
+  id      String             @id @default(cuid())
+  userId  String
+  eventId String
+  status  RegistrationStatus @default(PENDING)
+
+  // Registration details
+  registeredAt DateTime  @default(now())
+  confirmedAt  DateTime?
+  cancelledAt  DateTime?
+
+  // Additional data
+  notes               String?
+  dietaryRequirements String?
+  specialRequests     String?
+
+  // Payment tracking
+  requiresPayment Boolean @default(false)
+  paymentId       String? @unique
+
+  // Relations
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event   Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  payment Payment? @relation(fields: [paymentId], references: [id])
+
+  // Prevent duplicate registrations
+  @@unique([userId, eventId])
+  @@index([eventId, status])
+  @@index([userId])
+  @@index([status, registeredAt]) // For admin reporting and timeline analysis
+  @@index([requiresPayment, paymentId]) // For payment tracking
+  @@index([confirmedAt]) // For attendance tracking
+  @@map("registrations")
+}
+
+model WaitingList {
+  id         String    @id @default(cuid())
+  userId     String
+  eventId    String
+  position   Int // Position in waiting list
+  joinedAt   DateTime  @default(now())
+  notifiedAt DateTime? // When user was notified of availability
+
+  // Additional data
+  notes String?
+
+  // Relations
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  // Prevent duplicate waiting list entries
+  @@unique([userId, eventId])
+  @@index([eventId, position])
+  @@map("waiting_list")
+}
+
+// ================================
+// PAYMENT SYSTEM
+// ================================
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  BANK_TRANSFER
+  QR_CODE
+  CASH
+  CARD
+  OTHER
+}
+
+model Payment {
+  id             String  @id @default(cuid())
+  userId         String
+  eventId        String?
+  registrationId String?
+
+  amount   Decimal       @db.Decimal(10, 2)
+  currency String        @default("EUR")
+  method   PaymentMethod @default(QR_CODE)
+  status   PaymentStatus @default(PENDING)
+
+  // Bank transfer details
+  bankAccountId  String?
+  variableSymbol String? @unique // Slovak banking variable symbol
+  constantSymbol String?
+  specificSymbol String?
+
+  // QR code data
+  qrCodeData String? // Generated QR code string
+  qrCodeUrl  String? // URL to QR code image
+
+  // Payment tracking
+  paidAt     DateTime?
+  verifiedAt DateTime?
+  refundedAt DateTime?
+
+  // Additional data
+  description String?
+  notes       String?
+  reference   String? // External payment reference
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user         User          @relation(fields: [userId], references: [id])
+  event        Event?        @relation(fields: [eventId], references: [id])
+  registration Registration?
+  bankAccount  BankAccount?  @relation(fields: [bankAccountId], references: [id])
+
+  @@index([userId])
+  @@index([eventId])
+  @@index([status, createdAt])
+  @@index([variableSymbol])
+  @@index([method, status]) // For payment method analysis
+  @@index([paidAt, verifiedAt]) // For financial reporting
+  @@index([currency, amount]) // For financial analytics
+  @@index([bankAccountId, status]) // For bank account reconciliation
+  // TODO: Add payment amount validation at application level - amount > 0
+  @@map("payments")
+}
+
+model BankAccount {
+  id            String  @id @default(cuid())
+  name          String // Display name for the account
+  bankName      String
+  accountNumber String
+  bankCode      String
+  iban          String? @unique
+  swift         String?
+
+  // Slovak banking specifics
+  isDefault Boolean @default(false)
+  isActive  Boolean @default(true)
+
+  // QR code settings
+  qrCodeEnabled Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  events   Event[]
+  payments Payment[]
+
+  @@index([isDefault, isActive])
+  @@index([isActive, qrCodeEnabled]) // For active payment methods
+  // TODO: Add Slovak IBAN validation at application level - iban ~ '^SK\\d{2}\\s?\\d{4}\\s?\\d{4}\\s?\\d{4}\\s?\\d{4}\\s?\\d{4}$'
+  @@map("bank_accounts")
+}
+
+// ================================
+// AUDIT & HISTORY TRACKING
+// ================================
+
+enum RegistrationAction {
+  REGISTERED
+  CONFIRMED
+  CANCELLED
+  PROMOTED_FROM_WAITING_LIST
+  MOVED_TO_WAITING_LIST
+  PAYMENT_COMPLETED
+  PAYMENT_FAILED
+  ADMIN_APPROVED
+  ADMIN_REJECTED
+}
+
+model RegistrationHistory {
+  id      String             @id @default(cuid())
+  userId  String
+  eventId String
+  action  RegistrationAction
+
+  // Context data
+  previousStatus String?
+  newStatus      String?
+  reason         String?
+  adminNotes     String?
+
+  // Metadata
+  performedById String? // Who performed the action (admin/system)
+  timestamp     DateTime @default(now())
+  ipAddress     String?
+  userAgent     String?
+
+  // Relations
+  user        User  @relation("RegistrationHistoryUser", fields: [userId], references: [id])
+  event       Event @relation(fields: [eventId], references: [id])
+  performedBy User? @relation("RegistrationHistoryPerformedBy", fields: [performedById], references: [id])
+
+  @@index([userId, eventId])
+  @@index([timestamp])
+  @@map("registration_history")
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  VIEW
+  LOGIN
+  LOGOUT
+  EXPORT
+  IMPORT
+}
+
+model AuditLog {
+  id         String      @id @default(cuid())
+  userId     String?
+  action     AuditAction
+  resource   String // Table/resource name
+  resourceId String? // ID of the affected resource
+
+  // Change tracking
+  oldData Json? // Previous state
+  newData Json? // New state
+  changes Json? // Specific fields that changed
+
+  // Context
+  description String?
+  ipAddress   String?
+  userAgent   String?
+  sessionId   String?
+
+  timestamp DateTime @default(now())
+
+  // Relations
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([userId, timestamp])
+  @@index([resource, resourceId])
+  @@index([timestamp])
+  @@index([action, resource, timestamp]) // For audit filtering by action type
+  @@index([resource, action, timestamp]) // For resource-specific audits
+  @@index([sessionId, timestamp]) // For session-based audit trails
+  @@map("audit_logs")
+}
+
+// ================================
+// SYSTEM CONFIGURATION
+// ================================
+
+model SystemConfig {
+  key         String  @id
+  value       String
+  description String?
+  type        String  @default("string") // string, number, boolean, json
+  category    String? // grouping configs
+  isPublic    Boolean @default(false) // can be accessed by frontend
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([category])
+  @@map("system_config")
+}
+
+// ================================
+// EMAIL & NOTIFICATIONS
+// ================================
+
+enum NotificationType {
+  EMAIL
+  SMS
+  PUSH
+  IN_APP
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  DELIVERED
+  FAILED
+  BOUNCED
+}
+
+model NotificationTemplate {
+  id      String           @id @default(cuid())
+  name    String           @unique
+  type    NotificationType
+  subject String?
+
+  // Template content (supports multiple languages)
+  content   Json // {"en": "template", "cs": "šablona"}
+  variables Json? // Available template variables
+
+  isActive Boolean @default(true)
+  isSystem Boolean @default(false) // System templates can't be deleted
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  notifications NotificationLog[]
+
+  @@map("notification_templates")
+}
+
+model NotificationLog {
+  id         String  @id @default(cuid())
+  templateId String?
+  userId     String?
+
+  type   NotificationType
+  status NotificationStatus @default(PENDING)
+
+  recipient String // email, phone, user_id, etc.
+  subject   String?
+  content   String
+
+  // Delivery tracking
+  sentAt       DateTime?
+  deliveredAt  DateTime?
+  failedAt     DateTime?
+  errorMessage String?
+
+  // Context
+  eventId  String?
+  metadata Json? // Additional context data
+
+  createdAt DateTime @default(now())
+
+  // Relations
+  template NotificationTemplate? @relation(fields: [templateId], references: [id])
+  user     User?                 @relation(fields: [userId], references: [id])
+
+  @@index([userId, createdAt])
+  @@index([status, createdAt])
+  @@index([type, recipient])
+  @@map("notification_logs")
+}
+
+// ================================
+// VIDEO CLIPS SHARING SYSTEM
+// ================================
+
+enum VideoClipStatus {
+  DRAFT
+  PUBLISHED
+  MODERATED
+  REJECTED
+  ARCHIVED
+}
+
+enum VideoPrivacy {
+  PUBLIC
+  PRIVATE
+  EVENT_ONLY // Only visible to event participants
+  ROLE_RESTRICTED // Based on user roles
+}
+
+model VideoCategory {
+  id          String  @id @default(cuid())
+  name        String  @unique
+  slug        String  @unique
+  description String?
+  color       String? // Hex color for UI display
+  icon        String? // Icon identifier
+
+  // Category settings
+  isActive  Boolean @default(true)
+  sortOrder Int     @default(0)
+
+  // Internationalization
+  translations Json? // {"en": {"name": "Gaming", "description": "..."}, "cs": {...}}
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  videoClips VideoClip[]
+
+  @@index([isActive, sortOrder])
+  @@index([slug])
+  @@map("video_categories")
+}
+
+model VideoClip {
+  id          String          @id @default(cuid())
+  title       String
+  description String?
+  slug        String          @unique
+
+  // YouTube integration
+  youtubeVideoId String        @unique // YouTube video ID (e.g., "dQw4w9WgXcQ")
+  youtubeUrl     String        // Full YouTube URL
+  thumbnailUrl   String?       // YouTube thumbnail URL
+  duration       Int?          // Video duration in seconds
+  embedCode      String?       // YouTube embed HTML
+
+  // Content metadata
+  status     VideoClipStatus @default(DRAFT)
+  privacy    VideoPrivacy    @default(PUBLIC)
+  tags       String[]        // Array of tags for searchability
+  language   String          @default("en") // Video language
+
+  // Moderation
+  moderatedBy String?
+  moderatedAt DateTime?
+  moderationNotes String?
+
+  // Analytics
+  viewCount    Int @default(0)
+  likeCount    Int @default(0) // Cached count of positive reactions
+  commentCount Int @default(0) // Cached count of comments
+
+  // Event association (optional)
+  eventId String?
+
+  // Category association
+  categoryId String?
+
+  // Timestamps
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  publishedAt DateTime?
+
+  // Foreign keys
+  creatorId String
+
+  // Relations
+  creator   User           @relation("VideoClipCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+  event     Event?         @relation(fields: [eventId], references: [id], onDelete: SetNull)
+  category  VideoCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  comments  VideoComment[]
+  reactions VideoReaction[]
+  views     VideoView[]
+
+  @@index([status, privacy, publishedAt])
+  @@index([creatorId, status])
+  @@index([eventId, status])
+  @@index([categoryId, status])
+  @@index([tags]) // For tag-based searches using GIN index
+  @@index([youtubeVideoId])
+  @@index([viewCount, publishedAt]) // For popular videos
+  @@index([createdAt, status]) // For chronological listing
+  @@index([language, status]) // For language-specific searches
+  // TODO: Add YouTube URL validation at application level
+  // TODO: Add duration validation (> 0 AND <= 43200 seconds = 12 hours max)
+  @@map("video_clips")
+}
+
+model VideoComment {
+  id      String  @id @default(cuid())
+  videoId String
+  userId  String
+  content String
+
+  // Comment threading
+  parentId String? // For nested comments/replies
+  depth    Int     @default(0) // Comment nesting depth (0 = top-level)
+
+  // Moderation
+  isApproved  Boolean   @default(true) // Auto-approve by default
+  isEdited    Boolean   @default(false)
+  editedAt    DateTime?
+  moderatedBy String?
+  moderatedAt DateTime?
+
+  // Analytics
+  reactionCount Int @default(0) // Cached count of reactions
+
+  // Internationalization
+  language String @default("en") // Comment language
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  video     VideoClip       @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  user      User            @relation("VideoCommentUser", fields: [userId], references: [id], onDelete: Cascade)
+  parent    VideoComment?   @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   VideoComment[]  @relation("CommentReplies")
+  reactions VideoReaction[]
+
+  @@index([videoId, parentId, createdAt])
+  @@index([userId, createdAt])
+  @@index([parentId, depth]) // For threaded comments
+  @@index([isApproved, createdAt])
+  @@index([language, isApproved]) // For language-specific moderation
+  // TODO: Add content length validation at application level (e.g., max 2000 chars)
+  // TODO: Add depth validation (max 5 levels deep)
+  @@map("video_comments")
+}
+
+enum ReactionType {
+  LIKE
+  LOVE
+  LAUGH
+  WOW
+  ANGRY
+  SAD
+  FIRE
+  CLAP
+  HEART_EYES
+  THUMBS_UP
+  THUMBS_DOWN
+}
+
+model VideoReaction {
+  id   String       @id @default(cuid())
+  type ReactionType
+
+  // Target - either video or comment
+  videoId   String?
+  commentId String?
+
+  userId String
+
+  createdAt DateTime @default(now())
+
+  // Relations
+  user    User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  video   VideoClip?    @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  comment VideoComment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  // Prevent duplicate reactions - user can only react once per target
+  @@unique([userId, videoId])
+  @@unique([userId, commentId])
+  @@index([videoId, type])
+  @@index([commentId, type])
+  @@index([userId, createdAt])
+  @@index([type, createdAt]) // For trending reaction analysis
+  @@map("video_reactions")
+}
+
+model VideoView {
+  id      String @id @default(cuid())
+  videoId String
+  userId  String?
+
+  // View metadata
+  ipAddress     String?
+  userAgent     String?
+  sessionId     String?
+  referrer      String?
+  watchDuration Int?    // How long they watched in seconds
+
+  // Geographic data (optional)
+  country String?
+  city    String?
+
+  createdAt DateTime @default(now())
+
+  // Relations
+  video VideoClip @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  user  User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  // Allow multiple views per user but track uniqueness for analytics
+  @@index([videoId, userId, createdAt])
+  @@index([videoId, createdAt]) // For view analytics
+  @@index([userId, createdAt]) // For user viewing history
+  @@index([sessionId, createdAt]) // For session-based analytics
+  @@index([country, createdAt]) // For geographic analytics
+  @@map("video_views")
+}
