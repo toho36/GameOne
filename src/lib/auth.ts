@@ -1,4 +1,5 @@
-import { NextRequest } from "next/server";
+/* eslint-disable no-console */
+import type { NextRequest } from "next/server";
 
 /**
  * Verifies that a cron request is coming from Vercel
@@ -69,11 +70,9 @@ export async function verifyVercelCronSecret(request: NextRequest): Promise<{
 /**
  * Rate limiting for cron jobs to prevent abuse
  */
-export function isRateLimited(jobName: string, windowMs: number = 60000): boolean {
+export function isRateLimited(_jobName: string, _windowMs: number = 60000): boolean {
   // In a real implementation, you'd use Redis or a database
   // For now, we'll use in-memory storage (not ideal for production)
-  const now = Date.now();
-  const key = `cron_${jobName}`;
   
   // This is a simplified implementation
   // In production, use Redis or database-backed rate limiting
@@ -87,7 +86,7 @@ export async function logCronExecution(
   jobName: string, 
   success: boolean, 
   duration: number, 
-  details?: any
+  details?: Record<string, unknown>
 ): Promise<void> {
   const logEntry = {
     jobName,
