@@ -91,9 +91,7 @@ model User {
   eventFeedback                EventFeedback[]
   uploadedDocuments            EventDocument[]
   createdVideoClips            VideoClip[]       @relation("VideoClipCreator")
-  videoComments                VideoComment[]    @relation("VideoCommentUser")
   videoReactions               VideoReaction[]
-  videoViews                   VideoView[]
 
   // Indexes for performance
   @@index([email])
@@ -792,9 +790,7 @@ model VideoClip {
   moderationNotes String?
 
   // Analytics
-  viewCount    Int @default(0)
   likeCount    Int @default(0) // Cached count of positive reactions
-  commentCount Int @default(0) // Cached count of comments
 
   // Event association (optional)
   eventId String?
@@ -814,9 +810,7 @@ model VideoClip {
   creator   User           @relation("VideoClipCreator", fields: [creatorId], references: [id], onDelete: Cascade)
   event     Event?         @relation(fields: [eventId], references: [id], onDelete: SetNull)
   category  VideoCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  comments  VideoComment[]
   reactions VideoReaction[]
-  views     VideoView[]
 
   @@index([status, privacy, publishedAt])
   @@index([creatorId, status])
@@ -824,7 +818,7 @@ model VideoClip {
   @@index([categoryId, status])
   @@index([tags]) // For tag-based searches using GIN index
   @@index([youtubeVideoId])
-  @@index([viewCount, publishedAt]) // For popular videos
+  @@index([likeCount, publishedAt]) // For popular videos
   @@index([createdAt, status]) // For chronological listing
   @@index([language, status]) // For language-specific searches
   // TODO: Add YouTube URL validation at application level
@@ -832,48 +826,6 @@ model VideoClip {
   @@map("video_clips")
 }
 
-model VideoComment {
-  id      String  @id @default(cuid())
-  videoId String
-  userId  String
-  content String
-
-  // Comment threading
-  parentId String? // For nested comments/replies
-  depth    Int     @default(0) // Comment nesting depth (0 = top-level)
-
-  // Moderation
-  isApproved  Boolean   @default(true) // Auto-approve by default
-  isEdited    Boolean   @default(false)
-  editedAt    DateTime?
-  moderatedBy String?
-  moderatedAt DateTime?
-
-  // Analytics
-  reactionCount Int @default(0) // Cached count of reactions
-
-  // Internationalization
-  language String @default("en") // Comment language
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  video     VideoClip       @relation(fields: [videoId], references: [id], onDelete: Cascade)
-  user      User            @relation("VideoCommentUser", fields: [userId], references: [id], onDelete: Cascade)
-  parent    VideoComment?   @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
-  replies   VideoComment[]  @relation("CommentReplies")
-  reactions VideoReaction[]
-
-  @@index([videoId, parentId, createdAt])
-  @@index([userId, createdAt])
-  @@index([parentId, depth]) // For threaded comments
-  @@index([isApproved, createdAt])
-  @@index([language, isApproved]) // For language-specific moderation
-  // TODO: Add content length validation at application level (e.g., max 2000 chars)
-  // TODO: Add depth validation (max 5 levels deep)
-  @@map("video_comments")
-}
 
 enum ReactionType {
   LIKE
@@ -893,56 +845,21 @@ model VideoReaction {
   id   String       @id @default(cuid())
   type ReactionType
 
-  // Target - either video or comment
-  videoId   String?
-  commentId String?
-
-  userId String
+  // Target - only videos now
+  videoId String
+  userId  String
 
   createdAt DateTime @default(now())
 
   // Relations
-  user    User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  video   VideoClip?    @relation(fields: [videoId], references: [id], onDelete: Cascade)
-  comment VideoComment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  user  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  video VideoClip @relation(fields: [videoId], references: [id], onDelete: Cascade)
 
-  // Prevent duplicate reactions - user can only react once per target
+  // Prevent duplicate reactions - user can only react once per video
   @@unique([userId, videoId])
-  @@unique([userId, commentId])
   @@index([videoId, type])
-  @@index([commentId, type])
   @@index([userId, createdAt])
   @@index([type, createdAt]) // For trending reaction analysis
   @@map("video_reactions")
 }
 
-model VideoView {
-  id      String @id @default(cuid())
-  videoId String
-  userId  String?
-
-  // View metadata
-  ipAddress     String?
-  userAgent     String?
-  sessionId     String?
-  referrer      String?
-  watchDuration Int?    // How long they watched in seconds
-
-  // Geographic data (optional)
-  country String?
-  city    String?
-
-  createdAt DateTime @default(now())
-
-  // Relations
-  video VideoClip @relation(fields: [videoId], references: [id], onDelete: Cascade)
-  user  User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
-
-  // Allow multiple views per user but track uniqueness for analytics
-  @@index([videoId, userId, createdAt])
-  @@index([videoId, createdAt]) // For view analytics
-  @@index([userId, createdAt]) // For user viewing history
-  @@index([sessionId, createdAt]) // For session-based analytics
-  @@index([country, createdAt]) // For geographic analytics
-  @@map("video_views")
-}

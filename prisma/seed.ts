@@ -22,7 +22,6 @@ async function main() {
         'profile.view',
         'videos.view',
         'videos.create',
-        'videos.comment',
         'videos.react'
       ]
     },
@@ -42,9 +41,7 @@ async function main() {
         'profile.view',
         'videos.view',
         'videos.create',
-        'videos.comment',
-        'videos.react',
-        'videos.upload_hq'
+        'videos.react'
       ]
     },
     {
@@ -66,10 +63,7 @@ async function main() {
         'profile.view',
         'videos.view',
         'videos.create',
-        'videos.comment',
         'videos.react',
-        'videos.upload_hq',
-        'videos.moderate_own_event'
       ]
     },
     {
@@ -103,8 +97,6 @@ async function main() {
         'reports.financial',
         'reports.analytics',
         'reports.export',
-        'feedback.view',
-        'feedback.moderate',
         'documents.view',
         'documents.upload',
         'documents.delete',
@@ -117,13 +109,7 @@ async function main() {
         'profile.view',
         'videos.view',
         'videos.create',
-        'videos.comment',
         'videos.react',
-        'videos.upload_hq',
-        'videos.moderate',
-        'videos.delete',
-        'videos.approve',
-        'videos.reject',
         'video_categories.create',
         'video_categories.update',
         'video_categories.delete'
