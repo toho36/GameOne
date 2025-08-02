@@ -40,7 +40,7 @@ export default async function LocaleLayout({
     <html lang={locale}>
       <body className={`${inter.className} antialiased`}>
         <NextIntlClientProvider messages={messages}>
-          <header className="absolute top-4 right-4">
+          <header className="absolute right-4 top-4">
             <LanguageSwitcher currentLocale={locale as Locale} />
           </header>
           {children}
