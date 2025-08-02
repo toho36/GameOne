@@ -383,6 +383,15 @@ enum RegistrationStatus {
   NO_SHOW // Didn't show up
 }
 
+enum RegistrationPaymentStatus {
+  PENDING_VERIFICATION                    // Doesn't take spot
+  PAYMENT_SENT_AWAITING_VERIFICATION     // Takes spot
+  PAYMENT_VERIFIED                       // Takes spot (confirmed)
+  VERIFIED_CASH                          // Takes spot (cash payment)
+  REJECTED                               // Back to pending or waiting list
+  WAITING_LIST_PROMOTED                  // New status for promoted users
+}
+
 enum RegistrationType {
   INDIVIDUAL // Single person registration
   GROUP // Group registration with friends
@@ -537,6 +546,18 @@ model Registration {
   paymentId        String? @unique
   pendingPaymentId String? // Reference to original pending payment
 
+  // New payment status tracking
+  paymentStatus RegistrationPaymentStatus @default(PENDING_VERIFICATION)
+  paymentClaimedAt DateTime?
+  paymentVerifiedAt DateTime?
+  paymentRejectedAt DateTime?
+  paymentRejectionReason String?
+  paymentMethod PaymentMethod? // BANK_TRANSFER, CASH, etc.
+
+  // Friend registration fields
+  friendInfo Json? // Stores friend details
+  registeredBy String? // User who registered the friend
+
   // Waiting list promotion tracking
   promotedFromWaitingList Boolean   @default(false)
   waitingListPosition     Int? // Original position in waiting list
@@ -567,6 +588,8 @@ model Registration {
   @@index([promotedFromWaitingList, promotedAt]) // For waiting list analytics
   @@index([isGuestRequest, guestEmail]) // For guest registration management
   @@index([pendingPaymentId]) // For linking to pending payments
+  @@index([paymentStatus]) // For payment status queries
+  @@index([paymentStatus, paymentClaimedAt]) // For payment claiming analytics
   @@map("registrations")
 }
 
@@ -651,7 +674,7 @@ model Payment {
   id             String  @id @default(cuid())
   userId         String
   eventId        String?
-  registrationId String?
+  registrationId String? @unique
 
   amount   Decimal       @db.Decimal(10, 2)
   currency String        @default("EUR")
@@ -672,6 +695,11 @@ model Payment {
   paidAt     DateTime?
   verifiedAt DateTime?
   refundedAt DateTime?
+
+  // New payment claiming and verification fields
+  claimedAt DateTime? // When user claimed payment
+  verifiedBy String? // Admin who verified
+  verificationNotes String?
 
   // Additional data
   description String?
@@ -701,6 +729,8 @@ model Payment {
   @@index([currency, amount]) // For financial analytics
   @@index([bankAccountId, status]) // For bank account reconciliation
   @@index([pendingPaymentId]) // For pending payment tracking
+  @@index([claimedAt]) // For payment claiming analytics
+  @@index([verifiedBy]) // For admin verification tracking
   // TODO: Add payment amount validation at application level - amount > 0
   @@map("payments")
 }
