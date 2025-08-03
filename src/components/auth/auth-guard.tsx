@@ -30,7 +30,7 @@ export function AuthGuard({
 }: AuthGuardProps) {
     const router = useRouter();
     const { isAuthenticated, isLoading, error } = useSession();
-    const { hasPermission, hasAllPermissions, hasAnyPermission } = useAuthorization();
+    const { hasAllPermissions, hasAnyPermission } = useAuthorization();
 
     // Show loading state
     if (isLoading) {
