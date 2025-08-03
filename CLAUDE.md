@@ -24,8 +24,11 @@ Use Bun as the primary package manager and runtime. All commands should use
 
 ### Testing
 
-- `bun run test` - Run Vitest unit tests
+- `bun run test` - Run Vitest unit tests (use this, NOT `bun test`)
+- `bun run test --run` - Run tests once without watch mode
 - `bun run test:watch` - Run tests in watch mode
+- `bun run test:coverage` - Run tests with coverage report
+- `bun run test:ui` - Run tests with Vitest UI
 
 ### Utilities
 
