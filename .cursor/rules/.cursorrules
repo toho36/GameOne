@@ -1,0 +1,321 @@
+# Cursor Rules for Frontend Development
+
+## File Organization & Structure
+
+### Component Files
+
+- Place all components in `src/components/`
+- Use PascalCase for component file names: `ComponentName.tsx`
+- Group related components in subdirectories when needed
+- Keep Shadcn/ui components in `src/components/ui/`
+- Use descriptive names that indicate the component's purpose
+
+### Import Organization
+
+- Use `@/` path aliases for all imports
+- Group imports in this order:
+  1. React and Next.js imports
+  2. Third-party libraries
+  3. Internal components and utilities
+  4. Types and interfaces
+- Use absolute imports with `@/` prefix
+
+## TypeScript Standards
+
+### Type Definitions
+
+- Define interfaces for all component props
+- Use descriptive interface names: `ComponentNameProps`
+- Avoid `any` type - always define proper types
+- Use union types for variant props
+- Export types when they're used across multiple files
+
+### Component Structure
+
+```typescript
+interface ComponentNameProps {
+  // Required props first
+  title: string;
+  // Optional props with defaults
+  variant?: 'default' | 'outline';
+  className?: string;
+}
+
+export default function ComponentName({
+  title,
+  variant = 'default',
+  className
+}: ComponentNameProps) {
+  // Component logic
+}
+```
+
+## Styling Conventions
+
+### Tailwind CSS Usage
+
+- Use `cn()` utility for conditional classes
+- Prefer utility classes over custom CSS
+- Group related classes logically
+- Use responsive prefixes consistently
+- Follow mobile-first approach
+
+### Class Organization
+
+```typescript
+const className = cn(
+  // Base styles
+  "flex items-center justify-center",
+  // Variant styles
+  variant === 'outline' && "border border-gray-300",
+  // Responsive styles
+  "text-sm md:text-base",
+  // Custom classes
+  className
+);
+```
+
+## Component Patterns
+
+### Server vs Client Components
+
+- Default to Server Components
+- Use "use client" only when necessary (interactivity, hooks, browser APIs)
+- Keep client components as small as possible
+- Pass data down from server components
+
+### Reusable Component Structure
+
+```typescript
+// 1. Import statements
+import { cn } from "@/lib/utils";
+import { ComponentProps } from "react";
+
+// 2. Type definitions
+interface ComponentProps extends ComponentProps<"div"> {
+  // Component-specific props
+}
+
+// 3. Component implementation
+export default function Component({ className, ...props }: ComponentProps) {
+  return (
+    <div className={cn("base-styles", className)} {...props}>
+      {/* Component content */}
+    </div>
+  );
+}
+```
+
+## Internationalization
+
+### Translation Usage
+
+- Import `useTranslations` from "next-intl"
+- Use descriptive translation keys
+- Group related translations in the same namespace
+- Handle pluralization and interpolation properly
+
+```typescript
+import { useTranslations } from "next-intl";
+
+export default function Component() {
+  const t = useTranslations("ComponentName");
+
+  return (
+    <div>
+      <h1>{t("title")}</h1>
+      <p>{t("description")}</p>
+    </div>
+  );
+}
+```
+
+### Navigation with Locales
+
+```typescript
+import { Link } from "@/i18n/navigation";
+
+// Use Link component for locale-aware navigation
+<Link href="/about" className="link-styles">
+  {t("about")}
+</Link>
+```
+
+## Performance & Best Practices
+
+### Image Optimization
+
+- Use Next.js `Image` component for all images
+- Provide proper `alt` text for accessibility
+- Use appropriate `sizes` prop for responsive images
+
+### State Management
+
+- Use React hooks for local state
+- Prefer server state over client state when possible
+- Use `useCallback` and `useMemo` for expensive operations
+- Keep state as close to where it's used as possible
+
+### Accessibility
+
+- Use semantic HTML elements
+- Include proper ARIA labels and roles
+- Ensure keyboard navigation support
+- Maintain color contrast requirements
+- Test with screen readers
+
+## Code Quality Standards
+
+### Error Handling
+
+- Implement proper error boundaries for client components
+- Use try-catch blocks for async operations
+- Provide meaningful error messages
+- Handle loading and error states gracefully
+
+### Code Comments
+
+- Comment complex logic and business rules
+- Explain "why" not "what" in comments
+- Use JSDoc for component documentation
+- Keep comments up-to-date with code changes
+
+### Naming Conventions
+
+- Use descriptive variable and function names
+- Follow camelCase for variables and functions
+- Use PascalCase for components and types
+- Use UPPER_SNAKE_CASE for constants
+
+## File Templates
+
+### New Component Template
+
+```typescript
+import { cn } from "@/lib/utils";
+import { ComponentProps } from "react";
+
+interface ComponentNameProps extends ComponentProps<"div"> {
+  // Define component-specific props here
+}
+
+export default function ComponentName({
+  className,
+  ...props
+}: ComponentNameProps) {
+  return (
+    <div className={cn("base-styles", className)} {...props}>
+      {/* Component content */}
+    </div>
+  );
+}
+```
+
+### Page Component Template
+
+```typescript
+import { useTranslations } from "next-intl";
+
+export default function PageName() {
+  const t = useTranslations("PageName");
+
+  return (
+    <main className="container mx-auto px-4 py-8">
+      <h1 className="text-2xl font-bold mb-4">
+        {t("title")}
+      </h1>
+      {/* Page content */}
+    </main>
+  );
+}
+```
+
+## Development Workflow
+
+### Before Creating New Code
+
+1. Check existing components for similar patterns
+2. Determine if it should be a server or client component
+3. Plan the component's props interface
+4. Consider internationalization needs
+5. Think about accessibility requirements
+
+### Code Review Checklist
+
+- [ ] TypeScript compiles without errors
+- [ ] All props have proper interfaces
+- [ ] Component is responsive across breakpoints
+- [ ] Accessibility requirements are met
+- [ ] Internationalization is properly implemented
+- [ ] Performance considerations are addressed
+- [ ] Code follows established patterns
+
+## Common Patterns to Follow
+
+### Form Components
+
+```typescript
+interface FormFieldProps {
+  label: string;
+  error?: string;
+  required?: boolean;
+}
+
+export default function FormField({ label, error, required }: FormFieldProps) {
+  return (
+    <div className="space-y-2">
+      <label className="block text-sm font-medium">
+        {label} {required && <span className="text-red-500">*</span>}
+      </label>
+      {/* Form input */}
+      {error && <p className="text-sm text-red-500">{error}</p>}
+    </div>
+  );
+}
+```
+
+### Loading States
+
+```typescript
+export default function LoadingSpinner({ className }: { className?: string }) {
+  return (
+    <div className={cn("animate-spin rounded-full border-2 border-gray-300 border-t-blue-600", className)} />
+  );
+}
+```
+
+### Error Boundaries
+
+```typescript
+"use client";
+
+import { Component, ComponentProps, ReactNode } from "react";
+
+interface ErrorBoundaryProps {
+  children: ReactNode;
+  fallback?: ReactNode;
+}
+
+interface ErrorBoundaryState {
+  hasError: boolean;
+}
+
+export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(): ErrorBoundaryState {
+    return { hasError: true };
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback || <div>Something went wrong.</div>;
+    }
+
+    return this.props.children;
+  }
+}
+```
