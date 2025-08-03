@@ -1,6 +1,11 @@
+---
+alwaysApply: true
+---
+
 # Component Organization and Patterns
 
 ## Overview
+
 This document defines the comprehensive component architecture, organization patterns, and development conventions for the GameOne event management system. All components should follow consistent patterns for maintainability, reusability, and type safety.
 
 ## Directory Structure
@@ -101,16 +106,19 @@ src/components/
 ## Component Naming Conventions
 
 ### File Naming
+
 - **Components**: `kebab-case.tsx` (e.g., `event-card.tsx`, `user-profile.tsx`)
 - **Directories**: `kebab-case` (e.g., `form-fields/`, `shared/`)
 - **Index Files**: `index.ts` for re-exports
 
 ### Component Naming
+
 - **React Components**: `PascalCase` (e.g., `EventCard`, `UserProfile`)
 - **Props Interfaces**: `{ComponentName}Props` (e.g., `EventCardProps`)
 - **Ref Types**: `{ComponentName}Ref` (e.g., `EventCardRef`)
 
 ### Export Patterns
+
 ```typescript
 // Named export (preferred for most components)
 export function EventCard({ event, onSelect }: EventCardProps) {
@@ -140,6 +148,7 @@ Button.displayName = "Button";
 ## TypeScript Patterns
 
 ### Props Interface Definition
+
 ```typescript
 // Base props interface
 interface BaseComponentProps {
@@ -176,6 +185,7 @@ interface DataTableProps<TData> extends BaseComponentProps {
 ```
 
 ### Event Handler Patterns
+
 ```typescript
 // Event handler type definitions
 type EventHandler<T = void> = () => T;
@@ -194,6 +204,7 @@ interface FormProps {
 ```
 
 ### Ref Patterns
+
 ```typescript
 // Forward ref for custom components
 interface CustomInputProps {
@@ -251,6 +262,7 @@ export const DataTable = React.forwardRef<DataTableRef, DataTableProps>(
 ## Styling Patterns
 
 ### Tailwind CSS with Variants
+
 ```typescript
 import { cva, type VariantProps } from 'class-variance-authority';
 
@@ -282,7 +294,7 @@ const buttonVariants = cva(
 );
 
 // Component with variants
-interface ButtonProps 
+interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
           VariantProps<typeof buttonVariants> {
   asChild?: boolean;
@@ -303,6 +315,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 ```
 
 ### Responsive Design Patterns
+
 ```typescript
 // Responsive component with Tailwind
 export function EventGrid({ events }: EventGridProps) {
@@ -335,6 +348,7 @@ export function EventLayout({ children }: EventLayoutProps) {
 ## State Management Patterns
 
 ### Local State with useState
+
 ```typescript
 export function EventForm({ event, onSave }: EventFormProps) {
   const [formData, setFormData] = useState({
@@ -351,7 +365,7 @@ export function EventForm({ event, onSave }: EventFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+
     try {
       const validatedData = validateEventData(formData);
       await onSave(validatedData);
@@ -371,6 +385,7 @@ export function EventForm({ event, onSave }: EventFormProps) {
 ```
 
 ### Context for Feature State
+
 ```typescript
 // Context for event management
 interface EventContextValue {
@@ -437,6 +452,7 @@ export function useEvents() {
 ## Component Composition Patterns
 
 ### Compound Components
+
 ```typescript
 // Card compound component
 interface CardProps extends BaseComponentProps {
@@ -500,6 +516,7 @@ export function EventCard({ event }: EventCardProps) {
 ```
 
 ### Render Props Pattern
+
 ```typescript
 interface DataFetcherProps<T> {
   url: string;
@@ -546,7 +563,7 @@ export function EventList() {
         if (loading) return <LoadingSpinner />;
         if (error) return <ErrorMessage error={error} onRetry={refetch} />;
         if (!events?.length) return <EmptyState />;
-        
+
         return (
           <div className="space-y-4">
             {events.map(event => (
@@ -563,6 +580,7 @@ export function EventList() {
 ## Error Handling Patterns
 
 ### Error Boundary
+
 ```typescript
 interface ErrorBoundaryState {
   hasError: boolean;
@@ -615,6 +633,7 @@ function DefaultErrorFallback({ error }: { error: Error }) {
 ```
 
 ### Error States in Components
+
 ```typescript
 export function EventDetails({ eventId }: EventDetailsProps) {
   const [event, setEvent] = useState<Event | null>(null);
@@ -626,14 +645,14 @@ export function EventDetails({ eventId }: EventDetailsProps) {
       try {
         setLoading(true);
         const response = await fetch(`/api/events/${eventId}`);
-        
+
         if (!response.ok) {
           if (response.status === 404) {
             throw new Error('Event not found');
           }
           throw new Error('Failed to load event');
         }
-        
+
         const data = await response.json();
         setEvent(data.event);
       } catch (err) {
@@ -689,6 +708,7 @@ export function EventDetails({ eventId }: EventDetailsProps) {
 ## Performance Optimization Patterns
 
 ### Memoization
+
 ```typescript
 // Memoize expensive calculations
 export function EventStatistics({ events }: EventStatisticsProps) {
@@ -726,6 +746,7 @@ export const EventCard = React.memo<EventCardProps>(({ event, onSelect }) => {
 ```
 
 ### Lazy Loading
+
 ```typescript
 // Lazy load heavy components
 const LazyEventCalendar = lazy(() => import('./event-calendar'));
@@ -737,7 +758,7 @@ export function EventPage() {
   return (
     <div>
       <ViewSelector value={view} onChange={setView} />
-      
+
       <Suspense fallback={<LoadingSpinner />}>
         {view === 'list' && <EventList />}
         {view === 'calendar' && <LazyEventCalendar />}
@@ -751,6 +772,7 @@ export function EventPage() {
 ## Testing Patterns
 
 ### Component Testing
+
 ```typescript
 // __tests__/components/event-card.test.tsx
 import { render, screen, fireEvent } from '@testing-library/react';
@@ -768,7 +790,7 @@ const mockEvent = {
 describe('EventCard', () => {
   it('renders event information correctly', () => {
     render(<EventCard event={mockEvent} />);
-    
+
     expect(screen.getByText('Test Event')).toBeInTheDocument();
     expect(screen.getByText('Test Description')).toBeInTheDocument();
   });
@@ -776,7 +798,7 @@ describe('EventCard', () => {
   it('calls onSelect when clicked', () => {
     const onSelect = jest.fn();
     render(<EventCard event={mockEvent} onSelect={onSelect} />);
-    
+
     fireEvent.click(screen.getByRole('button'));
     expect(onSelect).toHaveBeenCalledWith(mockEvent);
   });
@@ -791,6 +813,7 @@ describe('EventCard', () => {
 ## Accessibility Patterns
 
 ### ARIA and Semantic HTML
+
 ```typescript
 export function EventCard({ event, onSelect }: EventCardProps) {
   return (
@@ -813,14 +836,14 @@ export function EventCard({ event, onSelect }: EventCardProps) {
           {formatDate(event.startDate)}
         </time>
       </header>
-      
+
       <div
         aria-labelledby={`event-title-${event.id}`}
         className="event-description"
       >
         {event.description}
       </div>
-      
+
       <footer>
         <Button
           aria-label={`Register for ${event.title}`}
@@ -840,10 +863,11 @@ export function EventCard({ event, onSelect }: EventCardProps) {
 ## Documentation Requirements
 
 ### Component Documentation
-```typescript
+
+````typescript
 /**
  * EventCard displays event information in a card format with optional actions.
- * 
+ *
  * @example
  * ```tsx
  * <EventCard
@@ -854,17 +878,18 @@ export function EventCard({ event, onSelect }: EventCardProps) {
  * />
  * ```
  */
-export function EventCard({ 
-  event, 
-  onSelect, 
+export function EventCard({
+  event,
+  onSelect,
   showActions = false,
-  variant = 'default' 
+  variant = 'default'
 }: EventCardProps) {
   // Implementation
 }
-```
+````
 
 ### Storybook Stories
+
 ```typescript
 // stories/EventCard.stories.tsx
 import type { Meta, StoryObj } from '@storybook/react';

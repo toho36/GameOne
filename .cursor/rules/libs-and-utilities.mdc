@@ -1,6 +1,11 @@
+---
+alwaysApply: true
+---
+
 # Libraries and Utilities Structure
 
 ## Overview
+
 This document defines the comprehensive structure and patterns for libraries, utilities, and shared functionality in the GameOne event management system. All utilities should be modular, well-typed, and follow consistent patterns for maintainability and reusability.
 
 ## Directory Structure
@@ -91,6 +96,7 @@ src/lib/
 ## Core System Utilities
 
 ### Database Client (`src/lib/core/prisma.ts`)
+
 ```typescript
 import { PrismaClient } from '@prisma/client';
 
@@ -140,7 +146,7 @@ export async function checkDatabaseHealth(): Promise<{
   error?: string;
 }> {
   const startTime = Date.now();
-  
+
   try {
     await prisma.$queryRaw`SELECT 1`;
     return {
@@ -222,6 +228,7 @@ export async function paginate<T>(
 ```
 
 ### Configuration Management (`src/lib/core/config.ts`)
+
 ```typescript
 import { z } from 'zod';
 
@@ -229,7 +236,7 @@ import { z } from 'zod';
 const envSchema = z.object({
   // Database
   DATABASE_URL: z.string().url(),
-  
+
   // Authentication
   KINDE_CLIENT_ID: z.string(),
   KINDE_CLIENT_SECRET: z.string(),
@@ -237,22 +244,22 @@ const envSchema = z.object({
   KINDE_SITE_URL: z.string().url(),
   KINDE_POST_LOGOUT_REDIRECT_URL: z.string().url(),
   KINDE_POST_LOGIN_REDIRECT_URL: z.string().url(),
-  
+
   // External services
   SMTP_HOST: z.string().optional(),
   SMTP_PORT: z.coerce.number().optional(),
   SMTP_USER: z.string().optional(),
   SMTP_PASS: z.string().optional(),
-  
+
   // Vercel
   VERCEL_ENV: z.enum(['development', 'preview', 'production']).optional(),
   VERCEL_URL: z.string().optional(),
   CRON_SECRET: z.string(),
-  
+
   // App settings
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   PORT: z.coerce.number().default(3000),
-  
+
   // Feature flags
   ENABLE_ANALYTICS: z.coerce.boolean().default(false),
   ENABLE_PUSH_NOTIFICATIONS: z.coerce.boolean().default(false),
@@ -279,7 +286,7 @@ export const config = {
     maxConnections: 20,
     connectionTimeout: 10000
   },
-  
+
   // Authentication
   auth: {
     kinde: {
@@ -293,7 +300,7 @@ export const config = {
     sessionTimeout: 24 * 60 * 60 * 1000, // 24 hours
     refreshTokenTimeout: 7 * 24 * 60 * 60 * 1000 // 7 days
   },
-  
+
   // API settings
   api: {
     rateLimiting: {
@@ -302,15 +309,15 @@ export const config = {
       skipSuccessfulRequests: false
     },
     cors: {
-      origin: env.NODE_ENV === 'production' 
-        ? [env.VERCEL_URL!, 'https://gameone.sk'] 
+      origin: env.NODE_ENV === 'production'
+        ? [env.VERCEL_URL!, 'https://gameone.sk']
         : true,
       credentials: true
     },
     timeout: 30000, // 30 seconds
     maxBodySize: '10mb'
   },
-  
+
   // Email settings
   email: {
     smtp: {
@@ -322,14 +329,14 @@ export const config = {
     from: 'noreply@gameone.sk',
     replyTo: 'support@gameone.sk'
   },
-  
+
   // Feature flags
   features: {
     analytics: env.ENABLE_ANALYTICS,
     pushNotifications: env.ENABLE_PUSH_NOTIFICATIONS,
     videoProcessing: env.ENABLE_VIDEO_PROCESSING
   },
-  
+
   // App settings
   app: {
     name: 'GameOne',
@@ -340,7 +347,7 @@ export const config = {
     supportedLocales: ['en', 'cs'] as const,
     defaultLocale: 'en' as const
   },
-  
+
   // Cron settings
   cron: {
     secret: env.CRON_SECRET,
@@ -359,6 +366,7 @@ export type SupportedLocale = typeof config.app.supportedLocales[number];
 ```
 
 ### Logging Utilities (`src/lib/core/logger.ts`)
+
 ```typescript
 import { config } from './config';
 
@@ -383,8 +391,8 @@ class Logger {
   private level: LogLevel;
 
   constructor() {
-    this.level = config.app.environment === 'production' 
-      ? LogLevel.INFO 
+    this.level = config.app.environment === 'production'
+      ? LogLevel.INFO
       : LogLevel.DEBUG;
   }
 
@@ -397,7 +405,7 @@ class Logger {
     const level = LogLevel[entry.level];
     const context = entry.context ? ` ${JSON.stringify(entry.context)}` : '';
     const error = entry.error ? ` Error: ${entry.error.message}` : '';
-    
+
     return `[${timestamp}] ${level}: ${entry.message}${context}${error}`;
   }
 
@@ -506,6 +514,7 @@ export const logDebug = (message: string, context?: Record<string, any>) => {
 ## API Utilities
 
 ### Response Formatting (`src/lib/api/response.ts`)
+
 ```typescript
 import { NextResponse } from 'next/server';
 import { logger } from '@/lib/core/logger';
@@ -570,7 +579,7 @@ export function createApiResponse<T>(
     }
   };
 
-  return NextResponse.json(response, { 
+  return NextResponse.json(response, {
     status: options.status || 200,
     headers: {
       'Content-Type': 'application/json',
@@ -612,7 +621,7 @@ export function createErrorResponse(
     path
   });
 
-  return NextResponse.json(response, { 
+  return NextResponse.json(response, {
     status,
     headers: {
       'Content-Type': 'application/json',
@@ -713,6 +722,7 @@ export function setCorsHeaders(response: NextResponse, origin?: string) {
 ## Validation Utilities
 
 ### Schema Definitions (`src/lib/validation/schemas/`)
+
 ```typescript
 // src/lib/validation/schemas/common.ts
 import { z } from 'zod';
@@ -798,6 +808,7 @@ export const EventFiltersSchema = z.object({
 ## Data Processing Utilities
 
 ### Transformers (`src/lib/data/transformers.ts`)
+
 ```typescript
 import { Event, User, Registration } from '@prisma/client';
 import type { SupportedLocale } from '@/lib/core/config';
@@ -837,7 +848,7 @@ export class EventTransformer implements Transformer<Event & { category: any; re
     const now = new Date();
     const registrationStart = event.registrationStartDate || event.createdAt;
     const registrationEnd = event.registrationEndDate || event.startDate;
-    
+
     return {
       id: event.id,
       title: this.getLocalizedTitle(event, this.locale),
@@ -886,11 +897,11 @@ export class EventTransformer implements Transformer<Event & { category: any; re
 
   private calculateAvailableSpots(event: Event & { registrations?: any[] }): number | undefined {
     if (!event.maxParticipants) return undefined;
-    
+
     const confirmedRegistrations = event.registrations?.filter(
       reg => reg.status === 'confirmed'
     ).length || 0;
-    
+
     return Math.max(0, event.maxParticipants - confirmedRegistrations);
   }
 
@@ -992,6 +1003,7 @@ export class TransformerFactory {
 ## Performance and Utility Functions
 
 ### Async Utilities (`src/lib/utils/async.ts`)
+
 ```typescript
 // Retry utility with exponential backoff
 export async function retry<T>(
@@ -1019,7 +1031,7 @@ export async function retry<T>(
       return await fn();
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error));
-      
+
       if (attempt === maxAttempts || !shouldRetry(lastError)) {
         throw lastError;
       }
@@ -1153,14 +1165,14 @@ export function memoize<T extends (...args: any[]) => any>(
   getKey?: (...args: Parameters<T>) => string
 ): T {
   const cache = new Map<string, ReturnType<T>>();
-  
+
   return ((...args: Parameters<T>) => {
     const key = getKey ? getKey(...args) : JSON.stringify(args);
-    
+
     if (cache.has(key)) {
       return cache.get(key)!;
     }
-    
+
     const result = func(...args);
     cache.set(key, result);
     return result;
@@ -1171,6 +1183,7 @@ export function memoize<T extends (...args: any[]) => any>(
 ## Testing Utilities
 
 ### Mock Data Generators (`src/lib/testing/mocks.ts`)
+
 ```typescript
 import { faker } from '@faker-js/faker';
 import type { Event, User, Registration } from '@prisma/client';

@@ -1,23 +1,31 @@
+---
+alwaysApply: true
+---
+
 # Security and Privacy Rules
 
 ## Overview
+
 This document defines comprehensive security and privacy guidelines for the GameOne event management system. These rules ensure data protection, regulatory compliance (GDPR, PCI DSS), and robust security practices throughout the application.
 
 ## Security Principles
 
 ### 1. **Defense in Depth**
+
 - Multiple layers of security controls
 - Fail-safe defaults (deny by default)
 - Principle of least privilege
 - Regular security assessments
 
 ### 2. **Data Protection by Design**
+
 - Privacy by default
 - Data minimization
 - Purpose limitation
 - Storage limitation
 
 ### 3. **Zero Trust Architecture**
+
 - Never trust, always verify
 - Verify explicitly
 - Use least privilege access
@@ -28,6 +36,7 @@ This document defines comprehensive security and privacy guidelines for the Game
 ### Authentication Rules
 
 #### Kinde Auth Integration
+
 ```typescript
 // src/lib/auth/kinde.ts
 import { KindeApi } from '@kinde-oss/kinde-typescript-sdk';
@@ -48,7 +57,7 @@ export class AuthService {
   async validateToken(token: string): Promise<TokenValidationResult> {
     try {
       const decoded = await this.kindeClient.verifyToken(token);
-      
+
       // Additional custom validation
       if (!this.isValidTokenClaims(decoded)) {
         throw new AuthError('Invalid token claims');
@@ -70,7 +79,7 @@ export class AuthService {
       decoded.aud === process.env.KINDE_CLIENT_ID &&
       decoded.iss === process.env.KINDE_ISSUER_URL &&
       decoded.exp > Date.now() / 1000 &&
-      decoded.sub && 
+      decoded.sub &&
       decoded.email
     );
   }
@@ -78,6 +87,7 @@ export class AuthService {
 ```
 
 #### Session Management
+
 ```typescript
 // src/lib/auth/session.ts
 import { cookies } from 'next/headers';
@@ -108,10 +118,10 @@ export class SessionManager {
   static async validateSession(token: string): Promise<SessionValidationResult> {
     try {
       const { payload } = await jwtVerify(token, this.SECRET);
-      
+
       // Check if session needs refresh
       const needsRefresh = this.needsRefresh(payload);
-      
+
       return {
         valid: true,
         payload,
@@ -147,6 +157,7 @@ export class SessionManager {
 ### Authorization Patterns
 
 #### Role-Based Access Control (RBAC)
+
 ```typescript
 // src/lib/auth/permissions.ts
 export enum Permission {
@@ -156,20 +167,20 @@ export enum Permission {
   EVENT_UPDATE = 'event:update',
   EVENT_DELETE = 'event:delete',
   EVENT_PUBLISH = 'event:publish',
-  
+
   // Registration permissions
   REGISTRATION_CREATE = 'registration:create',
   REGISTRATION_READ = 'registration:read',
   REGISTRATION_UPDATE = 'registration:update',
   REGISTRATION_DELETE = 'registration:delete',
   REGISTRATION_APPROVE = 'registration:approve',
-  
+
   // User permissions
   USER_READ = 'user:read',
   USER_UPDATE = 'user:update',
   USER_DELETE = 'user:delete',
   USER_IMPERSONATE = 'user:impersonate',
-  
+
   // Admin permissions
   ADMIN_FULL_ACCESS = 'admin:*',
   SYSTEM_CONFIG = 'system:config',
@@ -194,7 +205,7 @@ export class PermissionChecker {
     // Check wildcard permissions
     const [resource, action] = requiredPermission.split(':');
     const wildcardPermission = `${resource}:*`;
-    
+
     return userPermissions.includes(wildcardPermission);
   }
 
@@ -265,6 +276,7 @@ export class PermissionChecker {
 ```
 
 #### API Route Protection
+
 ```typescript
 // src/lib/auth/middleware.ts
 import { NextRequest, NextResponse } from 'next/server';
@@ -378,6 +390,7 @@ export const DELETE = withAuth(async (request, { params }) => {
 ### GDPR Compliance
 
 #### Data Processing Principles
+
 ```typescript
 // src/lib/privacy/gdpr.ts
 export enum DataProcessingPurpose {
@@ -570,6 +583,7 @@ export class GDPRComplianceService {
 ### Data Encryption
 
 #### Field-Level Encryption
+
 ```typescript
 // src/lib/security/encryption.ts
 import { createCipheriv, createDecipheriv, randomBytes, scryptSync } from 'crypto';
@@ -607,7 +621,7 @@ export class FieldEncryption {
   static decrypt(encryptedData: string, purpose: string = 'default'): string {
     try {
       const [ivHex, tagHex, encrypted] = encryptedData.split(':');
-      
+
       if (!ivHex || !tagHex || !encrypted) {
         throw new Error('Invalid encrypted data format');
       }
@@ -650,6 +664,7 @@ export const encryptedAddress = FieldEncryption.createEncryptedField('address');
 ## Input Validation & Sanitization
 
 ### Request Validation
+
 ```typescript
 // src/lib/security/validation.ts
 import { z } from 'zod';
@@ -702,7 +717,7 @@ export class SecurityValidator {
   private static async validateFileSignature(file: File): Promise<boolean> {
     const buffer = await file.arrayBuffer();
     const bytes = new Uint8Array(buffer);
-    
+
     // Check magic numbers for common file types
     const signatures = {
       'image/jpeg': [0xFF, 0xD8, 0xFF],
@@ -729,10 +744,10 @@ export class SecurityValidator {
 
       // Get existing requests for this identifier
       const userRequests = requests.get(identifier) || [];
-      
+
       // Remove old requests outside the window
       const validRequests = userRequests.filter(time => time > windowStart);
-      
+
       // Check if under limit
       if (validRequests.length >= maxRequests) {
         return false;
@@ -753,16 +768,16 @@ export const secureEventSchema = z.object({
     .min(1, 'Title is required')
     .max(255, 'Title too long')
     .transform(SecurityValidator.sanitizeInput),
-  
+
   description: z.string()
     .min(1, 'Description is required')
     .max(5000, 'Description too long')
     .transform(SecurityValidator.sanitizeHtml),
-  
+
   price: z.number()
     .min(0, 'Price cannot be negative')
     .max(100000, 'Price too high'),
-  
+
   maxParticipants: z.number()
     .min(1, 'Must allow at least 1 participant')
     .max(10000, 'Too many participants')
@@ -773,6 +788,7 @@ export const secureEventSchema = z.object({
 ## PCI DSS Compliance (Payment Security)
 
 ### Payment Data Protection
+
 ```typescript
 // src/lib/payments/security.ts
 export class PaymentSecurity {
@@ -808,7 +824,7 @@ export class PaymentSecurity {
 
   static sanitizePaymentData(data: any): any {
     const sanitized = { ...data };
-    
+
     // Remove prohibited fields
     this.PROHIBITED_FIELDS.forEach(field => {
       delete sanitized[field];
@@ -900,22 +916,23 @@ export class PaymentSecurity {
 ## Security Headers & CSP
 
 ### Security Headers Configuration
+
 ```typescript
 // src/lib/security/headers.ts
 export function getSecurityHeaders(): Record<string, string> {
   return {
     // XSS Protection
     'X-XSS-Protection': '1; mode=block',
-    
+
     // Content Type Options
     'X-Content-Type-Options': 'nosniff',
-    
+
     // Frame Options
     'X-Frame-Options': 'DENY',
-    
+
     // Referrer Policy
     'Referrer-Policy': 'strict-origin-when-cross-origin',
-    
+
     // Permissions Policy
     'Permissions-Policy': [
       'camera=()',
@@ -925,10 +942,10 @@ export function getSecurityHeaders(): Record<string, string> {
       'usb=()',
       'bluetooth=()'
     ].join(', '),
-    
+
     // Strict Transport Security
     'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
-    
+
     // Content Security Policy
     'Content-Security-Policy': getCSPDirectives()
   };
@@ -978,8 +995,8 @@ function getCSPDirectives(): string {
   };
 
   return Object.entries(directives)
-    .map(([directive, sources]) => 
-      sources.length > 0 
+    .map(([directive, sources]) =>
+      sources.length > 0
         ? `${directive} ${sources.join(' ')}`
         : directive
     )
@@ -990,6 +1007,7 @@ function getCSPDirectives(): string {
 ## Security Monitoring & Incident Response
 
 ### Security Event Logging
+
 ```typescript
 // src/lib/security/monitoring.ts
 export enum SecurityEventType {
@@ -1106,7 +1124,7 @@ export class SecurityMonitor {
     // Temporarily block user account
     await prisma.user.update({
       where: { id: userId },
-      data: { 
+      data: {
         status: 'SUSPENDED',
         suspendedAt: new Date(),
         suspensionReason: 'Automatic security block'

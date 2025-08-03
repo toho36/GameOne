@@ -1,6 +1,11 @@
+---
+alwaysApply: true
+---
+
 # API Structure and Routing Rules
 
 ## Overview
+
 This document defines the comprehensive API structure and routing conventions for the GameOne event management system. All APIs should follow RESTful principles with consistent patterns for authentication, error handling, and response formatting.
 
 ## Directory Structure
@@ -66,12 +71,14 @@ src/app/api/
 ## Route Naming Conventions
 
 ### RESTful Resource Patterns
+
 - **Collections**: `/api/{resource}` (e.g., `/api/events`)
 - **Individual Resources**: `/api/{resource}/{id}` (e.g., `/api/events/123`)
 - **Sub-resources**: `/api/{resource}/{id}/{sub-resource}` (e.g., `/api/events/123/registrations`)
 - **Actions**: `/api/{resource}/{id}/{action}` (e.g., `/api/events/123/publish`)
 
 ### HTTP Methods
+
 - `GET` - Retrieve data (collections or individual resources)
 - `POST` - Create new resources or perform actions
 - `PUT` - Update entire resources (replace)
@@ -79,6 +86,7 @@ src/app/api/
 - `DELETE` - Remove resources
 
 ### Query Parameters
+
 - **Pagination**: `?page=1&limit=20&offset=0`
 - **Filtering**: `?status=active&category=workshop&dateFrom=2024-01-01`
 - **Sorting**: `?sortBy=createdAt&sortOrder=desc`
@@ -88,6 +96,7 @@ src/app/api/
 ## Request/Response Patterns
 
 ### Standard Response Format
+
 ```typescript
 interface ApiResponse<T> {
   success: boolean;
@@ -114,6 +123,7 @@ interface ApiResponse<T> {
 ```
 
 ### Error Response Format
+
 ```typescript
 interface ErrorResponse {
   success: false;
@@ -137,6 +147,7 @@ interface ErrorResponse {
 ```
 
 ### Status Codes
+
 - **200 OK** - Successful GET, PUT, PATCH
 - **201 Created** - Successful POST with resource creation
 - **204 No Content** - Successful DELETE or action with no response body
@@ -152,6 +163,7 @@ interface ErrorResponse {
 ## Authentication and Authorization
 
 ### Authentication Headers
+
 ```typescript
 // For Kinde Auth (user requests)
 Authorization: Bearer {access_token}
@@ -164,6 +176,7 @@ X-API-Key: {api_key}
 ```
 
 ### Role-Based Access Control
+
 ```typescript
 interface RoutePermissions {
   public?: boolean;           // No authentication required
@@ -176,6 +189,7 @@ interface RoutePermissions {
 ```
 
 ### Route Protection Examples
+
 ```typescript
 // Public endpoint
 export const config = { public: true };
@@ -184,22 +198,23 @@ export const config = { public: true };
 export const config = { authenticated: true };
 
 // Specific roles
-export const config = { 
-  authenticated: true, 
-  roles: ['admin', 'moderator'] 
+export const config = {
+  authenticated: true,
+  roles: ['admin', 'moderator']
 };
 
 // Resource owner or admin
-export const config = { 
-  authenticated: true, 
+export const config = {
+  authenticated: true,
   owner: true,
-  fallbackRoles: ['admin'] 
+  fallbackRoles: ['admin']
 };
 ```
 
 ## File Structure for Route Handlers
 
 ### Route Handler Template
+
 ```typescript
 // src/app/api/events/route.ts
 import { NextRequest, NextResponse } from 'next/server';
@@ -276,7 +291,7 @@ export async function POST(request: NextRequest) {
     // Parse and validate request body
     const body = await request.json();
     const validationResult = validateEventData(body);
-    
+
     if (!validationResult.success) {
       return createErrorResponse('VALIDATION_ERROR', 'Invalid event data', 422, {
         details: validationResult.errors
@@ -310,12 +325,13 @@ export async function POST(request: NextRequest) {
 ## API Utilities and Helpers
 
 ### Response Helpers Location
+
 ```typescript
 // src/lib/api-utils.ts
 export function createApiResponse<T>(
-  data: T, 
-  options?: { 
-    status?: number; 
+  data: T,
+  options?: {
+    status?: number;
     pagination?: PaginationInfo;
     meta?: Record<string, any>;
   }
@@ -338,6 +354,7 @@ export function buildWhereClause(
 ```
 
 ### Validation Helpers Location
+
 ```typescript
 // src/lib/validations/
 ├── event.ts        # Event validation schemas
@@ -350,6 +367,7 @@ export function buildWhereClause(
 ## Cron Jobs and Background Tasks
 
 ### Cron Route Structure
+
 ```typescript
 // src/app/api/cron/[job]/route.ts
 import { NextRequest, NextResponse } from 'next/server';
@@ -382,6 +400,7 @@ export async function POST(
 ## Performance and Caching
 
 ### Database Query Optimization
+
 - Use `select` to limit fields returned
 - Use `include` strategically for relations
 - Implement cursor-based pagination for large datasets
@@ -389,6 +408,7 @@ export async function POST(
 - Batch related queries with `Promise.all()`
 
 ### Response Caching Headers
+
 ```typescript
 // Cache for static data
 export const revalidate = 3600; // 1 hour
@@ -403,6 +423,7 @@ return NextResponse.json(data, {
 ```
 
 ### Rate Limiting
+
 ```typescript
 // src/lib/rate-limit.ts
 import { Ratelimit } from '@upstash/ratelimit';
@@ -417,6 +438,7 @@ export const ratelimit = new Ratelimit({
 ## Testing Patterns
 
 ### API Route Testing Structure
+
 ```typescript
 // __tests__/api/events.test.ts
 import { GET, POST } from '@/app/api/events/route';
@@ -428,7 +450,7 @@ describe('/api/events', () => {
       const request = createMockRequest('GET', '/api/events?page=1&limit=10');
       const response = await GET(request);
       const data = await response.json();
-      
+
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
       expect(data.pagination).toBeDefined();
@@ -440,7 +462,7 @@ describe('/api/events', () => {
       const eventData = { title: 'Test Event', description: 'Test' };
       const request = createMockRequest('POST', '/api/events', eventData);
       const response = await POST(request);
-      
+
       expect(response.status).toBe(201);
     });
   });
@@ -450,12 +472,14 @@ describe('/api/events', () => {
 ## Documentation Requirements
 
 ### API Documentation
+
 - Each route handler should include JSDoc comments
 - Document expected request/response formats
 - Include example usage and error scenarios
 - Maintain OpenAPI/Swagger specification for public APIs
 
 ### Changelog and Versioning
+
 - Use semantic versioning for API changes
 - Document breaking changes and migration guides
 - Maintain backward compatibility when possible

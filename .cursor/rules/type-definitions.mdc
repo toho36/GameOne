@@ -1,6 +1,12 @@
+---
+description: Type Definitions and Interfaces
+alwaysApply: false
+---
+
 # Type Definitions and Interfaces
 
 ## Overview
+
 This document defines comprehensive TypeScript type definitions, interfaces, and type management patterns for the GameOne event management system. All types should be strongly typed, well-documented, and follow consistent patterns for maintainability and developer experience.
 
 ## Directory Structure
@@ -45,6 +51,7 @@ src/types/
 ## Type Naming Conventions
 
 ### General Rules
+
 - **Interfaces**: PascalCase with descriptive names (e.g., `EventCreateRequest`, `UserProfile`)
 - **Types**: PascalCase for type aliases (e.g., `EventStatus`, `PaymentMethod`)
 - **Enums**: PascalCase with SCREAMING_SNAKE_CASE values (e.g., `EventStatus.PUBLISHED`)
@@ -52,6 +59,7 @@ src/types/
 - **Utility Types**: Descriptive PascalCase (e.g., `Optional`, `Nullable`, `ApiResponse`)
 
 ### Specific Patterns
+
 - **Request Types**: `{Entity}{Action}Request` (e.g., `EventCreateRequest`, `UserUpdateRequest`)
 - **Response Types**: `{Entity}{Action}Response` (e.g., `EventListResponse`, `UserProfileResponse`)
 - **Props Types**: `{Component}Props` (e.g., `EventCardProps`, `UserFormProps`)
@@ -61,6 +69,7 @@ src/types/
 ## Core Type Definitions
 
 ### Common Utility Types (`src/types/utils/common.ts`)
+
 ```typescript
 // Basic utility types
 export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
@@ -149,6 +158,7 @@ export interface FilterOptions<T = any> {
 ### API Types (`src/types/api/`)
 
 #### Request Types (`src/types/api/requests.ts`)
+
 ```typescript
 // Base request types
 export interface BaseRequest {
@@ -292,6 +302,7 @@ export interface UserFilters {
 ```
 
 #### Response Types (`src/types/api/responses.ts`)
+
 ```typescript
 // Base response types
 export interface BaseResponse {
@@ -380,6 +391,7 @@ export interface HealthCheckResponse extends BaseResponse {
 ### Feature Types (`src/types/features/`)
 
 #### Event Types (`src/types/features/events.ts`)
+
 ```typescript
 // Event enums
 export enum EventStatus {
@@ -541,6 +553,7 @@ export interface EventDocument {
 ```
 
 #### Registration Types (`src/types/features/registration.ts`)
+
 ```typescript
 // Registration enums
 export enum RegistrationStatus {
@@ -721,6 +734,7 @@ export interface RegistrationWizardState {
 ```
 
 #### User Types (`src/types/features/users.ts`)
+
 ```typescript
 // User-related enums
 export enum UserStatus {
@@ -923,6 +937,7 @@ export interface UserSession {
 ### UI Component Types (`src/types/ui/`)
 
 #### Component Props (`src/types/ui/components.ts`)
+
 ```typescript
 // Base component props
 export interface BaseComponentProps {
@@ -1105,6 +1120,7 @@ export interface TabItem {
 ```
 
 ### Type Guards and Utilities (`src/types/utils/guards.ts`)
+
 ```typescript
 // Type guard functions for runtime type checking
 export function isString(value: unknown): value is string {
@@ -1290,7 +1306,7 @@ export function hasRequiredFields<T extends Record<string, any>>(
   obj: T,
   requiredFields: (keyof T)[]
 ): obj is T & Required<Pick<T, typeof requiredFields[number]>> {
-  return requiredFields.every(field => 
+  return requiredFields.every(field =>
     field in obj && obj[field] !== null && obj[field] !== undefined && obj[field] !== ''
   );
 }
@@ -1304,6 +1320,7 @@ export function isValidFormData<T>(
 ```
 
 ## Global Type Exports (`src/types/global/index.ts`)
+
 ```typescript
 // Re-export all types for easy importing
 export * from '../api/requests';

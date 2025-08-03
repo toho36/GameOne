@@ -1,11 +1,18 @@
+---
+description: Testing and Quality Assurance Rules
+alwaysApply: false
+---
+
 # Testing and Quality Assurance Rules
 
 ## Overview
+
 This document defines comprehensive testing strategies, quality assurance patterns, and validation processes for the GameOne event management system. These rules ensure high code quality, reliability, and maintainability through systematic testing approaches.
 
 ## Testing Strategy
 
 ### Testing Pyramid
+
 ```
                     /\
                    /  \
@@ -32,6 +39,7 @@ This document defines comprehensive testing strategies, quality assurance patter
 ## Testing Framework Configuration
 
 ### Vitest Configuration (`vitest.config.ts`)
+
 ```typescript
 import { defineConfig } from 'vitest/config';
 import path from 'path';
@@ -42,7 +50,7 @@ export default defineConfig({
     environment: 'node',
     setupFiles: ['./src/lib/testing/setup.ts'],
     globalSetup: ['./src/lib/testing/global-setup.ts'],
-    
+
     // Coverage configuration
     coverage: {
       provider: 'v8',
@@ -72,7 +80,7 @@ export default defineConfig({
         }
       }
     },
-    
+
     // Test execution
     testTimeout: 10000,
     hookTimeout: 10000,
@@ -84,7 +92,7 @@ export default defineConfig({
         minThreads: 1
       }
     },
-    
+
     // File patterns
     include: [
       'src/**/*.{test,spec}.{js,ts,jsx,tsx}',
@@ -97,7 +105,7 @@ export default defineConfig({
       'e2e'
     ]
   },
-  
+
   // Path resolution
   resolve: {
     alias: {
@@ -109,6 +117,7 @@ export default defineConfig({
 ```
 
 ### Test Setup Configuration
+
 ```typescript
 // src/lib/testing/setup.ts
 import { beforeAll, beforeEach, afterAll, afterEach, vi } from 'vitest';
@@ -121,12 +130,12 @@ import { mockNotifications } from './mocks/notifications';
 beforeAll(async () => {
   // Setup test database
   await setupTestDatabase();
-  
+
   // Setup global mocks
   mockAuth();
   mockPayments();
   mockNotifications();
-  
+
   // Mock environment variables
   process.env.NODE_ENV = 'test';
   process.env.ENABLE_ANALYTICS = 'false';
@@ -136,10 +145,10 @@ beforeAll(async () => {
 beforeEach(async () => {
   // Clean database before each test
   await cleanTestDatabase();
-  
+
   // Reset all mocks
   vi.clearAllMocks();
-  
+
   // Mock console methods to avoid noise in test output
   vi.spyOn(console, 'log').mockImplementation(() => {});
   vi.spyOn(console, 'info').mockImplementation(() => {});
@@ -171,33 +180,33 @@ globalThis.testUtils = {
     const userData = createMockUserData();
     return await testPrisma.user.create({ data: userData });
   },
-  
+
   createMockEvent: async () => {
     const user = await globalThis.testUtils.createMockUser();
     const category = await testPrisma.eventCategory.create({
       data: createMockEventCategoryData()
     });
-    
+
     const eventData = createMockEventData({
       createdById: user.id,
       categoryId: category.id
     });
-    
+
     return await testPrisma.event.create({ data: eventData });
   },
-  
+
   createMockRegistration: async () => {
     const user = await globalThis.testUtils.createMockUser();
     const event = await globalThis.testUtils.createMockEvent();
-    
+
     const registrationData = createMockRegistrationData({
       userId: user.id,
       eventId: event.id
     });
-    
+
     return await testPrisma.registration.create({ data: registrationData });
   },
-  
+
   loginAs: (user: User) => {
     return generateTestToken(user);
   }
@@ -207,6 +216,7 @@ globalThis.testUtils = {
 ## Unit Testing Patterns
 
 ### Service Layer Testing
+
 ```typescript
 // src/lib/services/__tests__/event-service.test.ts
 import { describe, it, expect, beforeEach, vi } from 'vitest';
@@ -295,7 +305,7 @@ describe('EventService', () => {
 
       mockEventRepository.findById.mockResolvedValue(event);
       mockEventRepository.getAvailableSpots.mockResolvedValue(50);
-      
+
       const expectedRegistration = {
         id: 'reg-123',
         userId: user.id,
@@ -381,6 +391,7 @@ describe('EventService', () => {
 ```
 
 ### Repository Testing
+
 ```typescript
 // src/lib/repositories/__tests__/event-repository.test.ts
 import { describe, it, expect, beforeEach } from 'vitest';
@@ -580,6 +591,7 @@ describe('EventRepository', () => {
 ## Integration Testing
 
 ### API Endpoint Testing
+
 ```typescript
 // src/app/api/events/__tests__/route.test.ts
 import { describe, it, expect, beforeEach } from 'vitest';
@@ -598,7 +610,7 @@ describe('/api/events', () => {
       ]);
 
       const request = createMockRequest('GET', '/api/events?page=1&limit=2');
-      
+
       // Act
       const response = await GET(request);
       const data = await response.json();
@@ -793,6 +805,7 @@ describe('/api/events', () => {
 ## End-to-End Testing
 
 ### E2E Test Setup (Playwright)
+
 ```typescript
 // e2e/setup/global-setup.ts
 import { chromium, FullConfig } from '@playwright/test';
@@ -808,7 +821,7 @@ async function globalSetup(config: FullConfig) {
 
   // Pre-authenticate test users
   await createTestUsers();
-  
+
   await browser.close();
 }
 
@@ -816,6 +829,7 @@ export default globalSetup;
 ```
 
 ### Critical User Journey Tests
+
 ```typescript
 // e2e/event-registration.spec.ts
 import { test, expect } from '@playwright/test';
@@ -834,34 +848,34 @@ test.describe('Event Registration Flow', () => {
 
     // Act - Navigate to event page
     await page.goto(`/events/${event.id}`);
-    
+
     // Verify event details are displayed
     await expect(page.locator('h1')).toContainText('React Workshop');
     await expect(page.locator('[data-testid=event-price]')).toContainText('€50');
-    
+
     // Start registration
     await page.click('[data-testid=register-button]');
-    
+
     // Fill registration form
     await page.fill('[data-testid=guest-count]', '2');
     await page.fill('[data-testid=special-requirements]', 'Vegetarian meal');
-    
+
     // Accept terms
     await page.check('[data-testid=accept-terms]');
-    
+
     // Continue to payment
     await page.click('[data-testid=continue-payment]');
-    
+
     // Select payment method
     await page.click('[data-testid=payment-method-bank-transfer]');
-    
+
     // Complete registration
     await page.click('[data-testid=complete-registration]');
-    
+
     // Assert - Verify success
     await expect(page.locator('[data-testid=success-message]')).toBeVisible();
     await expect(page.locator('[data-testid=registration-id]')).toBeVisible();
-    
+
     // Verify user receives confirmation email
     const emails = await getTestEmails();
     expect(emails).toContainEqual(
@@ -938,13 +952,13 @@ test.describe('Event Registration Flow', () => {
     // Act
     await page.goto('/my-registrations');
     await page.click(`[data-testid=cancel-registration-${registration.id}]`);
-    
+
     // Confirm cancellation
     await page.click('[data-testid=confirm-cancellation]');
 
     // Assert
     await expect(page.locator('[data-testid=cancellation-success]')).toBeVisible();
-    
+
     // Verify registration status is updated
     await page.reload();
     await expect(page.locator(`[data-testid=registration-${registration.id}] [data-testid=status]`))
@@ -956,10 +970,11 @@ test.describe('Event Registration Flow', () => {
 ## Performance Testing
 
 ### Load Testing with Artillery
+
 ```yaml
 # artillery/load-test.yml
 config:
-  target: 'http://localhost:3000'
+  target: "http://localhost:3000"
   phases:
     - duration: 60
       arrivalRate: 10
@@ -972,7 +987,7 @@ config:
       name: "Sustained high load"
   defaults:
     headers:
-      Content-Type: 'application/json'
+      Content-Type: "application/json"
 
 scenarios:
   - name: "Event browsing"
@@ -1037,6 +1052,7 @@ scenarios:
 ```
 
 ### Database Performance Testing
+
 ```typescript
 // src/lib/testing/performance/database.test.ts
 import { describe, it, expect } from 'vitest';
@@ -1055,7 +1071,7 @@ describe('Database Performance', () => {
 
     // Act - Measure query performance
     const startTime = performance.now();
-    
+
     const result = await eventRepository.findManyPaginated({
       pagination: { page: 1, limit: 20 },
       sort: { field: 'startDate', direction: 'desc' },
@@ -1080,7 +1096,7 @@ describe('Database Performance', () => {
 
     // Act - Simulate concurrent registrations
     const startTime = performance.now();
-    
+
     const registrationPromises = users.map(user =>
       eventRepository.createRegistration({
         eventId: event.id,
@@ -1090,17 +1106,17 @@ describe('Database Performance', () => {
     );
 
     const results = await Promise.allSettled(registrationPromises);
-    
+
     const endTime = performance.now();
     const totalTime = endTime - startTime;
 
     // Assert
     expect(totalTime).toBeLessThan(5000); // 5 seconds for 100 concurrent registrations
-    
+
     const successfulRegistrations = results.filter(
       result => result.status === 'fulfilled'
     );
-    
+
     expect(successfulRegistrations.length).toBeGreaterThan(0);
   });
 });
@@ -1109,6 +1125,7 @@ describe('Database Performance', () => {
 ## Security Testing
 
 ### Input Validation Testing
+
 ```typescript
 // src/lib/security/__tests__/validation.test.ts
 import { describe, it, expect } from 'vitest';
@@ -1157,7 +1174,7 @@ describe('SecurityValidator', () => {
       });
 
       const result = SecurityValidator.validateFile(largeFile);
-      
+
       expect(result.valid).toBe(false);
       expect(result.error).toBe('File too large');
     });
@@ -1168,7 +1185,7 @@ describe('SecurityValidator', () => {
       });
 
       const result = SecurityValidator.validateFile(executableFile);
-      
+
       expect(result.valid).toBe(false);
       expect(result.error).toBe('File type not allowed');
     });
@@ -1177,6 +1194,7 @@ describe('SecurityValidator', () => {
 ```
 
 ### Authentication Testing
+
 ```typescript
 // src/lib/auth/__tests__/security.test.ts
 import { describe, it, expect } from 'vitest';
@@ -1191,7 +1209,7 @@ describe('Authentication Security', () => {
       });
 
       const result = await AuthService.validateToken(expiredToken);
-      
+
       expect(result.valid).toBe(false);
       expect(result.error).toContain('expired');
     });
@@ -1200,7 +1218,7 @@ describe('Authentication Security', () => {
       const tamperedToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.tampered.signature';
 
       const result = await AuthService.validateToken(tamperedToken);
-      
+
       expect(result.valid).toBe(false);
     });
 
@@ -1210,7 +1228,7 @@ describe('Authentication Security', () => {
       });
 
       const result = await AuthService.validateToken(maliciousToken);
-      
+
       expect(result.valid).toBe(false);
     });
   });
@@ -1232,7 +1250,7 @@ describe('Authentication Security', () => {
 
       // First 5 should be allowed (though fail authentication)
       expect(responses.slice(0, 5).every(r => r.status !== 429)).toBe(true);
-      
+
       // 6th should be rate limited
       expect(responses[5].status).toBe(429);
     });
@@ -1243,6 +1261,7 @@ describe('Authentication Security', () => {
 ## Accessibility Testing
 
 ### Automated a11y Testing
+
 ```typescript
 // src/components/__tests__/accessibility.test.tsx
 import { describe, it, expect } from 'vitest';
@@ -1257,7 +1276,7 @@ describe('Accessibility Tests', () => {
   it('EventCard should have no accessibility violations', async () => {
     const mockEvent = createMockEvent();
     const { container } = render(<EventCard event={mockEvent} />);
-    
+
     const results = await axe(container);
     expect(results).toHaveNoViolations();
   });
@@ -1271,18 +1290,18 @@ describe('Accessibility Tests', () => {
     // Check for proper labeling
     expect(getByLabelText('Number of guests')).toBeInTheDocument();
     expect(getByLabelText('Special requirements')).toBeInTheDocument();
-    
+
     // Check ARIA attributes
     const form = container.querySelector('form');
     expect(form).toHaveAttribute('aria-describedby');
-    
+
     const results = await axe(container);
     expect(results).toHaveNoViolations();
   });
 
   it('should support keyboard navigation', async () => {
     const { container } = render(<EventCard event={createMockEvent()} />);
-    
+
     const interactiveElements = container.querySelectorAll(
       'button, [role="button"], a, input, select, textarea'
     );
@@ -1297,6 +1316,7 @@ describe('Accessibility Tests', () => {
 ## Test Data Management
 
 ### Test Data Factory
+
 ```typescript
 // src/lib/testing/factory.ts
 export class TestDataFactory {

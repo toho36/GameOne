@@ -1,6 +1,12 @@
+---
+description: Monitoring and Observability Rules
+alwaysApply: false
+---
+
 # Monitoring and Observability Rules
 
 ## Overview
+
 This document defines comprehensive monitoring, observability, and alerting strategies for the GameOne event management system. These rules ensure system reliability, performance visibility, and proactive issue detection through structured logging, metrics collection, distributed tracing, and intelligent alerting.
 
 ## Observability Principles
@@ -8,16 +14,19 @@ This document defines comprehensive monitoring, observability, and alerting stra
 ### The Three Pillars
 
 #### 1. **Metrics** - Quantitative measurements
+
 - Response times, throughput, error rates
 - Business metrics (registrations, payments, events)
 - Infrastructure metrics (CPU, memory, database)
 
 #### 2. **Logs** - Event records with context
+
 - Structured logging with consistent format
 - Contextual information for debugging
 - Security and audit trail logging
 
 #### 3. **Traces** - Request flow through system
+
 - Distributed tracing across services
 - Performance bottleneck identification
 - User journey tracking
@@ -25,6 +34,7 @@ This document defines comprehensive monitoring, observability, and alerting stra
 ## Logging Strategy
 
 ### Structured Logging Framework
+
 ```typescript
 // src/lib/logging/logger.ts
 import { createLogger, format, transports } from 'winston';
@@ -154,7 +164,7 @@ class GameOneLogger {
   // Core logging methods
   error(message: string, context: LogContext = {}, error?: Error): void {
     this.logger.error(message, { context, error });
-    
+
     // Send critical errors to external monitoring
     if (this.isCriticalError(error)) {
       this.sendToExternalMonitoring('error', message, context, error);
@@ -185,7 +195,7 @@ class GameOneLogger {
 
   response(method: string, url: string, statusCode: number, duration: number, context: LogContext = {}): void {
     const level = statusCode >= 500 ? 'error' : statusCode >= 400 ? 'warn' : 'info';
-    
+
     this.logger.log(level, `${method} ${url} ${statusCode} ${duration}ms`, {
       context: {
         ...context,
@@ -204,7 +214,7 @@ class GameOneLogger {
       type: 'security',
       event
     });
-    
+
     // Always send security events to external monitoring
     this.sendToExternalMonitoring('security', event, context);
   }
@@ -219,7 +229,7 @@ class GameOneLogger {
 
   performance(operation: string, duration: number, context: LogContext = {}): void {
     const level = duration > 5000 ? 'warn' : 'info'; // Warn if > 5 seconds
-    
+
     this.logger.log(level, `Performance: ${operation} took ${duration}ms`, {
       context: {
         ...context,
@@ -232,23 +242,23 @@ class GameOneLogger {
 
   private isCriticalError(error?: Error): boolean {
     if (!error) return false;
-    
+
     const criticalErrors = [
       'DatabaseConnectionError',
       'PaymentProcessingError',
       'AuthenticationServiceError',
       'DataCorruptionError'
     ];
-    
-    return criticalErrors.includes(error.name) || 
+
+    return criticalErrors.includes(error.name) ||
            error.message.includes('CRITICAL') ||
            error.stack?.includes('ECONNREFUSED');
   }
 
   private async sendToExternalMonitoring(
-    type: string, 
-    message: string, 
-    context: LogContext, 
+    type: string,
+    message: string,
+    context: LogContext,
     error?: Error
   ): Promise<void> {
     try {
@@ -256,11 +266,11 @@ class GameOneLogger {
       if (process.env.SENTRY_DSN) {
         // Sentry integration would go here
       }
-      
+
       if (process.env.DATADOG_API_KEY) {
         // DataDog integration would go here
       }
-      
+
       // Send Slack alerts for critical issues
       if (type === 'error' || type === 'security') {
         await this.sendSlackAlert(type, message, context, error);
@@ -272,16 +282,16 @@ class GameOneLogger {
   }
 
   private async sendSlackAlert(
-    type: string, 
-    message: string, 
-    context: LogContext, 
+    type: string,
+    message: string,
+    context: LogContext,
     error?: Error
   ): Promise<void> {
     if (!process.env.SLACK_WEBHOOK_URL) return;
 
     const color = type === 'error' ? 'danger' : 'warning';
     const emoji = type === 'error' ? '🚨' : '⚠️';
-    
+
     const payload = {
       channel: '#alerts',
       username: 'GameOne Monitor',
@@ -314,6 +324,7 @@ export const logger = new GameOneLogger();
 ```
 
 ### Request Correlation and Context
+
 ```typescript
 // src/lib/logging/correlation.ts
 import { AsyncLocalStorage } from 'async_hooks';
@@ -336,7 +347,7 @@ class CorrelationContextManager {
   createContext(request: Request): RequestContext {
     const requestId = this.extractRequestId(request) || randomUUID();
     const url = new URL(request.url);
-    
+
     return {
       requestId,
       startTime: Date.now(),
@@ -363,7 +374,7 @@ class CorrelationContextManager {
   }
 
   private extractRequestId(request: Request): string | null {
-    return request.headers.get('x-request-id') || 
+    return request.headers.get('x-request-id') ||
            request.headers.get('x-correlation-id') ||
            null;
   }
@@ -383,14 +394,14 @@ export function withCorrelation<T extends (...args: any[]) => any>(
 ): T {
   return (async (request: Request, ...args: any[]) => {
     const context = correlationContext.createContext(request);
-    
+
     return correlationContext.run(context, async () => {
       const startTime = Date.now();
-      
+
       try {
         const response = await handler(request, ...args);
         const duration = Date.now() - startTime;
-        
+
         logger.response(
           context.method,
           context.path,
@@ -398,17 +409,17 @@ export function withCorrelation<T extends (...args: any[]) => any>(
           duration,
           context
         );
-        
+
         return response;
       } catch (error) {
         const duration = Date.now() - startTime;
-        
+
         logger.error(
           `Request failed: ${context.method} ${context.path}`,
           { ...context, duration },
           error as Error
         );
-        
+
         throw error;
       }
     });
@@ -419,6 +430,7 @@ export function withCorrelation<T extends (...args: any[]) => any>(
 ## Metrics Collection
 
 ### Business Metrics Tracking
+
 ```typescript
 // src/lib/metrics/business-metrics.ts
 export enum BusinessEvent {
@@ -583,7 +595,7 @@ class BusinessMetricsCollector {
       .map(([key, value]) => `${key}:${value}`)
       .sort()
       .join(',');
-    
+
     return tagString ? `${metric}{${tagString}}` : metric;
   }
 
@@ -643,9 +655,9 @@ class BusinessMetricsCollector {
     // Prometheus push gateway implementation
     const job = 'gameone-api';
     const instance = process.env.VERCEL_URL || 'localhost';
-    
+
     const metricLine = `gameone_${metric.replace(/\./g, '_')} ${value}`;
-    
+
     await fetch(`${process.env.PROMETHEUS_GATEWAY_URL}/metrics/job/${job}/instance/${instance}`, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain' },
@@ -658,6 +670,7 @@ export const businessMetrics = new BusinessMetricsCollector();
 ```
 
 ### Performance Monitoring
+
 ```typescript
 // src/lib/metrics/performance.ts
 export class PerformanceMonitor {
@@ -669,11 +682,11 @@ export class PerformanceMonitor {
     queryFn: () => Promise<T>
   ): Promise<T> {
     const startTime = Date.now();
-    
+
     return queryFn()
       .then(result => {
         const duration = Date.now() - startTime;
-        
+
         businessMetrics.histogram('database_query_duration', duration, {
           environment: getCurrentEnvironment().name,
           query: queryName
@@ -691,12 +704,12 @@ export class PerformanceMonitor {
       })
       .catch(error => {
         const duration = Date.now() - startTime;
-        
+
         logger.error(`Database query failed: ${queryName}`, {
           query: queryName,
           duration
         }, error);
-        
+
         businessMetrics.increment('database_query_errors', {
           environment: getCurrentEnvironment().name,
           query: queryName,
@@ -712,11 +725,11 @@ export class PerformanceMonitor {
     requestFn: () => Promise<T>
   ): Promise<T> {
     const startTime = Date.now();
-    
+
     return requestFn()
       .then(result => {
         const duration = Date.now() - startTime;
-        
+
         businessMetrics.histogram('api_request_duration', duration, {
           environment: getCurrentEnvironment().name,
           endpoint
@@ -734,7 +747,7 @@ export class PerformanceMonitor {
       })
       .catch(error => {
         const duration = Date.now() - startTime;
-        
+
         logger.error(`API request failed: ${endpoint}`, {
           endpoint,
           duration
@@ -755,10 +768,10 @@ export class PerformanceMonitor {
     fn: () => T
   ): T {
     const startTime = Date.now();
-    
+
     try {
       const result = fn();
-      
+
       if (result instanceof Promise) {
         return result
           .then(resolvedResult => {
@@ -813,7 +826,7 @@ export function trackPerformance(target: any, propertyName: string, descriptor: 
   descriptor.value = function (...args: any[]) {
     const className = target.constructor.name;
     const methodName = `${className}.${propertyName}`;
-    
+
     return PerformanceMonitor.trackFunction(methodName, () => method.apply(this, args));
   };
 
@@ -824,6 +837,7 @@ export function trackPerformance(target: any, propertyName: string, descriptor: 
 ## Application Performance Monitoring (APM)
 
 ### Distributed Tracing
+
 ```typescript
 // src/lib/tracing/tracer.ts
 import { trace, context, SpanStatusCode, SpanKind } from '@opentelemetry/api';
@@ -878,7 +892,7 @@ class TracingService {
     attributes: Record<string, string | number | boolean> = {}
   ): Promise<T> {
     const span = this.startSpan(name);
-    
+
     // Add custom attributes
     Object.entries(attributes).forEach(([key, value]) => {
       span.setAttributes({ [key]: value });
@@ -893,7 +907,7 @@ class TracingService {
         code: SpanStatusCode.ERROR,
         message: error instanceof Error ? error.message : 'Unknown error'
       });
-      
+
       span.recordException(error as Error);
       throw error;
     } finally {
@@ -995,6 +1009,7 @@ export function trace(operationName?: string) {
 ## Real-time Monitoring Dashboard
 
 ### Metrics Dashboard Data Provider
+
 ```typescript
 // src/app/api/admin/metrics/route.ts
 import { NextRequest, NextResponse } from 'next/server';
@@ -1022,7 +1037,7 @@ export const GET = withAuth(async (request: NextRequest) => {
 
 async function collectDashboardMetrics(timeRange: string, requestedMetrics: string[]) {
   const timeFilter = getTimeFilter(timeRange);
-  
+
   const [
     userMetrics,
     eventMetrics,
@@ -1030,15 +1045,15 @@ async function collectDashboardMetrics(timeRange: string, requestedMetrics: stri
     paymentMetrics,
     systemMetrics
   ] = await Promise.all([
-    requestedMetrics.includes('all') || requestedMetrics.includes('users') 
+    requestedMetrics.includes('all') || requestedMetrics.includes('users')
       ? getUserMetrics(timeFilter) : null,
-    requestedMetrics.includes('all') || requestedMetrics.includes('events') 
+    requestedMetrics.includes('all') || requestedMetrics.includes('events')
       ? getEventMetrics(timeFilter) : null,
-    requestedMetrics.includes('all') || requestedMetrics.includes('registrations') 
+    requestedMetrics.includes('all') || requestedMetrics.includes('registrations')
       ? getRegistrationMetrics(timeFilter) : null,
-    requestedMetrics.includes('all') || requestedMetrics.includes('payments') 
+    requestedMetrics.includes('all') || requestedMetrics.includes('payments')
       ? getPaymentMetrics(timeFilter) : null,
-    requestedMetrics.includes('all') || requestedMetrics.includes('system') 
+    requestedMetrics.includes('all') || requestedMetrics.includes('system')
       ? getSystemMetrics() : null
   ]);
 
@@ -1061,7 +1076,7 @@ function getTimeFilter(timeRange: string) {
     '7d': new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000),
     '30d': new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
   };
-  
+
   return filters[timeRange as keyof typeof filters] || filters['24h'];
 }
 
@@ -1096,11 +1111,11 @@ async function getEventMetrics(since: Date) {
     prisma.event.count({ where: { status: 'PUBLISHED' } }),
     prisma.event.count({ where: { status: 'DRAFT' } }),
     prisma.event.count({ where: { status: 'CANCELLED' } }),
-    prisma.event.count({ 
-      where: { 
+    prisma.event.count({
+      where: {
         status: 'PUBLISHED',
         startDate: { gte: new Date() }
-      } 
+      }
     })
   ]);
 
@@ -1129,7 +1144,7 @@ async function getRegistrationMetrics(since: Date) {
     prisma.registration.count({ where: { status: 'CANCELLED' } }),
     prisma.registration.count({ where: { status: 'WAITLISTED' } }),
     prisma.registration.aggregate({
-      where: { 
+      where: {
         status: 'CONFIRMED',
         createdAt: { gte: since }
       },
@@ -1165,7 +1180,7 @@ async function getPaymentMetrics(since: Date) {
       _sum: { amount: true }
     }),
     prisma.payment.aggregate({
-      where: { 
+      where: {
         status: 'COMPLETED',
         createdAt: { gte: since }
       },
@@ -1173,8 +1188,8 @@ async function getPaymentMetrics(since: Date) {
     })
   ]);
 
-  const successRate = totalPayments > 0 
-    ? (completedPayments / totalPayments) * 100 
+  const successRate = totalPayments > 0
+    ? (completedPayments / totalPayments) * 100
     : 0;
 
   return {
@@ -1190,7 +1205,7 @@ async function getPaymentMetrics(since: Date) {
 
 async function getSystemMetrics() {
   const currentMetrics = businessMetrics.getMetrics();
-  
+
   return {
     performance: currentMetrics,
     uptime: process.uptime(),
@@ -1204,6 +1219,7 @@ async function getSystemMetrics() {
 ## Alerting Rules
 
 ### Intelligent Alerting System
+
 ```typescript
 // src/lib/monitoring/alerting.ts
 export enum AlertSeverity {
@@ -1360,7 +1376,7 @@ class AlertingEngine {
 
       try {
         const conditionMet = rule.condition(metrics);
-        
+
         if (conditionMet) {
           await this.triggerAlert(rule, metrics);
         } else {
@@ -1394,10 +1410,10 @@ class AlertingEngine {
     };
 
     this.activeAlerts.set(rule.id, alertEvent);
-    
+
     // Send alert to configured channels
     await this.sendAlert(alertEvent, rule.channels);
-    
+
     // Set cooldown
     this.cooldowns.set(rule.id, Date.now() + (rule.cooldownPeriod * 1000));
 
@@ -1415,9 +1431,9 @@ class AlertingEngine {
     }
 
     activeAlert.resolved = true;
-    
+
     await this.sendAlertResolution(activeAlert);
-    
+
     logger.info(`Alert resolved: ${activeAlert.title}`, {
       alertId: ruleId,
       duration: Date.now() - activeAlert.timestamp.getTime()
@@ -1426,7 +1442,7 @@ class AlertingEngine {
 
   private generateAlertMessage(rule: AlertRule, metrics: any): string {
     const context = this.extractRelevantMetrics(rule, metrics);
-    
+
     return `${rule.description}\n\nCurrent metrics:\n${JSON.stringify(context, null, 2)}`;
   }
 
@@ -1493,7 +1509,7 @@ class AlertingEngine {
   private calculateErrorRate(metrics: any): number {
     const totalRequests = metrics.counters?.['api_requests_total'] || 0;
     const errorRequests = metrics.counters?.['api_requests_errors'] || 0;
-    
+
     return totalRequests > 0 ? (errorRequests / totalRequests) * 100 : 0;
   }
 
@@ -1505,7 +1521,7 @@ class AlertingEngine {
   private calculatePaymentFailureRate(metrics: any): number {
     const totalPayments = metrics.counters?.['payment_initiated'] || 0;
     const failedPayments = metrics.counters?.['payment_failed'] || 0;
-    
+
     return totalPayments > 0 ? (failedPayments / totalPayments) * 100 : 0;
   }
 

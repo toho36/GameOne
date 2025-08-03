@@ -1,3 +1,7 @@
+---
+alwaysApply: true
+---
+
 # GameOne Architecture Rules
 
 This directory contains comprehensive architectural guidelines and patterns for the GameOne event management system. These rules ensure consistent code organization, maintainability, and scalability across the entire codebase.
@@ -7,7 +11,7 @@ This directory contains comprehensive architectural guidelines and patterns for 
 The GameOne system is a modern, enterprise-grade event management platform built with Next.js 15+, TypeScript, Prisma, and PostgreSQL. These architectural rules provide detailed guidance for:
 
 - **API Structure** - RESTful endpoints with consistent patterns
-- **Component Organization** - React component architecture and patterns  
+- **Component Organization** - React component architecture and patterns
 - **Database Patterns** - Prisma ORM usage and schema design
 - **Hook Organization** - Custom React hooks structure
 - **Library Structure** - Utility functions and shared libraries
@@ -15,8 +19,10 @@ The GameOne system is a modern, enterprise-grade event management platform built
 
 ## 📁 Rule Files
 
-### [api-structure.md](./api-structure.md)
+### [api-structure.mdc](./api-structure.mdc)
+
 **API Structure and Routing Rules**
+
 - RESTful API design patterns
 - Route organization and naming conventions
 - Request/response formatting standards
@@ -24,8 +30,10 @@ The GameOne system is a modern, enterprise-grade event management platform built
 - Error handling and status codes
 - Performance optimization strategies
 
-### [component-organization.md](./component-organization.md)
+### [component-organization.mdc](./component-organization.mdc)
+
 **Component Organization and Patterns**
+
 - Component directory structure
 - TypeScript patterns for React components
 - Styling conventions with Tailwind CSS
@@ -33,8 +41,10 @@ The GameOne system is a modern, enterprise-grade event management platform built
 - Performance optimization techniques
 - Testing strategies for components
 
-### [database-patterns.md](./database-patterns.md)
+### [database-patterns.mdc](./database-patterns.mdc)
+
 **Database Schema and ORM Patterns**
+
 - Prisma schema design principles
 - Repository pattern implementation
 - Query optimization strategies
@@ -42,8 +52,10 @@ The GameOne system is a modern, enterprise-grade event management platform built
 - Data migration patterns
 - Database testing approaches
 
-### [hooks-organization.md](./hooks-organization.md)
+### [hooks-organization.mdc](./hooks-organization.mdc)
+
 **Hooks Organization and Conventions**
+
 - Custom hook directory structure
 - Hook naming conventions
 - State management with hooks
@@ -51,8 +63,10 @@ The GameOne system is a modern, enterprise-grade event management platform built
 - Performance optimization hooks
 - Hook testing methodologies
 
-### [libs-and-utilities.md](./libs-and-utilities.md)
+### [libs-and-utilities.mdc](./libs-and-utilities.mdc)
+
 **Libraries and Utilities Structure**
+
 - Utility library organization
 - Core system utilities (auth, config, logging)
 - API utilities and helpers
@@ -60,8 +74,10 @@ The GameOne system is a modern, enterprise-grade event management platform built
 - Validation and security utilities
 - Testing utilities and mocks
 
-### [type-definitions.md](./type-definitions.md)
+### [type-definitions.mdc](./type-definitions.mdc)
+
 **Type Definitions and Interfaces**
+
 - TypeScript type organization
 - API request/response types
 - Database model types
@@ -72,21 +88,27 @@ The GameOne system is a modern, enterprise-grade event management platform built
 ## 🎯 Key Principles
 
 ### 1. **Consistency**
+
 All code should follow the established patterns and conventions outlined in these rules. Consistency reduces cognitive load and improves maintainability.
 
 ### 2. **Type Safety**
+
 Comprehensive TypeScript usage with strict type checking. Every function, component, and API should be properly typed.
 
 ### 3. **Performance**
+
 Code should be optimized for performance with proper caching, lazy loading, and efficient database queries.
 
 ### 4. **Scalability**
+
 Architecture should support growth in both features and team size through modular design and clear separation of concerns.
 
 ### 5. **Testability**
+
 All code should be easily testable with clear interfaces and minimal dependencies.
 
 ### 6. **Security**
+
 Security-first approach with proper authentication, authorization, input validation, and data protection.
 
 ## 🚀 Getting Started
