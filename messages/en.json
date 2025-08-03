@@ -71,5 +71,9 @@
     "save": "Save",
     "close": "Close",
     "goHome": "Go Home"
+  },
+  "Language": {
+    "switchTo": "Switch to {language}",
+    "currentLanguage": "Current language: {language}"
   }
 }

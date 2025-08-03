@@ -16,8 +16,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "BunPlate",
-  description: "A clean, minimal web application",
+  title: "GameOne - Event Management Platform",
+  description: "The ultimate event management platform for modern teams. Create, manage, and track events with ease.",
 };
 
 interface LocaleLayoutProps {
@@ -58,9 +58,9 @@ export default async function LocaleLayout({
         <NextIntlClientProvider messages={messages}>
           <SessionProvider initialSession={initialSession}>
             <Navigation />
-            <header className="absolute right-4 top-4 z-40">
+            <div className="fixed right-4 top-4 z-50">
               <LanguageSwitcher currentLocale={locale as Locale} />
-            </header>
+            </div>
             {children}
           </SessionProvider>
         </NextIntlClientProvider>
