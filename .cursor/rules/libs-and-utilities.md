@@ -1,0 +1,1293 @@
+# Libraries and Utilities Structure
+
+## Overview
+This document defines the comprehensive structure and patterns for libraries, utilities, and shared functionality in the GameOne event management system. All utilities should be modular, well-typed, and follow consistent patterns for maintainability and reusability.
+
+## Directory Structure
+
+```
+src/lib/
+├── core/                   # Core system utilities
+│   ├── prisma.ts          # Database client and connection management
+│   ├── auth.ts            # Authentication and authorization utilities
+│   ├── config.ts          # Configuration management
+│   ├── logger.ts          # Logging utilities
+│   ├── cache.ts           # Caching layer utilities
+│   └── rate-limit.ts      # Rate limiting utilities
+├── api/                   # API-related utilities
+│   ├── response.ts        # API response formatting
+│   ├── validation.ts      # Request validation utilities
+│   ├── middleware.ts      # Middleware utilities
+│   ├── pagination.ts      # Pagination helpers
+│   └── error-handling.ts  # Error handling utilities
+├── data/                  # Data processing and transformation
+│   ├── transformers.ts    # Data transformation utilities
+│   ├── serializers.ts     # Data serialization utilities
+│   ├── filters.ts         # Data filtering utilities
+│   ├── sorters.ts         # Data sorting utilities
+│   └── aggregators.ts     # Data aggregation utilities
+├── validation/            # Validation schemas and utilities
+│   ├── schemas/           # Zod validation schemas
+│   │   ├── event.ts
+│   │   ├── user.ts
+│   │   ├── registration.ts
+│   │   ├── payment.ts
+│   │   └── common.ts
+│   ├── validators.ts      # Custom validation functions
+│   └── sanitizers.ts      # Data sanitization utilities
+├── security/              # Security utilities
+│   ├── encryption.ts      # Encryption/decryption utilities
+│   ├── hashing.ts         # Password hashing utilities
+│   ├── tokens.ts          # Token generation and validation
+│   ├── permissions.ts     # Permission checking utilities
+│   └── sanitization.ts    # Input sanitization
+├── formatting/            # Data formatting utilities
+│   ├── dates.ts           # Date formatting and manipulation
+│   ├── numbers.ts         # Number formatting utilities
+│   ├── currency.ts        # Currency formatting
+│   ├── text.ts            # Text processing utilities
+│   └── localization.ts    # Localization utilities
+├── integrations/          # External service integrations
+│   ├── email/
+│   │   ├── providers.ts   # Email service providers
+│   │   ├── templates.ts   # Email templates
+│   │   └── sender.ts      # Email sending utilities
+│   ├── payments/
+│   │   ├── qr-code.ts     # QR code generation
+│   │   ├── bank-transfer.ts # Bank transfer utilities
+│   │   └── providers.ts   # Payment provider integrations
+│   ├── storage/
+│   │   ├── file-upload.ts # File upload utilities
+│   │   ├── image-processing.ts # Image processing
+│   │   └── cdn.ts         # CDN integration
+│   ├── analytics/
+│   │   ├── tracking.ts    # Analytics tracking
+│   │   └── reporting.ts   # Analytics reporting
+│   └── notifications/
+│       ├── push.ts        # Push notifications
+│       ├── sms.ts         # SMS notifications
+│       └── in-app.ts      # In-app notifications
+├── ui/                    # UI-related utilities
+│   ├── utils.ts           # Core UI utilities (cn function)
+│   ├── constants.ts       # UI constants and themes
+│   ├── animations.ts      # Animation utilities
+│   ├── responsive.ts      # Responsive design utilities
+│   └── accessibility.ts   # Accessibility utilities
+├── testing/               # Testing utilities
+│   ├── mocks.ts           # Mock data generators
+│   ├── fixtures.ts        # Test fixtures
+│   ├── helpers.ts         # Test helper functions
+│   └── setup.ts           # Test setup utilities
+└── utils/                 # General utilities
+    ├── array.ts           # Array manipulation utilities
+    ├── object.ts          # Object manipulation utilities
+    ├── string.ts          # String manipulation utilities
+    ├── async.ts           # Async utilities and helpers
+    ├── debounce.ts        # Debouncing utilities
+    ├── throttle.ts        # Throttling utilities
+    └── performance.ts     # Performance measurement utilities
+```
+
+## Core System Utilities
+
+### Database Client (`src/lib/core/prisma.ts`)
+```typescript
+import { PrismaClient } from '@prisma/client';
+
+declare global {
+  // eslint-disable-next-line no-var
+  var __prisma: PrismaClient | undefined;
+}
+
+// Singleton pattern for Prisma client
+export const prisma = globalThis.__prisma || new PrismaClient({
+  log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+  datasources: {
+    db: {
+      url: process.env.DATABASE_URL
+    }
+  }
+});
+
+if (process.env.NODE_ENV !== 'production') {
+  globalThis.__prisma = prisma;
+}
+
+// Connection management utilities
+export async function connectDatabase(): Promise<void> {
+  try {
+    await prisma.$connect();
+    console.log('Database connected successfully');
+  } catch (error) {
+    console.error('Database connection failed:', error);
+    throw error;
+  }
+}
+
+export async function disconnectDatabase(): Promise<void> {
+  try {
+    await prisma.$disconnect();
+    console.log('Database disconnected');
+  } catch (error) {
+    console.error('Database disconnection failed:', error);
+  }
+}
+
+// Health check utility
+export async function checkDatabaseHealth(): Promise<{
+  status: 'healthy' | 'unhealthy';
+  responseTime: number;
+  error?: string;
+}> {
+  const startTime = Date.now();
+  
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    return {
+      status: 'healthy',
+      responseTime: Date.now() - startTime
+    };
+  } catch (error) {
+    return {
+      status: 'unhealthy',
+      responseTime: Date.now() - startTime,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    };
+  }
+}
+
+// Transaction utilities
+export async function withTransaction<T>(
+  fn: (tx: PrismaClient) => Promise<T>
+): Promise<T> {
+  return prisma.$transaction(fn);
+}
+
+// Pagination utilities
+export interface PaginationOptions {
+  page?: number;
+  limit?: number;
+  offset?: number;
+}
+
+export interface PaginatedResult<T> {
+  data: T[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+  };
+}
+
+export async function paginate<T>(
+  model: any,
+  options: PaginationOptions & {
+    where?: any;
+    include?: any;
+    orderBy?: any;
+  } = {}
+): Promise<PaginatedResult<T>> {
+  const page = Math.max(1, options.page || 1);
+  const limit = Math.min(100, Math.max(1, options.limit || 20));
+  const offset = options.offset ?? (page - 1) * limit;
+
+  const [data, total] = await Promise.all([
+    model.findMany({
+      where: options.where,
+      include: options.include,
+      orderBy: options.orderBy,
+      skip: offset,
+      take: limit
+    }),
+    model.count({ where: options.where })
+  ]);
+
+  const totalPages = Math.ceil(total / limit);
+
+  return {
+    data,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages,
+      hasNext: page < totalPages,
+      hasPrev: page > 1
+    }
+  };
+}
+```
+
+### Configuration Management (`src/lib/core/config.ts`)
+```typescript
+import { z } from 'zod';
+
+// Environment schema validation
+const envSchema = z.object({
+  // Database
+  DATABASE_URL: z.string().url(),
+  
+  // Authentication
+  KINDE_CLIENT_ID: z.string(),
+  KINDE_CLIENT_SECRET: z.string(),
+  KINDE_ISSUER_URL: z.string().url(),
+  KINDE_SITE_URL: z.string().url(),
+  KINDE_POST_LOGOUT_REDIRECT_URL: z.string().url(),
+  KINDE_POST_LOGIN_REDIRECT_URL: z.string().url(),
+  
+  // External services
+  SMTP_HOST: z.string().optional(),
+  SMTP_PORT: z.coerce.number().optional(),
+  SMTP_USER: z.string().optional(),
+  SMTP_PASS: z.string().optional(),
+  
+  // Vercel
+  VERCEL_ENV: z.enum(['development', 'preview', 'production']).optional(),
+  VERCEL_URL: z.string().optional(),
+  CRON_SECRET: z.string(),
+  
+  // App settings
+  NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
+  PORT: z.coerce.number().default(3000),
+  
+  // Feature flags
+  ENABLE_ANALYTICS: z.coerce.boolean().default(false),
+  ENABLE_PUSH_NOTIFICATIONS: z.coerce.boolean().default(false),
+  ENABLE_VIDEO_PROCESSING: z.coerce.boolean().default(false),
+});
+
+// Validate environment variables
+function validateEnv() {
+  try {
+    return envSchema.parse(process.env);
+  } catch (error) {
+    console.error('❌ Invalid environment variables:', error);
+    throw new Error('Invalid environment configuration');
+  }
+}
+
+export const env = validateEnv();
+
+// Configuration object
+export const config = {
+  // Database
+  database: {
+    url: env.DATABASE_URL,
+    maxConnections: 20,
+    connectionTimeout: 10000
+  },
+  
+  // Authentication
+  auth: {
+    kinde: {
+      clientId: env.KINDE_CLIENT_ID,
+      clientSecret: env.KINDE_CLIENT_SECRET,
+      issuerUrl: env.KINDE_ISSUER_URL,
+      siteUrl: env.KINDE_SITE_URL,
+      postLogoutRedirectUrl: env.KINDE_POST_LOGOUT_REDIRECT_URL,
+      postLoginRedirectUrl: env.KINDE_POST_LOGIN_REDIRECT_URL
+    },
+    sessionTimeout: 24 * 60 * 60 * 1000, // 24 hours
+    refreshTokenTimeout: 7 * 24 * 60 * 60 * 1000 // 7 days
+  },
+  
+  // API settings
+  api: {
+    rateLimiting: {
+      windowMs: 15 * 60 * 1000, // 15 minutes
+      maxRequests: 100,
+      skipSuccessfulRequests: false
+    },
+    cors: {
+      origin: env.NODE_ENV === 'production' 
+        ? [env.VERCEL_URL!, 'https://gameone.sk'] 
+        : true,
+      credentials: true
+    },
+    timeout: 30000, // 30 seconds
+    maxBodySize: '10mb'
+  },
+  
+  // Email settings
+  email: {
+    smtp: {
+      host: env.SMTP_HOST,
+      port: env.SMTP_PORT,
+      user: env.SMTP_USER,
+      pass: env.SMTP_PASS,
+    },
+    from: 'noreply@gameone.sk',
+    replyTo: 'support@gameone.sk'
+  },
+  
+  // Feature flags
+  features: {
+    analytics: env.ENABLE_ANALYTICS,
+    pushNotifications: env.ENABLE_PUSH_NOTIFICATIONS,
+    videoProcessing: env.ENABLE_VIDEO_PROCESSING
+  },
+  
+  // App settings
+  app: {
+    name: 'GameOne',
+    version: process.env.npm_package_version || '1.0.0',
+    environment: env.NODE_ENV,
+    port: env.PORT,
+    url: env.VERCEL_URL || `http://localhost:${env.PORT}`,
+    supportedLocales: ['en', 'cs'] as const,
+    defaultLocale: 'en' as const
+  },
+  
+  // Cron settings
+  cron: {
+    secret: env.CRON_SECRET,
+    jobs: {
+      cleanup: '0 2 * * *', // Daily at 2 AM
+      notifications: '*/5 * * * *', // Every 5 minutes
+      analytics: '0 1 * * 0' // Weekly on Sunday at 1 AM
+    }
+  }
+} as const;
+
+// Type exports
+export type Config = typeof config;
+export type Environment = typeof env;
+export type SupportedLocale = typeof config.app.supportedLocales[number];
+```
+
+### Logging Utilities (`src/lib/core/logger.ts`)
+```typescript
+import { config } from './config';
+
+export enum LogLevel {
+  ERROR = 0,
+  WARN = 1,
+  INFO = 2,
+  DEBUG = 3
+}
+
+interface LogEntry {
+  level: LogLevel;
+  message: string;
+  timestamp: Date;
+  context?: Record<string, any>;
+  error?: Error;
+  userId?: string;
+  requestId?: string;
+}
+
+class Logger {
+  private level: LogLevel;
+
+  constructor() {
+    this.level = config.app.environment === 'production' 
+      ? LogLevel.INFO 
+      : LogLevel.DEBUG;
+  }
+
+  private shouldLog(level: LogLevel): boolean {
+    return level <= this.level;
+  }
+
+  private formatLog(entry: LogEntry): string {
+    const timestamp = entry.timestamp.toISOString();
+    const level = LogLevel[entry.level];
+    const context = entry.context ? ` ${JSON.stringify(entry.context)}` : '';
+    const error = entry.error ? ` Error: ${entry.error.message}` : '';
+    
+    return `[${timestamp}] ${level}: ${entry.message}${context}${error}`;
+  }
+
+  private log(level: LogLevel, message: string, context?: Record<string, any>, error?: Error) {
+    if (!this.shouldLog(level)) return;
+
+    const entry: LogEntry = {
+      level,
+      message,
+      timestamp: new Date(),
+      context,
+      error
+    };
+
+    const formatted = this.formatLog(entry);
+
+    switch (level) {
+      case LogLevel.ERROR:
+        console.error(formatted);
+        break;
+      case LogLevel.WARN:
+        console.warn(formatted);
+        break;
+      case LogLevel.INFO:
+        console.info(formatted);
+        break;
+      case LogLevel.DEBUG:
+        console.debug(formatted);
+        break;
+    }
+
+    // In production, you might want to send logs to an external service
+    if (config.app.environment === 'production' && level <= LogLevel.WARN) {
+      this.sendToExternalService(entry);
+    }
+  }
+
+  private async sendToExternalService(entry: LogEntry) {
+    // Implementation for external logging service (e.g., Vercel Analytics, Sentry)
+    try {
+      // Example: Send to external logging service
+      if (config.features.analytics) {
+        // Send to analytics service
+      }
+    } catch (error) {
+      console.error('Failed to send log to external service:', error);
+    }
+  }
+
+  error(message: string, context?: Record<string, any>, error?: Error) {
+    this.log(LogLevel.ERROR, message, context, error);
+  }
+
+  warn(message: string, context?: Record<string, any>) {
+    this.log(LogLevel.WARN, message, context);
+  }
+
+  info(message: string, context?: Record<string, any>) {
+    this.log(LogLevel.INFO, message, context);
+  }
+
+  debug(message: string, context?: Record<string, any>) {
+    this.log(LogLevel.DEBUG, message, context);
+  }
+
+  // Request-specific logging
+  request(requestId: string, method: string, url: string, userId?: string) {
+    this.info(`${method} ${url}`, { requestId, userId });
+  }
+
+  response(requestId: string, status: number, duration: number) {
+    this.info(`Response ${status}`, { requestId, duration });
+  }
+
+  // Database logging
+  query(query: string, duration: number, requestId?: string) {
+    this.debug(`DB Query: ${query}`, { duration, requestId });
+  }
+
+  // Authentication logging
+  auth(event: string, userId: string, context?: Record<string, any>) {
+    this.info(`Auth: ${event}`, { userId, ...context });
+  }
+}
+
+export const logger = new Logger();
+
+// Convenience functions
+export const logError = (message: string, error?: Error, context?: Record<string, any>) => {
+  logger.error(message, context, error);
+};
+
+export const logWarn = (message: string, context?: Record<string, any>) => {
+  logger.warn(message, context);
+};
+
+export const logInfo = (message: string, context?: Record<string, any>) => {
+  logger.info(message, context);
+};
+
+export const logDebug = (message: string, context?: Record<string, any>) => {
+  logger.debug(message, context);
+};
+```
+
+## API Utilities
+
+### Response Formatting (`src/lib/api/response.ts`)
+```typescript
+import { NextResponse } from 'next/server';
+import { logger } from '@/lib/core/logger';
+
+export interface ApiResponse<T = any> {
+  success: boolean;
+  data?: T;
+  error?: {
+    code: string;
+    message: string;
+    details?: any;
+  };
+  pagination?: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+  };
+  meta?: {
+    timestamp: string;
+    requestId: string;
+    version: string;
+  };
+}
+
+export interface ApiErrorResponse {
+  success: false;
+  error: {
+    code: string;
+    message: string;
+    details?: any;
+    stack?: string;
+  };
+  meta: {
+    timestamp: string;
+    requestId: string;
+    path?: string;
+  };
+}
+
+// Success response helper
+export function createApiResponse<T>(
+  data: T,
+  options: {
+    status?: number;
+    pagination?: ApiResponse['pagination'];
+    meta?: Partial<ApiResponse['meta']>;
+    requestId?: string;
+  } = {}
+): NextResponse {
+  const response: ApiResponse<T> = {
+    success: true,
+    data,
+    ...(options.pagination && { pagination: options.pagination }),
+    meta: {
+      timestamp: new Date().toISOString(),
+      requestId: options.requestId || generateRequestId(),
+      version: '1.0.0',
+      ...options.meta
+    }
+  };
+
+  return NextResponse.json(response, { 
+    status: options.status || 200,
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Request-ID': response.meta.requestId
+    }
+  });
+}
+
+// Error response helper
+export function createErrorResponse(
+  code: string,
+  message: string,
+  status: number = 500,
+  details?: any,
+  requestId?: string,
+  path?: string
+): NextResponse {
+  const response: ApiErrorResponse = {
+    success: false,
+    error: {
+      code,
+      message,
+      ...(details && { details }),
+      ...(process.env.NODE_ENV === 'development' && { stack: new Error().stack })
+    },
+    meta: {
+      timestamp: new Date().toISOString(),
+      requestId: requestId || generateRequestId(),
+      ...(path && { path })
+    }
+  };
+
+  // Log error
+  logger.error(`API Error: ${code}`, {
+    message,
+    status,
+    details,
+    requestId: response.meta.requestId,
+    path
+  });
+
+  return NextResponse.json(response, { 
+    status,
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Request-ID': response.meta.requestId
+    }
+  });
+}
+
+// Validation error response
+export function createValidationErrorResponse(
+  errors: Record<string, string[]>,
+  requestId?: string
+): NextResponse {
+  return createErrorResponse(
+    'VALIDATION_ERROR',
+    'Validation failed',
+    422,
+    { fieldErrors: errors },
+    requestId
+  );
+}
+
+// Authentication error responses
+export function createUnauthorizedResponse(requestId?: string): NextResponse {
+  return createErrorResponse(
+    'UNAUTHORIZED',
+    'Authentication required',
+    401,
+    undefined,
+    requestId
+  );
+}
+
+export function createForbiddenResponse(requestId?: string): NextResponse {
+  return createErrorResponse(
+    'FORBIDDEN',
+    'Insufficient permissions',
+    403,
+    undefined,
+    requestId
+  );
+}
+
+// Not found error response
+export function createNotFoundResponse(
+  resource: string = 'Resource',
+  requestId?: string
+): NextResponse {
+  return createErrorResponse(
+    'NOT_FOUND',
+    `${resource} not found`,
+    404,
+    undefined,
+    requestId
+  );
+}
+
+// Rate limit error response
+export function createRateLimitResponse(requestId?: string): NextResponse {
+  return createErrorResponse(
+    'RATE_LIMIT_EXCEEDED',
+    'Too many requests',
+    429,
+    undefined,
+    requestId
+  );
+}
+
+// Utility functions
+function generateRequestId(): string {
+  return `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+}
+
+// Response header helpers
+export function setCacheHeaders(response: NextResponse, maxAge: number = 3600) {
+  response.headers.set('Cache-Control', `public, max-age=${maxAge}, stale-while-revalidate=${maxAge * 2}`);
+  return response;
+}
+
+export function setNoCacheHeaders(response: NextResponse) {
+  response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  response.headers.set('Pragma', 'no-cache');
+  response.headers.set('Expires', '0');
+  return response;
+}
+
+export function setCorsHeaders(response: NextResponse, origin?: string) {
+  if (origin) {
+    response.headers.set('Access-Control-Allow-Origin', origin);
+  }
+  response.headers.set('Access-Control-Allow-Credentials', 'true');
+  response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  return response;
+}
+```
+
+## Validation Utilities
+
+### Schema Definitions (`src/lib/validation/schemas/`)
+```typescript
+// src/lib/validation/schemas/common.ts
+import { z } from 'zod';
+
+export const IdSchema = z.string().uuid();
+export const SlugSchema = z.string().regex(/^[a-z0-9-]+$/);
+export const EmailSchema = z.string().email();
+export const UrlSchema = z.string().url();
+export const PhoneSchema = z.string().regex(/^\+?[1-9]\d{1,14}$/);
+
+export const PaginationSchema = z.object({
+  page: z.coerce.number().min(1).default(1),
+  limit: z.coerce.number().min(1).max(100).default(20),
+  offset: z.coerce.number().min(0).optional()
+});
+
+export const SortSchema = z.object({
+  sortBy: z.string().optional(),
+  sortOrder: z.enum(['asc', 'desc']).default('desc')
+});
+
+export const SearchSchema = z.object({
+  search: z.string().optional(),
+  searchFields: z.array(z.string()).optional()
+});
+
+export const DateRangeSchema = z.object({
+  startDate: z.coerce.date().optional(),
+  endDate: z.coerce.date().optional()
+}).refine(
+  (data) => !data.startDate || !data.endDate || data.startDate <= data.endDate,
+  { message: "Start date must be before end date" }
+);
+
+// src/lib/validation/schemas/event.ts
+export const EventStatusSchema = z.enum(['draft', 'published', 'cancelled', 'completed']);
+
+export const CreateEventSchema = z.object({
+  title: z.string().min(1).max(255),
+  description: z.string().min(1).max(2000),
+  shortDescription: z.string().max(500).optional(),
+  startDate: z.coerce.date(),
+  endDate: z.coerce.date(),
+  registrationStartDate: z.coerce.date().optional(),
+  registrationEndDate: z.coerce.date().optional(),
+  maxParticipants: z.number().min(1).optional(),
+  price: z.number().min(0).optional(),
+  currency: z.string().length(3).default('EUR'),
+  location: z.string().max(255).optional(),
+  categoryId: IdSchema,
+  tags: z.array(z.string()).optional(),
+  isPrivate: z.boolean().default(false),
+  requiresApproval: z.boolean().default(false),
+  allowGuests: z.boolean().default(false),
+  maxGuestsPerRegistration: z.number().min(0).max(10).default(0),
+  metadata: z.record(z.any()).optional()
+}).refine(
+  (data) => data.startDate <= data.endDate,
+  { message: "Start date must be before end date", path: ["endDate"] }
+).refine(
+  (data) => !data.registrationEndDate || data.registrationEndDate <= data.startDate,
+  { message: "Registration must end before event starts", path: ["registrationEndDate"] }
+);
+
+export const UpdateEventSchema = CreateEventSchema.partial().extend({
+  id: IdSchema,
+  status: EventStatusSchema.optional()
+});
+
+export const EventFiltersSchema = z.object({
+  status: EventStatusSchema.optional(),
+  categoryId: IdSchema.optional(),
+  startDate: z.coerce.date().optional(),
+  endDate: z.coerce.date().optional(),
+  location: z.string().optional(),
+  tags: z.array(z.string()).optional(),
+  isPrivate: z.boolean().optional(),
+  priceMin: z.number().min(0).optional(),
+  priceMax: z.number().min(0).optional()
+}).merge(PaginationSchema).merge(SortSchema).merge(SearchSchema);
+```
+
+## Data Processing Utilities
+
+### Transformers (`src/lib/data/transformers.ts`)
+```typescript
+import { Event, User, Registration } from '@prisma/client';
+import type { SupportedLocale } from '@/lib/core/config';
+
+// Generic transformer interface
+export interface Transformer<TInput, TOutput> {
+  transform(input: TInput): TOutput;
+  transformArray(input: TInput[]): TOutput[];
+}
+
+// Event transformers
+export interface PublicEvent {
+  id: string;
+  title: string;
+  description: string;
+  shortDescription?: string;
+  startDate: string;
+  endDate: string;
+  location?: string;
+  price?: number;
+  currency: string;
+  maxParticipants?: number;
+  availableSpots?: number;
+  category: {
+    id: string;
+    name: string;
+    slug: string;
+  };
+  registrationOpen: boolean;
+  tags: string[];
+}
+
+export class EventTransformer implements Transformer<Event & { category: any; registrations?: any[] }, PublicEvent> {
+  constructor(private locale: SupportedLocale = 'en') {}
+
+  transform(event: Event & { category: any; registrations?: any[] }): PublicEvent {
+    const now = new Date();
+    const registrationStart = event.registrationStartDate || event.createdAt;
+    const registrationEnd = event.registrationEndDate || event.startDate;
+    
+    return {
+      id: event.id,
+      title: this.getLocalizedTitle(event, this.locale),
+      description: this.getLocalizedDescription(event, this.locale),
+      shortDescription: this.getLocalizedShortDescription(event, this.locale),
+      startDate: event.startDate.toISOString(),
+      endDate: event.endDate.toISOString(),
+      location: event.location,
+      price: event.price,
+      currency: event.currency,
+      maxParticipants: event.maxParticipants,
+      availableSpots: this.calculateAvailableSpots(event),
+      category: {
+        id: event.category.id,
+        name: this.getLocalizedCategoryName(event.category, this.locale),
+        slug: event.category.slug
+      },
+      registrationOpen: this.isRegistrationOpen(now, registrationStart, registrationEnd),
+      tags: event.tags || []
+    };
+  }
+
+  transformArray(events: (Event & { category: any; registrations?: any[] })[]): PublicEvent[] {
+    return events.map(event => this.transform(event));
+  }
+
+  private getLocalizedTitle(event: Event, locale: SupportedLocale): string {
+    const metadata = event.metadata as any;
+    return metadata?.translations?.[locale]?.title || event.title;
+  }
+
+  private getLocalizedDescription(event: Event, locale: SupportedLocale): string {
+    const metadata = event.metadata as any;
+    return metadata?.translations?.[locale]?.description || event.description;
+  }
+
+  private getLocalizedShortDescription(event: Event, locale: SupportedLocale): string | undefined {
+    const metadata = event.metadata as any;
+    return metadata?.translations?.[locale]?.shortDescription || event.shortDescription;
+  }
+
+  private getLocalizedCategoryName(category: any, locale: SupportedLocale): string {
+    const metadata = category.metadata as any;
+    return metadata?.translations?.[locale]?.name || category.name;
+  }
+
+  private calculateAvailableSpots(event: Event & { registrations?: any[] }): number | undefined {
+    if (!event.maxParticipants) return undefined;
+    
+    const confirmedRegistrations = event.registrations?.filter(
+      reg => reg.status === 'confirmed'
+    ).length || 0;
+    
+    return Math.max(0, event.maxParticipants - confirmedRegistrations);
+  }
+
+  private isRegistrationOpen(now: Date, start: Date, end: Date): boolean {
+    return now >= start && now <= end;
+  }
+}
+
+// User transformers
+export interface PublicUser {
+  id: string;
+  name: string;
+  email: string;
+  avatar?: string;
+  roles: string[];
+  createdAt: string;
+}
+
+export class UserTransformer implements Transformer<User & { userRoles?: any[] }, PublicUser> {
+  transform(user: User & { userRoles?: any[] }): PublicUser {
+    return {
+      id: user.id,
+      name: user.name || 'Anonymous User',
+      email: user.email,
+      avatar: user.picture,
+      roles: user.userRoles?.map(ur => ur.role.name) || [],
+      createdAt: user.createdAt.toISOString()
+    };
+  }
+
+  transformArray(users: (User & { userRoles?: any[] })[]): PublicUser[] {
+    return users.map(user => this.transform(user));
+  }
+}
+
+// Registration transformers
+export interface PublicRegistration {
+  id: string;
+  status: string;
+  registeredAt: string;
+  numberOfGuests: number;
+  totalAmount?: number;
+  paymentStatus?: string;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+  };
+  event: {
+    id: string;
+    title: string;
+    startDate: string;
+  };
+}
+
+export class RegistrationTransformer implements Transformer<Registration & { user: User; event: Event }, PublicRegistration> {
+  transform(registration: Registration & { user: User; event: Event }): PublicRegistration {
+    return {
+      id: registration.id,
+      status: registration.status,
+      registeredAt: registration.createdAt.toISOString(),
+      numberOfGuests: registration.numberOfGuests,
+      totalAmount: registration.totalAmount,
+      paymentStatus: registration.paymentStatus,
+      user: {
+        id: registration.user.id,
+        name: registration.user.name || 'Anonymous User',
+        email: registration.user.email
+      },
+      event: {
+        id: registration.event.id,
+        title: registration.event.title,
+        startDate: registration.event.startDate.toISOString()
+      }
+    };
+  }
+
+  transformArray(registrations: (Registration & { user: User; event: Event })[]): PublicRegistration[] {
+    return registrations.map(registration => this.transform(registration));
+  }
+}
+
+// Factory for transformers
+export class TransformerFactory {
+  static createEventTransformer(locale: SupportedLocale = 'en'): EventTransformer {
+    return new EventTransformer(locale);
+  }
+
+  static createUserTransformer(): UserTransformer {
+    return new UserTransformer();
+  }
+
+  static createRegistrationTransformer(): RegistrationTransformer {
+    return new RegistrationTransformer();
+  }
+}
+```
+
+## Performance and Utility Functions
+
+### Async Utilities (`src/lib/utils/async.ts`)
+```typescript
+// Retry utility with exponential backoff
+export async function retry<T>(
+  fn: () => Promise<T>,
+  options: {
+    maxAttempts?: number;
+    delay?: number;
+    backoffFactor?: number;
+    maxDelay?: number;
+    shouldRetry?: (error: Error) => boolean;
+  } = {}
+): Promise<T> {
+  const {
+    maxAttempts = 3,
+    delay = 1000,
+    backoffFactor = 2,
+    maxDelay = 10000,
+    shouldRetry = () => true
+  } = options;
+
+  let lastError: Error;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+      
+      if (attempt === maxAttempts || !shouldRetry(lastError)) {
+        throw lastError;
+      }
+
+      const waitTime = Math.min(delay * Math.pow(backoffFactor, attempt - 1), maxDelay);
+      await sleep(waitTime);
+    }
+  }
+
+  throw lastError!;
+}
+
+// Sleep utility
+export function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// Timeout utility
+export function withTimeout<T>(
+  promise: Promise<T>,
+  timeoutMs: number,
+  timeoutMessage = 'Operation timed out'
+): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) => {
+      setTimeout(() => reject(new Error(timeoutMessage)), timeoutMs);
+    })
+  ]);
+}
+
+// Batch processing utility
+export async function processBatch<TInput, TOutput>(
+  items: TInput[],
+  processor: (item: TInput) => Promise<TOutput>,
+  options: {
+    batchSize?: number;
+    concurrency?: number;
+    onProgress?: (completed: number, total: number) => void;
+  } = {}
+): Promise<TOutput[]> {
+  const { batchSize = 10, concurrency = 3, onProgress } = options;
+  const results: TOutput[] = [];
+  let completed = 0;
+
+  for (let i = 0; i < items.length; i += batchSize) {
+    const batch = items.slice(i, i + batchSize);
+    const semaphore = new Semaphore(concurrency);
+
+    const batchPromises = batch.map(async (item) => {
+      await semaphore.acquire();
+      try {
+        const result = await processor(item);
+        completed++;
+        onProgress?.(completed, items.length);
+        return result;
+      } finally {
+        semaphore.release();
+      }
+    });
+
+    const batchResults = await Promise.all(batchPromises);
+    results.push(...batchResults);
+  }
+
+  return results;
+}
+
+// Semaphore for concurrency control
+class Semaphore {
+  private permits: number;
+  private waiting: (() => void)[] = [];
+
+  constructor(permits: number) {
+    this.permits = permits;
+  }
+
+  async acquire(): Promise<void> {
+    if (this.permits > 0) {
+      this.permits--;
+      return;
+    }
+
+    return new Promise<void>((resolve) => {
+      this.waiting.push(resolve);
+    });
+  }
+
+  release(): void {
+    if (this.waiting.length > 0) {
+      const resolve = this.waiting.shift()!;
+      resolve();
+    } else {
+      this.permits++;
+    }
+  }
+}
+
+// Debounce utility for functions
+export function debounce<T extends (...args: any[]) => any>(
+  func: T,
+  delay: number
+): (...args: Parameters<T>) => void {
+  let timeoutId: NodeJS.Timeout;
+
+  return (...args: Parameters<T>) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => func(...args), delay);
+  };
+}
+
+// Throttle utility for functions
+export function throttle<T extends (...args: any[]) => any>(
+  func: T,
+  delay: number
+): (...args: Parameters<T>) => void {
+  let lastCallTime = 0;
+
+  return (...args: Parameters<T>) => {
+    const now = Date.now();
+    if (now - lastCallTime >= delay) {
+      lastCallTime = now;
+      func(...args);
+    }
+  };
+}
+
+// Memoization utility
+export function memoize<T extends (...args: any[]) => any>(
+  func: T,
+  getKey?: (...args: Parameters<T>) => string
+): T {
+  const cache = new Map<string, ReturnType<T>>();
+  
+  return ((...args: Parameters<T>) => {
+    const key = getKey ? getKey(...args) : JSON.stringify(args);
+    
+    if (cache.has(key)) {
+      return cache.get(key)!;
+    }
+    
+    const result = func(...args);
+    cache.set(key, result);
+    return result;
+  }) as T;
+}
+```
+
+## Testing Utilities
+
+### Mock Data Generators (`src/lib/testing/mocks.ts`)
+```typescript
+import { faker } from '@faker-js/faker';
+import type { Event, User, Registration } from '@prisma/client';
+
+// Mock data generators
+export function createMockUser(overrides: Partial<User> = {}): User {
+  return {
+    id: faker.string.uuid(),
+    kindeId: faker.string.uuid(),
+    email: faker.internet.email(),
+    name: faker.person.fullName(),
+    givenName: faker.person.firstName(),
+    familyName: faker.person.lastName(),
+    picture: faker.image.avatar(),
+    isVerified: faker.datatype.boolean(),
+    phone: faker.phone.number(),
+    locale: faker.helpers.arrayElement(['en', 'cs']),
+    timezone: faker.location.timeZone(),
+    lastActiveAt: faker.date.recent(),
+    createdAt: faker.date.past(),
+    updatedAt: faker.date.recent(),
+    ...overrides
+  };
+}
+
+export function createMockEvent(overrides: Partial<Event> = {}): Event {
+  const startDate = faker.date.future();
+  const endDate = new Date(startDate.getTime() + faker.number.int({ min: 1, max: 24 }) * 60 * 60 * 1000);
+
+  return {
+    id: faker.string.uuid(),
+    title: faker.lorem.sentence({ min: 2, max: 6 }),
+    description: faker.lorem.paragraphs(3),
+    shortDescription: faker.lorem.sentence(),
+    startDate,
+    endDate,
+    registrationStartDate: faker.date.recent(),
+    registrationEndDate: new Date(startDate.getTime() - 24 * 60 * 60 * 1000),
+    maxParticipants: faker.number.int({ min: 10, max: 100 }),
+    price: faker.number.float({ min: 0, max: 500, fractionDigits: 2 }),
+    currency: 'EUR',
+    location: faker.location.streetAddress(),
+    status: faker.helpers.arrayElement(['draft', 'published', 'cancelled', 'completed']),
+    categoryId: faker.string.uuid(),
+    tags: faker.helpers.arrayElements(['workshop', 'conference', 'meetup', 'webinar'], { min: 1, max: 3 }),
+    isPrivate: faker.datatype.boolean({ probability: 0.2 }),
+    requiresApproval: faker.datatype.boolean({ probability: 0.3 }),
+    allowGuests: faker.datatype.boolean({ probability: 0.7 }),
+    maxGuestsPerRegistration: faker.number.int({ min: 0, max: 5 }),
+    metadata: {},
+    createdById: faker.string.uuid(),
+    createdAt: faker.date.past(),
+    updatedAt: faker.date.recent(),
+    ...overrides
+  };
+}
+
+export function createMockRegistration(overrides: Partial<Registration> = {}): Registration {
+  return {
+    id: faker.string.uuid(),
+    eventId: faker.string.uuid(),
+    userId: faker.string.uuid(),
+    status: faker.helpers.arrayElement(['pending', 'confirmed', 'cancelled', 'waitlisted']),
+    numberOfGuests: faker.number.int({ min: 0, max: 3 }),
+    totalAmount: faker.number.float({ min: 0, max: 200, fractionDigits: 2 }),
+    paymentStatus: faker.helpers.arrayElement(['pending', 'completed', 'failed', 'refunded']),
+    notes: faker.lorem.sentence(),
+    metadata: {},
+    createdAt: faker.date.past(),
+    updatedAt: faker.date.recent(),
+    ...overrides
+  };
+}
+
+// Batch generators
+export function createMockUsers(count: number): User[] {
+  return Array.from({ length: count }, () => createMockUser());
+}
+
+export function createMockEvents(count: number): Event[] {
+  return Array.from({ length: count }, () => createMockEvent());
+}
+
+export function createMockRegistrations(count: number): Registration[] {
+  return Array.from({ length: count }, () => createMockRegistration());
+}
+
+// Request mocking utilities
+export function createMockRequest(
+  method: string,
+  url: string,
+  body?: any,
+  headers: Record<string, string> = {}
+): Request {
+  return new Request(url, {
+    method,
+    headers: {
+      'Content-Type': 'application/json',
+      ...headers
+    },
+    ...(body && { body: JSON.stringify(body) })
+  });
+}
+
+export function createMockNextRequest(
+  method: string,
+  url: string,
+  body?: any,
+  headers: Record<string, string> = {}
+): any {
+  const request = createMockRequest(method, url, body, headers);
+  return {
+    ...request,
+    nextUrl: new URL(url),
+    json: async () => body || {}
+  };
+}
+```
+
+This comprehensive library structure provides a solid foundation for building scalable, maintainable utilities and services in the GameOne application. Each utility is designed to be modular, well-typed, and follows consistent patterns for easy adoption and maintenance.
