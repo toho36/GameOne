@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import type { NextRequest } from "next/server";
 
 // ================================
@@ -184,7 +183,7 @@ export async function verifyVercelCronSecret(request: NextRequest): Promise<{
 /**
  * Rate limiting for cron jobs to prevent abuse
  */
-export function isRateLimited(_jobName: string, _windowMs: number = 60000): boolean {
+export function isRateLimited(): boolean {
   // In a real implementation, you'd use Redis or a database
   // For now, we'll use in-memory storage (not ideal for production)
   

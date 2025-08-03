@@ -3,9 +3,15 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { UserProfile } from "@/components/auth";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import { useState } from "react";
+import { type Locale } from "@/i18n/routing";
 
-export function Navigation() {
+interface NavigationProps {
+  currentLocale: Locale;
+}
+
+export function Navigation({ currentLocale }: NavigationProps) {
     const t = useTranslations("Navigation");
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -37,27 +43,33 @@ export function Navigation() {
                         </Link>
                     </div>
 
-                    {/* User Profile / Auth Buttons */}
-                    <div className="flex items-center">
-                        <UserProfile />
-                    </div>
+                    {/* Right Side: Language Switcher + User Profile */}
+                    <div className="flex items-center gap-4">
+                        {/* Language Switcher */}
+                        <div className="hidden md:block">
+                            <LanguageSwitcher currentLocale={currentLocale} variant="compact" />
+                        </div>
 
-                    {/* Mobile Menu Button */}
-                    <div className="md:hidden">
-                        <button
-                            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                            className="rounded-md p-2 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
-                            aria-label="Toggle mobile menu"
-                        >
-                            <svg className="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d={isMobileMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"}
-                                />
-                            </svg>
-                        </button>
+                        {/* User Profile / Auth Buttons */}
+                        <UserProfile />
+
+                        {/* Mobile Menu Button */}
+                        <div className="md:hidden">
+                            <button
+                                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                                className="rounded-md p-2 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
+                                aria-label="Toggle mobile menu"
+                            >
+                                <svg className="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d={isMobileMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"}
+                                    />
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -79,6 +91,16 @@ export function Navigation() {
                             >
                                 {t("dashboard")}
                             </Link>
+                            
+                            {/* Language Switcher in Mobile Menu */}
+                            <div className="border-t border-gray-200 pt-2">
+                                <div className="px-3 py-2">
+                                    <span className="text-sm font-medium text-gray-700 mb-2 block">
+                                        Language
+                                    </span>
+                                    <LanguageSwitcher currentLocale={currentLocale} variant="compact" />
+                                </div>
+                            </div>
                         </div>
                     </div>
                 )}
