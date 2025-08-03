@@ -1,0 +1,932 @@
+---
+alwaysApply: true
+---
+
+# Component Organization and Patterns
+
+## Overview
+
+This document defines the comprehensive component architecture, organization patterns, and development conventions for the GameOne event management system. All components should follow consistent patterns for maintainability, reusability, and type safety.
+
+## Directory Structure
+
+```
+src/components/
+├── ui/                     # Core design system components (Shadcn/ui)
+│   ├── button.tsx
+│   ├── input.tsx
+│   ├── card.tsx
+│   ├── dialog.tsx
+│   ├── dropdown-menu.tsx
+│   ├── form.tsx
+│   ├── table.tsx
+│   ├── toast.tsx
+│   └── index.ts           # Re-export all UI components
+├── layout/                # Layout and navigation components
+│   ├── header.tsx
+│   ├── footer.tsx
+│   ├── sidebar.tsx
+│   ├── navigation.tsx
+│   ├── breadcrumbs.tsx
+│   └── page-wrapper.tsx
+├── forms/                 # Form components and inputs
+│   ├── event-form.tsx
+│   ├── registration-form.tsx
+│   ├── user-form.tsx
+│   ├── payment-form.tsx
+│   ├── search-form.tsx
+│   └── form-fields/       # Specialized form field components
+│       ├── date-picker.tsx
+│       ├── rich-text-editor.tsx
+│       ├── file-upload.tsx
+│       ├── multi-select.tsx
+│       └── address-input.tsx
+├── features/              # Feature-specific component groups
+│   ├── events/
+│   │   ├── event-card.tsx
+│   │   ├── event-list.tsx
+│   │   ├── event-details.tsx
+│   │   ├── event-calendar.tsx
+│   │   ├── event-feedback.tsx
+│   │   └── index.ts
+│   ├── registration/
+│   │   ├── registration-wizard.tsx
+│   │   ├── registration-summary.tsx
+│   │   ├── waiting-list.tsx
+│   │   ├── guest-registration.tsx
+│   │   └── index.ts
+│   ├── payments/
+│   │   ├── payment-methods.tsx
+│   │   ├── qr-code-display.tsx
+│   │   ├── bank-transfer-info.tsx
+│   │   ├── payment-status.tsx
+│   │   └── index.ts
+│   ├── users/
+│   │   ├── user-profile.tsx
+│   │   ├── user-avatar.tsx
+│   │   ├── user-list.tsx
+│   │   ├── role-assignment.tsx
+│   │   └── index.ts
+│   ├── videos/
+│   │   ├── video-player.tsx
+│   │   ├── video-list.tsx
+│   │   ├── video-reactions.tsx
+│   │   ├── video-categories.tsx
+│   │   └── index.ts
+│   └── admin/
+│       ├── dashboard.tsx
+│       ├── analytics-charts.tsx
+│       ├── audit-log.tsx
+│       ├── system-config.tsx
+│       └── index.ts
+├── shared/                # Shared utility components
+│   ├── loading-spinner.tsx
+│   ├── error-boundary.tsx
+│   ├── empty-state.tsx
+│   ├── pagination.tsx
+│   ├── search-bar.tsx
+│   ├── filter-panel.tsx
+│   ├── data-table.tsx
+│   ├── confirmation-dialog.tsx
+│   ├── image-gallery.tsx
+│   └── language-switcher.tsx
+├── providers/             # Context providers and state management
+│   ├── auth-provider.tsx
+│   ├── theme-provider.tsx
+│   ├── toast-provider.tsx
+│   ├── query-provider.tsx
+│   └── notification-provider.tsx
+└── icons/                 # Custom icon components
+    ├── event-icon.tsx
+    ├── user-icon.tsx
+    ├── payment-icon.tsx
+    └── index.ts
+```
+
+## Component Naming Conventions
+
+### File Naming
+
+- **Components**: `kebab-case.tsx` (e.g., `event-card.tsx`, `user-profile.tsx`)
+- **Directories**: `kebab-case` (e.g., `form-fields/`, `shared/`)
+- **Index Files**: `index.ts` for re-exports
+
+### Component Naming
+
+- **React Components**: `PascalCase` (e.g., `EventCard`, `UserProfile`)
+- **Props Interfaces**: `{ComponentName}Props` (e.g., `EventCardProps`)
+- **Ref Types**: `{ComponentName}Ref` (e.g., `EventCardRef`)
+
+### Export Patterns
+
+```typescript
+// Named export (preferred for most components)
+export function EventCard({ event, onSelect }: EventCardProps) {
+  // Component implementation
+}
+
+// Default export for main feature components
+export default function EventDetails({ eventId }: EventDetailsProps) {
+  // Component implementation
+}
+
+// Forward ref pattern for UI components
+export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className, variant, size, ...props }, ref) => {
+    return (
+      <button
+        className={cn(buttonVariants({ variant, size, className }))}
+        ref={ref}
+        {...props}
+      />
+    );
+  }
+);
+Button.displayName = "Button";
+```
+
+## TypeScript Patterns
+
+### Props Interface Definition
+
+```typescript
+// Base props interface
+interface BaseComponentProps {
+  className?: string;
+  children?: React.ReactNode;
+  'data-testid'?: string;
+}
+
+// Specific component props
+interface EventCardProps extends BaseComponentProps {
+  event: Event;
+  onSelect?: (event: Event) => void;
+  onEdit?: (eventId: string) => void;
+  onDelete?: (eventId: string) => void;
+  showActions?: boolean;
+  variant?: 'default' | 'compact' | 'detailed';
+  locale?: string;
+}
+
+// Generic component props
+interface DataTableProps<TData> extends BaseComponentProps {
+  data: TData[];
+  columns: ColumnDef<TData>[];
+  loading?: boolean;
+  error?: string;
+  pagination?: {
+    page: number;
+    pageSize: number;
+    total: number;
+  };
+  onPageChange?: (page: number) => void;
+  onSortChange?: (sorting: SortingState) => void;
+}
+```
+
+### Event Handler Patterns
+
+```typescript
+// Event handler type definitions
+type EventHandler<T = void> = () => T;
+type EventHandlerWithValue<TValue, TReturn = void> = (value: TValue) => TReturn;
+type EventHandlerWithEvent<TEvent extends React.SyntheticEvent, TReturn = void> = (
+  event: TEvent
+) => TReturn;
+
+// Usage in component props
+interface FormProps {
+  onSubmit: EventHandlerWithValue<FormData, Promise<void>>;
+  onCancel?: EventHandler;
+  onFieldChange?: EventHandlerWithValue<{ field: string; value: any }>;
+  onError?: EventHandlerWithValue<Error>;
+}
+```
+
+### Ref Patterns
+
+```typescript
+// Forward ref for custom components
+interface CustomInputProps {
+  label: string;
+  error?: string;
+}
+
+export const CustomInput = React.forwardRef<HTMLInputElement, CustomInputProps>(
+  ({ label, error, ...props }, ref) => {
+    return (
+      <div className="space-y-2">
+        <label className="text-sm font-medium">{label}</label>
+        <input
+          ref={ref}
+          className={cn("input-base", error && "input-error")}
+          {...props}
+        />
+        {error && <p className="text-sm text-red-500">{error}</p>}
+      </div>
+    );
+  }
+);
+CustomInput.displayName = "CustomInput";
+
+// useImperativeHandle for complex components
+interface DataTableRef {
+  refresh: () => void;
+  exportData: () => void;
+  selectAll: () => void;
+  clearSelection: () => void;
+}
+
+export const DataTable = React.forwardRef<DataTableRef, DataTableProps>(
+  ({ data, columns, ...props }, ref) => {
+    const [selection, setSelection] = useState<string[]>([]);
+
+    useImperativeHandle(ref, () => ({
+      refresh: () => {
+        // Refresh data logic
+      },
+      exportData: () => {
+        // Export logic
+      },
+      selectAll: () => setSelection(data.map(item => item.id)),
+      clearSelection: () => setSelection([])
+    }));
+
+    return (
+      // Table implementation
+    );
+  }
+);
+```
+
+## Styling Patterns
+
+### Tailwind CSS with Variants
+
+```typescript
+import { cva, type VariantProps } from 'class-variance-authority';
+
+// Define component variants
+const buttonVariants = cva(
+  "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background",
+  {
+    variants: {
+      variant: {
+        default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+        outline: "border border-input hover:bg-accent hover:text-accent-foreground",
+        secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+        ghost: "hover:bg-accent hover:text-accent-foreground",
+        link: "underline-offset-4 hover:underline text-primary"
+      },
+      size: {
+        default: "h-10 py-2 px-4",
+        sm: "h-9 px-3 rounded-md",
+        lg: "h-11 px-8 rounded-md",
+        icon: "h-10 w-10"
+      }
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "default"
+    }
+  }
+);
+
+// Component with variants
+interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+          VariantProps<typeof buttonVariants> {
+  asChild?: boolean;
+}
+
+export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className, variant, size, asChild = false, ...props }, ref) => {
+    const Comp = asChild ? Slot : "button";
+    return (
+      <Comp
+        className={cn(buttonVariants({ variant, size, className }))}
+        ref={ref}
+        {...props}
+      />
+    );
+  }
+);
+```
+
+### Responsive Design Patterns
+
+```typescript
+// Responsive component with Tailwind
+export function EventGrid({ events }: EventGridProps) {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+      {events.map(event => (
+        <EventCard key={event.id} event={event} />
+      ))}
+    </div>
+  );
+}
+
+// Conditional responsive rendering
+export function EventLayout({ children }: EventLayoutProps) {
+  return (
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="flex flex-col lg:flex-row gap-6">
+        <aside className="w-full lg:w-1/4">
+          <FilterPanel />
+        </aside>
+        <main className="w-full lg:w-3/4">
+          {children}
+        </main>
+      </div>
+    </div>
+  );
+}
+```
+
+## State Management Patterns
+
+### Local State with useState
+
+```typescript
+export function EventForm({ event, onSave }: EventFormProps) {
+  const [formData, setFormData] = useState({
+    title: event?.title || '',
+    description: event?.description || '',
+    startDate: event?.startDate || new Date(),
+    endDate: event?.endDate || new Date(),
+    categoryId: event?.categoryId || ''
+  });
+
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      const validatedData = validateEventData(formData);
+      await onSave(validatedData);
+    } catch (error) {
+      setErrors(error.fieldErrors || {});
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Form fields */}
+    </form>
+  );
+}
+```
+
+### Context for Feature State
+
+```typescript
+// Context for event management
+interface EventContextValue {
+  events: Event[];
+  loading: boolean;
+  error: string | null;
+  selectedEvent: Event | null;
+  filters: EventFilters;
+  setFilters: (filters: EventFilters) => void;
+  selectEvent: (event: Event) => void;
+  refreshEvents: () => Promise<void>;
+}
+
+const EventContext = createContext<EventContextValue | undefined>(undefined);
+
+export function EventProvider({ children }: { children: React.ReactNode }) {
+  const [events, setEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [filters, setFilters] = useState<EventFilters>({});
+
+  const refreshEvents = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/events');
+      const data = await response.json();
+      setEvents(data.events);
+      setError(null);
+    } catch (err) {
+      setError('Failed to load events');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const value = {
+    events,
+    loading,
+    error,
+    selectedEvent,
+    filters,
+    setFilters,
+    selectEvent: setSelectedEvent,
+    refreshEvents
+  };
+
+  return (
+    <EventContext.Provider value={value}>
+      {children}
+    </EventContext.Provider>
+  );
+}
+
+export function useEvents() {
+  const context = useContext(EventContext);
+  if (context === undefined) {
+    throw new Error('useEvents must be used within an EventProvider');
+  }
+  return context;
+}
+```
+
+## Component Composition Patterns
+
+### Compound Components
+
+```typescript
+// Card compound component
+interface CardProps extends BaseComponentProps {
+  children: React.ReactNode;
+}
+
+interface CardHeaderProps extends BaseComponentProps {
+  children: React.ReactNode;
+}
+
+interface CardContentProps extends BaseComponentProps {
+  children: React.ReactNode;
+}
+
+interface CardFooterProps extends BaseComponentProps {
+  children: React.ReactNode;
+}
+
+export function Card({ className, ...props }: CardProps) {
+  return (
+    <div
+      className={cn("rounded-lg border bg-card text-card-foreground shadow-sm", className)}
+      {...props}
+    />
+  );
+}
+
+export function CardHeader({ className, ...props }: CardHeaderProps) {
+  return (
+    <div className={cn("flex flex-col space-y-1.5 p-6", className)} {...props} />
+  );
+}
+
+export function CardContent({ className, ...props }: CardContentProps) {
+  return <div className={cn("p-6 pt-0", className)} {...props} />;
+}
+
+export function CardFooter({ className, ...props }: CardFooterProps) {
+  return (
+    <div className={cn("flex items-center p-6 pt-0", className)} {...props} />
+  );
+}
+
+// Usage
+export function EventCard({ event }: EventCardProps) {
+  return (
+    <Card>
+      <CardHeader>
+        <h3 className="text-lg font-semibold">{event.title}</h3>
+        <p className="text-sm text-muted-foreground">{event.date}</p>
+      </CardHeader>
+      <CardContent>
+        <p>{event.description}</p>
+      </CardContent>
+      <CardFooter>
+        <Button>Register</Button>
+      </CardFooter>
+    </Card>
+  );
+}
+```
+
+### Render Props Pattern
+
+```typescript
+interface DataFetcherProps<T> {
+  url: string;
+  children: (state: {
+    data: T | null;
+    loading: boolean;
+    error: string | null;
+    refetch: () => void;
+  }) => React.ReactNode;
+}
+
+export function DataFetcher<T>({ url, children }: DataFetcherProps<T>) {
+  const [data, setData] = useState<T | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Failed to fetch');
+      const result = await response.json();
+      setData(result);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unknown error');
+    } finally {
+      setLoading(false);
+    }
+  }, [url]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  return <>{children({ data, loading, error, refetch: fetchData })}</>;
+}
+
+// Usage
+export function EventList() {
+  return (
+    <DataFetcher<Event[]> url="/api/events">
+      {({ data: events, loading, error, refetch }) => {
+        if (loading) return <LoadingSpinner />;
+        if (error) return <ErrorMessage error={error} onRetry={refetch} />;
+        if (!events?.length) return <EmptyState />;
+
+        return (
+          <div className="space-y-4">
+            {events.map(event => (
+              <EventCard key={event.id} event={event} />
+            ))}
+          </div>
+        );
+      }}
+    </DataFetcher>
+  );
+}
+```
+
+## Error Handling Patterns
+
+### Error Boundary
+
+```typescript
+interface ErrorBoundaryState {
+  hasError: boolean;
+  error: Error | null;
+}
+
+export class ErrorBoundary extends React.Component<
+  { children: React.ReactNode; fallback?: React.ComponentType<{ error: Error }> },
+  ErrorBoundaryState
+> {
+  constructor(props: any) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('Error caught by boundary:', error, errorInfo);
+    // Log to error reporting service
+  }
+
+  render() {
+    if (this.state.hasError) {
+      const FallbackComponent = this.props.fallback || DefaultErrorFallback;
+      return <FallbackComponent error={this.state.error!} />;
+    }
+
+    return this.props.children;
+  }
+}
+
+function DefaultErrorFallback({ error }: { error: Error }) {
+  return (
+    <div className="p-6 text-center">
+      <h2 className="text-lg font-semibold text-red-600">Something went wrong</h2>
+      <p className="mt-2 text-sm text-gray-600">{error.message}</p>
+      <Button
+        onClick={() => window.location.reload()}
+        className="mt-4"
+        variant="outline"
+      >
+        Reload page
+      </Button>
+    </div>
+  );
+}
+```
+
+### Error States in Components
+
+```typescript
+export function EventDetails({ eventId }: EventDetailsProps) {
+  const [event, setEvent] = useState<Event | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function loadEvent() {
+      try {
+        setLoading(true);
+        const response = await fetch(`/api/events/${eventId}`);
+
+        if (!response.ok) {
+          if (response.status === 404) {
+            throw new Error('Event not found');
+          }
+          throw new Error('Failed to load event');
+        }
+
+        const data = await response.json();
+        setEvent(data.event);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Unknown error');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadEvent();
+  }, [eventId]);
+
+  if (loading) {
+    return <EventDetailsSkeleton />;
+  }
+
+  if (error) {
+    return (
+      <ErrorState
+        title="Failed to load event"
+        message={error}
+        action={
+          <Button onClick={() => window.location.reload()}>
+            Try again
+          </Button>
+        }
+      />
+    );
+  }
+
+  if (!event) {
+    return (
+      <EmptyState
+        title="Event not found"
+        message="The event you're looking for doesn't exist or has been removed."
+        action={
+          <Button onClick={() => router.push('/events')}>
+            Browse events
+          </Button>
+        }
+      />
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Event details content */}
+    </div>
+  );
+}
+```
+
+## Performance Optimization Patterns
+
+### Memoization
+
+```typescript
+// Memoize expensive calculations
+export function EventStatistics({ events }: EventStatisticsProps) {
+  const statistics = useMemo(() => {
+    return {
+      total: events.length,
+      upcoming: events.filter(e => new Date(e.startDate) > new Date()).length,
+      completed: events.filter(e => new Date(e.endDate) < new Date()).length,
+      categories: groupBy(events, 'categoryId')
+    };
+  }, [events]);
+
+  return (
+    <div className="grid grid-cols-3 gap-4">
+      <StatCard label="Total Events" value={statistics.total} />
+      <StatCard label="Upcoming" value={statistics.upcoming} />
+      <StatCard label="Completed" value={statistics.completed} />
+    </div>
+  );
+}
+
+// Memoize components to prevent unnecessary re-renders
+export const EventCard = React.memo<EventCardProps>(({ event, onSelect }) => {
+  return (
+    <Card onClick={() => onSelect?.(event)}>
+      <CardHeader>
+        <h3>{event.title}</h3>
+      </CardHeader>
+      <CardContent>
+        <p>{event.description}</p>
+      </CardContent>
+    </Card>
+  );
+});
+```
+
+### Lazy Loading
+
+```typescript
+// Lazy load heavy components
+const LazyEventCalendar = lazy(() => import('./event-calendar'));
+const LazyAnalyticsDashboard = lazy(() => import('./analytics-dashboard'));
+
+export function EventPage() {
+  const [view, setView] = useState<'list' | 'calendar' | 'analytics'>('list');
+
+  return (
+    <div>
+      <ViewSelector value={view} onChange={setView} />
+
+      <Suspense fallback={<LoadingSpinner />}>
+        {view === 'list' && <EventList />}
+        {view === 'calendar' && <LazyEventCalendar />}
+        {view === 'analytics' && <LazyAnalyticsDashboard />}
+      </Suspense>
+    </div>
+  );
+}
+```
+
+## Testing Patterns
+
+### Component Testing
+
+```typescript
+// __tests__/components/event-card.test.tsx
+import { render, screen, fireEvent } from '@testing-library/react';
+import { EventCard } from '@/components/features/events/event-card';
+
+const mockEvent = {
+  id: '1',
+  title: 'Test Event',
+  description: 'Test Description',
+  startDate: new Date('2024-01-01'),
+  endDate: new Date('2024-01-02'),
+  categoryId: 'cat1'
+};
+
+describe('EventCard', () => {
+  it('renders event information correctly', () => {
+    render(<EventCard event={mockEvent} />);
+
+    expect(screen.getByText('Test Event')).toBeInTheDocument();
+    expect(screen.getByText('Test Description')).toBeInTheDocument();
+  });
+
+  it('calls onSelect when clicked', () => {
+    const onSelect = jest.fn();
+    render(<EventCard event={mockEvent} onSelect={onSelect} />);
+
+    fireEvent.click(screen.getByRole('button'));
+    expect(onSelect).toHaveBeenCalledWith(mockEvent);
+  });
+
+  it('shows loading state', () => {
+    render(<EventCard event={mockEvent} loading />);
+    expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
+  });
+});
+```
+
+## Accessibility Patterns
+
+### ARIA and Semantic HTML
+
+```typescript
+export function EventCard({ event, onSelect }: EventCardProps) {
+  return (
+    <article
+      className="event-card"
+      role="button"
+      tabIndex={0}
+      aria-label={`Event: ${event.title}`}
+      onClick={() => onSelect?.(event)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onSelect?.(event);
+        }
+      }}
+    >
+      <header>
+        <h3 id={`event-title-${event.id}`}>{event.title}</h3>
+        <time dateTime={event.startDate.toISOString()}>
+          {formatDate(event.startDate)}
+        </time>
+      </header>
+
+      <div
+        aria-labelledby={`event-title-${event.id}`}
+        className="event-description"
+      >
+        {event.description}
+      </div>
+
+      <footer>
+        <Button
+          aria-label={`Register for ${event.title}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            // Handle registration
+          }}
+        >
+          Register
+        </Button>
+      </footer>
+    </article>
+  );
+}
+```
+
+## Documentation Requirements
+
+### Component Documentation
+
+````typescript
+/**
+ * EventCard displays event information in a card format with optional actions.
+ *
+ * @example
+ * ```tsx
+ * <EventCard
+ *   event={event}
+ *   onSelect={(event) => console.log('Selected:', event)}
+ *   showActions={true}
+ *   variant="detailed"
+ * />
+ * ```
+ */
+export function EventCard({
+  event,
+  onSelect,
+  showActions = false,
+  variant = 'default'
+}: EventCardProps) {
+  // Implementation
+}
+````
+
+### Storybook Stories
+
+```typescript
+// stories/EventCard.stories.tsx
+import type { Meta, StoryObj } from '@storybook/react';
+import { EventCard } from '@/components/features/events/event-card';
+
+const meta: Meta<typeof EventCard> = {
+  title: 'Features/Events/EventCard',
+  component: EventCard,
+  parameters: {
+    layout: 'centered',
+  },
+  tags: ['autodocs'],
+};
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+export const Default: Story = {
+  args: {
+    event: {
+      id: '1',
+      title: 'Sample Event',
+      description: 'This is a sample event description.',
+      startDate: new Date('2024-01-15'),
+      endDate: new Date('2024-01-15'),
+      categoryId: 'workshop'
+    }
+  }
+};
+
+export const WithActions: Story = {
+  args: {
+    ...Default.args,
+    showActions: true,
+    onSelect: (event) => console.log('Selected:', event),
+    onEdit: (eventId) => console.log('Edit:', eventId),
+    onDelete: (eventId) => console.log('Delete:', eventId)
+  }
+};
+```

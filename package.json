@@ -12,10 +12,11 @@
     "lint:fix": "next lint --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "type-check": "tsc --noEmit",
+    "type-check": "echo '🔍 Checking TypeScript types...' && tsc --noEmit && echo '✅ TypeScript check passed!'",
+    "pre-deploy": "echo '🚀 Running pre-deployment checks...' && bun run format:check && bun run lint && bun run type-check && echo '✅ All checks passed! Ready for deployment!'",
     "test": "vitest",
     "test:watch": "vitest --watch",
-    "clean": "rm -rf .next .turbo node_modules/.cache",
+    "clean": "rm -rf .next .turbo node_modules/.cache test-results",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
@@ -31,6 +32,7 @@
     "postinstall": "prisma generate"
   },
   "dependencies": {
+    "@kinde-oss/kinde-auth-nextjs": "^2.8.6",
     "@prisma/client": "^6.13.0",
     "clsx": "^2.1.1",
     "next": "^15.1.3",

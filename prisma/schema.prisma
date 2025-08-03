@@ -2,11 +2,11 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   // Optimize for serverless environment
-  output   = "../node_modules/.prisma/client"
+  output        = "../node_modules/.prisma/client"
   // Enable edge runtime compatibility
-  engineType = "library"
+  engineType    = "library"
   // Optimize binary targets for Vercel deployment
   binaryTargets = ["native", "rhel-openssl-1.0.x"]
 }
@@ -81,6 +81,7 @@ model User {
   profile                      Profile?
   eventRegistrations           Registration[]
   waitingListEntries           WaitingList[]
+  pendingPayments              PendingPayment[]
   createdEvents                Event[]               @relation("EventCreator")
   managedEvents                Event[]               @relation("EventManager")
   payments                     Payment[]
@@ -90,7 +91,7 @@ model User {
   notificationLogs             NotificationLog[]
   eventFeedback                EventFeedback[]
   uploadedDocuments            EventDocument[]
-  createdVideoClips            VideoClip[]       @relation("VideoClipCreator")
+  createdVideoClips            VideoClip[]           @relation("VideoClipCreator")
   videoReactions               VideoReaction[]
 
   // Indexes for performance
@@ -240,6 +241,7 @@ model Event {
   category            EventCategory?        @relation(fields: [categoryId], references: [id])
   registrations       Registration[]
   waitingList         WaitingList[]
+  pendingPayments     PendingPayment[]
   registrationHistory RegistrationHistory[]
   payments            Payment[]
   feedback            EventFeedback[]
@@ -381,11 +383,153 @@ enum RegistrationStatus {
   NO_SHOW // Didn't show up
 }
 
+enum RegistrationPaymentStatus {
+  PENDING_VERIFICATION                    // Doesn't take spot
+  PAYMENT_SENT_AWAITING_VERIFICATION     // Takes spot
+  PAYMENT_VERIFIED                       // Takes spot (confirmed)
+  VERIFIED_CASH                          // Takes spot (cash payment)
+  REJECTED                               // Back to pending or waiting list
+  WAITING_LIST_PROMOTED                  // New status for promoted users
+}
+
+enum RegistrationType {
+  INDIVIDUAL // Single person registration
+  GROUP // Group registration with friends
+  ADMIN_CREATED // Created by admin/moderator
+}
+
+enum RegistrationSource {
+  WEB_FORM // Standard web registration
+  ADMIN_PANEL // Created by admin
+  PROMOTED_FROM_WAITING // Promoted from waiting list
+  PENDING_PAYMENT_CONFIRMED // Confirmed from pending payment
+}
+
+// ================================
+// PENDING PAYMENT SYSTEM
+// ================================
+
+enum PendingPaymentStatus {
+  AWAITING_PAYMENT // QR code generated, waiting for payment
+  PAYMENT_RECEIVED // Payment confirmed, ready to promote to registration
+  EXPIRED // Payment deadline passed
+  CANCELLED // User cancelled before payment
+  PROCESSED // Successfully converted to registration
+}
+
+model PendingPayment {
+  id      String               @id @default(cuid())
+  eventId String
+  status  PendingPaymentStatus @default(AWAITING_PAYMENT)
+
+  // Primary registrant (can be null for guest registrations)
+  userId String?
+
+  // Guest registration data (for non-authenticated users)
+  guestEmail     String?
+  guestName      String?
+  guestPhone     String?
+  isGuestRequest Boolean @default(false)
+
+  // Registration type and capacity tracking
+  registrationType  RegistrationType @default(INDIVIDUAL)
+  totalParticipants Int              @default(1) // Including primary + friends
+
+  // Friend registration data (JSON array of friend objects)
+  // Schema: [{"name": "John Doe", "email": "john@example.com", "phone": "+420123456789", "dietaryRequirements": "vegetarian", "specialRequests": "wheelchair access"}]
+  friendsData Json? @default("[]")
+
+  // Primary registrant additional data
+  primaryDietaryRequirements String?
+  primarySpecialRequests     String?
+  primaryNotes               String?
+
+  // Payment information
+  amount        Decimal       @db.Decimal(10, 2)
+  currency      String        @default("EUR")
+  paymentMethod PaymentMethod @default(QR_CODE)
+
+  // Bank transfer details for QR code generation
+  bankAccountId  String?
+  variableSymbol String? @unique // Slovak banking variable symbol
+  constantSymbol String?
+  specificSymbol String?
+
+  // QR code data
+  qrCodeData String? // Generated QR code string
+  qrCodeUrl  String? // URL to QR code image
+
+  // Expiration and lifecycle management
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  expiresAt DateTime // When payment request expires (typically 24-48 hours)
+
+  // Payment tracking
+  paidAt      DateTime?
+  verifiedAt  DateTime?
+  processedAt DateTime? // When converted to registration
+  cancelledAt DateTime?
+
+  // Additional metadata
+  description String? // Payment description
+  reference   String? // External payment reference
+  notes       String? // Internal notes
+
+  // Promotion tracking (for waiting list scenarios)
+  promotedFromWaitingList Boolean @default(false)
+  waitingListPosition     Int? // Original position if promoted from waiting list
+
+  // Relations
+  user        User?        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event       Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  bankAccount BankAccount? @relation(fields: [bankAccountId], references: [id])
+
+  // Reverse relations
+  registrations Registration[] @relation("RegistrationPendingPayment")
+  waitingLists  WaitingList[]  @relation("WaitingListPendingPayment")
+  payments      Payment[]      @relation("PaymentPendingPayment")
+
+  // Performance indexes
+  @@index([eventId, status, createdAt])
+  @@index([userId, status]) // For user's pending payments
+  @@index([status, expiresAt]) // For cleanup jobs
+  @@index([variableSymbol]) // For payment verification
+  @@index([isGuestRequest, status]) // For guest registration tracking
+  @@index([promotedFromWaitingList, waitingListPosition]) // For waiting list management
+  @@index([registrationType, totalParticipants]) // For capacity planning
+  @@index([paidAt, verifiedAt, processedAt]) // For payment lifecycle tracking
+  @@map("pending_payments")
+}
+
+// ================================
+// ENHANCED REGISTRATION SYSTEM
+// ================================
+
 model Registration {
   id      String             @id @default(cuid())
-  userId  String
+  userId  String? // Can be null for guest registrations
   eventId String
   status  RegistrationStatus @default(PENDING)
+
+  // Enhanced registration metadata
+  registrationType   RegistrationType   @default(INDIVIDUAL)
+  registrationSource RegistrationSource @default(WEB_FORM)
+
+  // Group registration support
+  isGroupLeader  Boolean @default(true) // Is this the primary registrant in a group
+  groupLeaderId  String? // Reference to group leader's registration (if this is a friend)
+  groupSize      Int     @default(1) // Total size of the group (including leader)
+  friendPosition Int? // Position within the group (null for leader, 1+ for friends)
+
+  // Guest registration data (for non-authenticated users)
+  guestEmail     String?
+  guestName      String?
+  guestPhone     String?
+  isGuestRequest Boolean @default(false)
+
+  // Friend data (stored as JSON for group leader registrations)
+  // Schema: [{"name": "John Doe", "email": "john@example.com", "phone": "+420123456789", "dietaryRequirements": "vegetarian", "specialRequests": "wheelchair access", "registrationId": "cuid"}]
+  friendsData Json? @default("[]")
 
   // Registration details
   registeredAt DateTime  @default(now())
@@ -398,42 +542,111 @@ model Registration {
   specialRequests     String?
 
   // Payment tracking
-  requiresPayment Boolean @default(false)
-  paymentId       String? @unique
+  requiresPayment  Boolean @default(false)
+  paymentId        String? @unique
+  pendingPaymentId String? // Reference to original pending payment
+
+  // New payment status tracking
+  paymentStatus RegistrationPaymentStatus @default(PENDING_VERIFICATION)
+  paymentClaimedAt DateTime?
+  paymentVerifiedAt DateTime?
+  paymentRejectedAt DateTime?
+  paymentRejectionReason String?
+  paymentMethod PaymentMethod? // BANK_TRANSFER, CASH, etc.
+
+  // Friend registration fields
+  friendInfo Json? // Stores friend details
+  registeredBy String? // User who registered the friend
+
+  // Waiting list promotion tracking
+  promotedFromWaitingList Boolean   @default(false)
+  waitingListPosition     Int? // Original position in waiting list
+  promotedAt              DateTime? // When promoted from waiting list
 
   // Relations
-  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  event   Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  payment Payment? @relation(fields: [paymentId], references: [id])
+  user           User?           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event          Event           @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  payment        Payment?        @relation(fields: [paymentId], references: [id])
+  pendingPayment PendingPayment? @relation("RegistrationPendingPayment", fields: [pendingPaymentId], references: [id])
 
-  // Prevent duplicate registrations
-  @@unique([userId, eventId])
+  // Group relationships
+  groupLeader  Registration?  @relation("GroupMembers", fields: [groupLeaderId], references: [id], onDelete: Cascade)
+  groupMembers Registration[] @relation("GroupMembers")
+
+  // Prevent duplicate registrations (considering guest registrations)
+  @@unique([userId, eventId]) // For authenticated users
+  @@unique([eventId, guestEmail, guestName]) // For guest registrations
+  // Performance indexes
   @@index([eventId, status])
-  @@index([userId])
+  @@index([userId, status])
   @@index([status, registeredAt]) // For admin reporting and timeline analysis
   @@index([requiresPayment, paymentId]) // For payment tracking
   @@index([confirmedAt]) // For attendance tracking
+  @@index([isGroupLeader, groupSize]) // For group registration queries
+  @@index([groupLeaderId, friendPosition]) // For group member queries
+  @@index([registrationType, registrationSource]) // For analytics
+  @@index([promotedFromWaitingList, promotedAt]) // For waiting list analytics
+  @@index([isGuestRequest, guestEmail]) // For guest registration management
+  @@index([pendingPaymentId]) // For linking to pending payments
+  @@index([paymentStatus]) // For payment status queries
+  @@index([paymentStatus, paymentClaimedAt]) // For payment claiming analytics
   @@map("registrations")
 }
 
+// ================================
+// ENHANCED WAITING LIST SYSTEM
+// ================================
+
 model WaitingList {
   id         String    @id @default(cuid())
-  userId     String
+  userId     String? // Can be null for guest waiting list entries
   eventId    String
   position   Int // Position in waiting list
   joinedAt   DateTime  @default(now())
   notifiedAt DateTime? // When user was notified of availability
 
+  // Enhanced waiting list metadata
+  registrationType RegistrationType @default(INDIVIDUAL)
+
+  // Group waiting list support
+  isGroupEntry Boolean @default(false) // Is this a group waiting list entry
+  groupSize    Int     @default(1) // Number of spots needed when promoted
+
+  // Guest waiting list data (for non-authenticated users)
+  guestEmail     String?
+  guestName      String?
+  guestPhone     String?
+  isGuestRequest Boolean @default(false)
+
+  // Friend data for group waiting list entries
+  // Schema: [{"name": "John Doe", "email": "john@example.com", "phone": "+420123456789", "dietaryRequirements": "vegetarian", "specialRequests": "wheelchair access"}]
+  friendsData Json? @default("[]")
+
   // Additional data
-  notes String?
+  notes               String?
+  dietaryRequirements String?
+  specialRequests     String?
+
+  // Promotion tracking
+  promotedAt       DateTime? // When promoted to registration
+  pendingPaymentId String? // Reference to created pending payment when promoted
 
   // Relations
-  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user           User?           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event          Event           @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  pendingPayment PendingPayment? @relation("WaitingListPendingPayment", fields: [pendingPaymentId], references: [id])
 
   // Prevent duplicate waiting list entries
-  @@unique([userId, eventId])
+  @@unique([userId, eventId]) // For authenticated users
+  @@unique([eventId, guestEmail, guestName]) // For guest waiting list entries
+  // Performance indexes
   @@index([eventId, position])
+  @@index([userId, joinedAt])
+  @@index([isGroupEntry, groupSize]) // For group waiting list management
+  @@index([registrationType, position]) // For waiting list analytics
+  @@index([isGuestRequest, guestEmail]) // For guest waiting list management
+  @@index([promotedAt, pendingPaymentId]) // For promotion tracking
+  @@index([notifiedAt, position]) // For notification management
   @@map("waiting_list")
 }
 
@@ -461,7 +674,7 @@ model Payment {
   id             String  @id @default(cuid())
   userId         String
   eventId        String?
-  registrationId String?
+  registrationId String? @unique
 
   amount   Decimal       @db.Decimal(10, 2)
   currency String        @default("EUR")
@@ -483,20 +696,29 @@ model Payment {
   verifiedAt DateTime?
   refundedAt DateTime?
 
+  // New payment claiming and verification fields
+  claimedAt DateTime? // When user claimed payment
+  verifiedBy String? // Admin who verified
+  verificationNotes String?
+
   // Additional data
   description String?
   notes       String?
   reference   String? // External payment reference
+
+  // Link to pending payment (for tracking payment lifecycle)
+  pendingPaymentId String? // Reference to original pending payment
 
   // Timestamps
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // Relations
-  user         User          @relation(fields: [userId], references: [id])
-  event        Event?        @relation(fields: [eventId], references: [id])
-  registration Registration?
-  bankAccount  BankAccount?  @relation(fields: [bankAccountId], references: [id])
+  user           User            @relation(fields: [userId], references: [id])
+  event          Event?          @relation(fields: [eventId], references: [id])
+  registration   Registration?
+  pendingPayment PendingPayment? @relation("PaymentPendingPayment", fields: [pendingPaymentId], references: [id])
+  bankAccount    BankAccount?    @relation(fields: [bankAccountId], references: [id])
 
   @@index([userId])
   @@index([eventId])
@@ -506,6 +728,9 @@ model Payment {
   @@index([paidAt, verifiedAt]) // For financial reporting
   @@index([currency, amount]) // For financial analytics
   @@index([bankAccountId, status]) // For bank account reconciliation
+  @@index([pendingPaymentId]) // For pending payment tracking
+  @@index([claimedAt]) // For payment claiming analytics
+  @@index([verifiedBy]) // For admin verification tracking
   // TODO: Add payment amount validation at application level - amount > 0
   @@map("payments")
 }
@@ -530,8 +755,9 @@ model BankAccount {
   updatedAt DateTime @updatedAt
 
   // Relations
-  events   Event[]
-  payments Payment[]
+  events          Event[]
+  payments        Payment[]
+  pendingPayments PendingPayment[]
 
   @@index([isDefault, isActive])
   @@index([isActive, qrCodeEnabled]) // For active payment methods
@@ -553,6 +779,13 @@ enum RegistrationAction {
   PAYMENT_FAILED
   ADMIN_APPROVED
   ADMIN_REJECTED
+  PENDING_PAYMENT_CREATED
+  PENDING_PAYMENT_EXPIRED
+  PENDING_PAYMENT_CANCELLED
+  PENDING_PAYMENT_PROCESSED
+  GROUP_REGISTRATION_CREATED
+  FRIEND_ADDED_TO_GROUP
+  FRIEND_REMOVED_FROM_GROUP
 }
 
 model RegistrationHistory {
@@ -766,31 +999,31 @@ model VideoCategory {
 }
 
 model VideoClip {
-  id          String          @id @default(cuid())
+  id          String  @id @default(cuid())
   title       String
   description String?
-  slug        String          @unique
+  slug        String  @unique
 
   // YouTube integration
-  youtubeVideoId String        @unique // YouTube video ID (e.g., "dQw4w9WgXcQ")
-  youtubeUrl     String        // Full YouTube URL
-  thumbnailUrl   String?       // YouTube thumbnail URL
-  duration       Int?          // Video duration in seconds
-  embedCode      String?       // YouTube embed HTML
+  youtubeVideoId String  @unique // YouTube video ID (e.g., "dQw4w9WgXcQ")
+  youtubeUrl     String // Full YouTube URL
+  thumbnailUrl   String? // YouTube thumbnail URL
+  duration       Int? // Video duration in seconds
+  embedCode      String? // YouTube embed HTML
 
   // Content metadata
-  status     VideoClipStatus @default(DRAFT)
-  privacy    VideoPrivacy    @default(PUBLIC)
-  tags       String[]        // Array of tags for searchability
-  language   String          @default("en") // Video language
+  status   VideoClipStatus @default(DRAFT)
+  privacy  VideoPrivacy    @default(PUBLIC)
+  tags     String[] // Array of tags for searchability
+  language String          @default("en") // Video language
 
   // Moderation
-  moderatedBy String?
-  moderatedAt DateTime?
+  moderatedBy     String?
+  moderatedAt     DateTime?
   moderationNotes String?
 
   // Analytics
-  likeCount    Int @default(0) // Cached count of positive reactions
+  likeCount Int @default(0) // Cached count of positive reactions
 
   // Event association (optional)
   eventId String?
@@ -799,17 +1032,17 @@ model VideoClip {
   categoryId String?
 
   // Timestamps
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
   publishedAt DateTime?
 
   // Foreign keys
   creatorId String
 
   // Relations
-  creator   User           @relation("VideoClipCreator", fields: [creatorId], references: [id], onDelete: Cascade)
-  event     Event?         @relation(fields: [eventId], references: [id], onDelete: SetNull)
-  category  VideoCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  creator   User            @relation("VideoClipCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+  event     Event?          @relation(fields: [eventId], references: [id], onDelete: SetNull)
+  category  VideoCategory?  @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   reactions VideoReaction[]
 
   @@index([status, privacy, publishedAt])
@@ -825,7 +1058,6 @@ model VideoClip {
   // TODO: Add duration validation (> 0 AND <= 43200 seconds = 12 hours max)
   @@map("video_clips")
 }
-
 
 enum ReactionType {
   LIKE
@@ -862,4 +1094,3 @@ model VideoReaction {
   @@index([type, createdAt]) // For trending reaction analysis
   @@map("video_reactions")
 }
-

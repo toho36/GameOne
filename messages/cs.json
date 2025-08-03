@@ -1,14 +1,67 @@
 {
   "HomePage": {
-    "title": "Vítejte v BunPlate",
-    "description": "Komplexní moderní šablona webové aplikace vytvořená s Bun runtime a optimalizovaná pro nasazení na Vercel.",
+    "title": "Vítejte v GameOne",
+    "description": "Ultimátní platforma pro správu událostí pro moderní týmy. Vytvářejte, spravujte a sledujte události s lehkostí.",
     "getStarted": "Začít",
-    "learnMore": "Zjistit více"
+    "learnMore": "Dozvědět se více",
+    "welcomeBack": "Vítejte zpět, {name}!",
+    "readyToManage": "Jste připraveni spravovat své události a projekty?",
+    "goToDashboard": "Přejít na nástěnku",
+    "getStartedToday": "Začněte ještě dnes",
+    "joinThousands": "Připojte se k tisícům uživatelů spravujících své události s GameOne",
+    "whyChoose": "Proč zvolit GameOne?",
+    "powerfulTools": "Výkonné nástroje pro správu událostí navržené pro moderní týmy",
+    "eventManagement": "Správa událostí",
+    "eventManagementDesc": "Vytvářejte a spravujte události pomocí našich intuitivních nástrojů. Od malých setkání po velké konference.",
+    "registrationSystem": "Registrační systém",
+    "registrationSystemDesc": "Zjednodušený registrační a ticketingový systém s automatickými potvrzeními a připomínkami.",
+    "analytics": "Analytika",
+    "analyticsDesc": "Komplexní přehledy a reporty, které vám pomohou porozumět vašim událostem a účastníkům lépe.",
+    "readyToStart": "Jste připraveni začít?",
+    "trustGameOne": "Připojte se k tisícům uživatelů, kteří důvěřují GameOne pro správu svých událostí.",
+    "activeUsers": "Aktivní uživatelé",
+    "eventsCreated": "Vytvořené události",
+    "uptime": "Dostupnost",
+    "support": "Podpora"
+  },
+  "Dashboard": {
+    "title": "Nástěnka",
+    "welcome": "Vítejte zpět,",
+    "userInfo": "Informace o uživateli",
+    "email": "Email",
+    "name": "Jméno",
+    "userId": "ID uživatele",
+    "actions": "Rychlé akce",
+    "signOut": "Odhlásit se",
+    "goHome": "Jít domů",
+    "authenticated": "Přihlášen",
+    "authStatus": "Jste úspěšně přihlášeni a máte přístup ke všem funkcím.",
+    "online": "Online",
+    "accountStatus": "Stav účtu",
+    "active": "Aktivní",
+    "manageEvents": "Spravovat události",
+    "manageEventsDesc": "Vytvářet a organizovat události",
+    "viewRegistrations": "Zobrazit registrace",
+    "viewRegistrationsDesc": "Zkontrolovat registrace na události",
+    "analyticsDesc": "Zobrazit přehledy a reporty",
+    "dashboardError": "Chyba nástěnky",
+    "errorMessage": "Při načítání nástěnky došlo k chybě. Zkuste to prosím znovu nebo kontaktujte podporu, pokud problém přetrvává.",
+    "loginAgain": "Přihlásit se znovu"
   },
   "Navigation": {
     "home": "Domů",
-    "about": "O nás",
-    "contact": "Kontakt"
+    "dashboard": "Nástěnka"
+  },
+  "Auth": {
+    "signIn": "Přihlásit se",
+    "signUp": "Registrovat se",
+    "signOut": "Odhlásit se",
+    "loading": "Načítání...",
+    "checkingAuth": "Kontrola přihlášení...",
+    "notAuthenticated": "Nepřihlášen",
+    "notAuthenticatedDesc": "V současné době nejste přihlášeni. Přihlaste se prosím pro přístup k nástěnce.",
+    "authenticated": "Přihlášen",
+    "authenticatedDesc": "Jste úspěšně přihlášeni."
   },
   "Common": {
     "loading": "Načítání...",
@@ -16,6 +69,7 @@
     "retry": "Zkusit znovu",
     "cancel": "Zrušit",
     "save": "Uložit",
-    "close": "Zavřít"
+    "close": "Zavřít",
+    "goHome": "Jít domů"
   }
 }
