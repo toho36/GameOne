@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { Button } from "@/components/ui/button";
-import { AuthButtons } from "@/components/auth";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getCurrentUser } from "@/lib/kinde-auth";
 import Link from "next/link";
 
@@ -10,7 +10,7 @@ export default async function HomePage() {
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      {/* Hero Section */}
+      {/* Hero Section - Pure Tailwind for layout */}
       <section className="relative overflow-hidden">
         <div className="container mx-auto px-4 py-16 lg:py-24">
           <div className="mx-auto max-w-4xl text-center">
@@ -27,19 +27,21 @@ export default async function HomePage() {
             {/* User-specific content */}
             {user ? (
               <div className="mb-12">
-                <div className="mb-6 rounded-2xl border border-green-200/50 bg-green-50/80 p-6 shadow-lg backdrop-blur-sm">
-                  <h2 className="mb-2 text-xl font-semibold text-green-900">
-                    Welcome back, {user.given_name ?? user.email}!
-                  </h2>
-                  <p className="mb-4 text-green-700">
-                    Ready to manage your events and projects?
-                  </p>
-                  <Link href="/dashboard">
-                    <Button size="lg" className="px-8 py-3 text-lg font-semibold">
-                      Go to Dashboard
-                    </Button>
-                  </Link>
-                </div>
+                <Card className="mb-6 border-green-200/50 bg-green-50/80 shadow-lg backdrop-blur-sm">
+                  <CardContent className="p-6">
+                    <h2 className="mb-2 text-xl font-semibold text-green-900">
+                      {t("welcomeBack", { name: user.given_name ?? user.email ?? "User" })}
+                    </h2>
+                    <p className="mb-4 text-green-700">
+                      {t("readyToManage")}
+                    </p>
+                    <Link href="/dashboard">
+                      <Button size="lg" className="px-8 py-3 text-lg font-semibold">
+                        {t("goToDashboard")}
+                      </Button>
+                    </Link>
+                  </CardContent>
+                </Card>
               </div>
             ) : (
               <div className="mb-12">
@@ -52,23 +54,12 @@ export default async function HomePage() {
                     {t("learnMore")}
                   </Button>
                 </div>
-
-                {/* Auth Section */}
-                <div className="rounded-2xl border border-gray-200/50 bg-white/80 p-8 shadow-lg backdrop-blur-sm">
-                  <h2 className="mb-4 text-2xl font-semibold text-gray-900">
-                    Get Started Today
-                  </h2>
-                  <p className="mb-6 text-gray-600">
-                    Join thousands of users managing their events with GameOne
-                  </p>
-                  <AuthButtons variant="default" size="lg" className="justify-center" />
-                </div>
               </div>
             )}
           </div>
         </div>
 
-        {/* Background Decoration */}
+        {/* Background Decoration - Pure Tailwind */}
         <div className="absolute inset-0 -z-10">
           <div className="animate-blob absolute left-1/4 top-0 size-72 rounded-full bg-blue-200 opacity-70 mix-blend-multiply blur-xl" />
           <div className="animate-blob animation-delay-2000 absolute right-1/4 top-0 size-72 rounded-full bg-purple-200 opacity-70 mix-blend-multiply blur-xl" />
@@ -76,69 +67,72 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Features Section */}
+      {/* Features Section - Shadcn Cards with Tailwind layout */}
       <section className="bg-gray-50 py-16">
         <div className="container mx-auto px-4">
           <div className="mb-12 text-center">
             <h2 className="mb-4 text-3xl font-bold text-gray-900 md:text-4xl">
-              Why Choose GameOne?
+              {t("whyChoose")}
             </h2>
             <p className="mx-auto max-w-2xl text-lg text-gray-600">
-              Powerful event management tools designed for modern teams
+              {t("powerfulTools")}
             </p>
           </div>
 
           <div className="grid gap-8 md:grid-cols-3">
-            {/* Feature 1 */}
-            <div className="rounded-xl bg-white p-8 text-center shadow-sm transition-all hover:scale-105 hover:shadow-md">
-              <div className="mx-auto mb-6 flex size-16 items-center justify-center rounded-full bg-blue-100">
-                <svg className="size-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <h3 className="mb-3 text-xl font-semibold text-gray-900">Event Management</h3>
-              <p className="leading-relaxed text-gray-600">Create and manage events with our intuitive tools. From small meetups to large conferences.</p>
-            </div>
+            {/* Feature 1 - Shadcn Card */}
+            <Card className="transition-all hover:scale-105 hover:shadow-md">
+              <CardHeader className="text-center">
+                <div className="mx-auto mb-6 flex size-16 items-center justify-center rounded-full bg-blue-100">
+                  <svg className="size-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <CardTitle>{t("eventManagement")}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription className="text-center leading-relaxed">
+                  {t("eventManagementDesc")}
+                </CardDescription>
+              </CardContent>
+            </Card>
 
-            {/* Feature 2 */}
-            <div className="rounded-xl bg-white p-8 text-center shadow-sm transition-all hover:scale-105 hover:shadow-md">
-              <div className="mx-auto mb-6 flex size-16 items-center justify-center rounded-full bg-green-100">
-                <svg className="size-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-              </div>
-              <h3 className="mb-3 text-xl font-semibold text-gray-900">Registration System</h3>
-              <p className="leading-relaxed text-gray-600">Streamlined registration and ticketing system with automated confirmations and reminders.</p>
-            </div>
+            {/* Feature 2 - Shadcn Card */}
+            <Card className="transition-all hover:scale-105 hover:shadow-md">
+              <CardHeader className="text-center">
+                <div className="mx-auto mb-6 flex size-16 items-center justify-center rounded-full bg-green-100">
+                  <svg className="size-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                </div>
+                <CardTitle>{t("registrationSystem")}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription className="text-center leading-relaxed">
+                  {t("registrationSystemDesc")}
+                </CardDescription>
+              </CardContent>
+            </Card>
 
-            {/* Feature 3 */}
-            <div className="rounded-xl bg-white p-8 text-center shadow-sm transition-all hover:scale-105 hover:shadow-md">
-              <div className="mx-auto mb-6 flex size-16 items-center justify-center rounded-full bg-purple-100">
-                <svg className="size-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
-              </div>
-              <h3 className="mb-3 text-xl font-semibold text-gray-900">Analytics</h3>
-              <p className="leading-relaxed text-gray-600">Comprehensive insights and reporting to help you understand your events and attendees better.</p>
-            </div>
+            {/* Feature 3 - Shadcn Card */}
+            <Card className="transition-all hover:scale-105 hover:shadow-md">
+              <CardHeader className="text-center">
+                <div className="mx-auto mb-6 flex size-16 items-center justify-center rounded-full bg-purple-100">
+                  <svg className="size-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                </div>
+                <CardTitle>{t("analytics")}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription className="text-center leading-relaxed">
+                  {t("analyticsDesc")}
+                </CardDescription>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>
-
-      {/* CTA Section */}
-      {!user && (
-        <section className="bg-gradient-to-r from-blue-600 to-purple-600 py-16">
-          <div className="container mx-auto px-4 text-center">
-            <h2 className="mb-4 text-3xl font-bold text-white md:text-4xl">
-              Ready to Get Started?
-            </h2>
-            <p className="mx-auto mb-8 max-w-2xl text-lg text-blue-100">
-              Join thousands of users who trust GameOne for their event management needs.
-            </p>
-            <AuthButtons variant="outline" size="lg" className="justify-center [&>*]:border-white [&>*]:text-white [&>*]:hover:bg-white [&>*]:hover:text-blue-600" />
-          </div>
-        </section>
-      )}
     </main>
   );
 }

@@ -1,3 +1,4 @@
+import React from "react";
 import "@/styles/globals.css";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
@@ -5,7 +6,6 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { routing, type Locale } from "@/i18n/routing";
-import { LanguageSwitcher } from "@/components/language-switcher";
 import { Navigation } from "@/components/layout/navigation";
 import { SessionProvider } from "@/components/auth";
 import { getCurrentUser, getUserPermissions } from "@/lib/kinde-auth";
@@ -16,8 +16,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "BunPlate",
-  description: "A clean, minimal web application",
+  title: "GameOne - Event Management Platform",
+  description: "The ultimate event management platform for modern teams. Create, manage, and track events with ease.",
 };
 
 interface LocaleLayoutProps {
@@ -57,10 +57,7 @@ export default async function LocaleLayout({
       <body className={`${inter.className} antialiased`} suppressHydrationWarning>
         <NextIntlClientProvider messages={messages}>
           <SessionProvider initialSession={initialSession}>
-            <Navigation />
-            <header className="absolute right-4 top-4 z-40">
-              <LanguageSwitcher currentLocale={locale as Locale} />
-            </header>
+            <Navigation currentLocale={locale as Locale} />
             {children}
           </SessionProvider>
         </NextIntlClientProvider>
