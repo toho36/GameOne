@@ -7,7 +7,7 @@ import { PrismaClient } from '@prisma/client'
 
 // Global variable to store Prisma client instance
 declare global {
-   
+
   var __prisma: PrismaClient | undefined
 }
 
@@ -39,36 +39,45 @@ const connectionPoolConfig = {
 const createPrismaClient = () => {
   const isDevelopment = process.env.NODE_ENV === 'development'
   const isProduction = process.env.NODE_ENV === 'production'
-  
-  const clientConfig: any = {
-    // Enable logging in development
-    log: isDevelopment
-      ? ['query', 'info', 'warn', 'error']
-      : ['error'],
-    
-    // Connection configuration
+
+  // Base configuration
+  const baseConfig = {
     datasources: {
       db: {
-        url: process.env.DATABASE_URL,
+        url: process.env.DATABASE_URL ?? '',
       },
     },
   }
 
-  // Add error formatting for better debugging in development
+  // Development configuration
   if (isDevelopment) {
-    clientConfig.errorFormat = 'pretty'
+    return new PrismaClient({
+      ...baseConfig,
+      log: ['query', 'info', 'warn', 'error'],
+      errorFormat: 'pretty',
+    })
   }
 
-  // Production optimizations for Vercel
+  // Production configuration
   if (isProduction) {
-    // Disable query logging in production for performance
-    clientConfig.log = ['error']
-    
-    // Add connection timeout for serverless
-    clientConfig.datasources.db.url = `${process.env.DATABASE_URL}?connection_limit=${connectionPoolConfig.connectionLimit}&pool_timeout=${connectionPoolConfig.poolTimeout}`
+    const productionUrl = `${process.env.DATABASE_URL}?connection_limit=${connectionPoolConfig.connectionLimit}&pool_timeout=${connectionPoolConfig.poolTimeout}`
+
+    return new PrismaClient({
+      ...baseConfig,
+      log: ['error'],
+      datasources: {
+        db: {
+          url: productionUrl,
+        },
+      },
+    })
   }
 
-  return new PrismaClient(clientConfig)
+  // Default configuration
+  return new PrismaClient({
+    ...baseConfig,
+    log: ['error'],
+  })
 }
 
 /**
@@ -124,13 +133,13 @@ export const withRetry = async <T>(
       return await operation()
     } catch (error) {
       lastError = error as Error
-      
+
       // Don't retry on certain types of errors
       if (
         error instanceof Error &&
         (error.message.includes('Unique constraint') ||
-         error.message.includes('Foreign key constraint') ||
-         error.message.includes('Check constraint'))
+          error.message.includes('Foreign key constraint') ||
+          error.message.includes('Check constraint'))
       ) {
         throw error
       }
@@ -144,7 +153,8 @@ export const withRetry = async <T>(
     }
   }
 
-  throw lastError!
+  // This should never be reached, but TypeScript requires it
+  throw new Error('Retry operation failed')
 }
 
 /**
@@ -152,7 +162,17 @@ export const withRetry = async <T>(
  * Implements cursor-based pagination for better performance
  */
 export const paginateQuery = (
-  model: any,
+  model: {
+    findMany: (options: {
+      where?: object
+      orderBy?: object
+      take?: number
+      cursor?: { id: string }
+      skip?: number
+      select?: object
+      include?: object
+    }) => Promise<unknown[]>
+  },
   options: {
     where?: object
     orderBy?: object
@@ -171,7 +191,15 @@ export const paginateQuery = (
     include
   } = options
 
-  const queryOptions: any = {
+  const queryOptions: {
+    where: object
+    orderBy: object
+    take: number
+    cursor?: { id: string }
+    skip?: number
+    select?: object
+    include?: object
+  } = {
     where,
     orderBy,
     take: take + 1, // Take one extra to check if there are more results
@@ -211,7 +239,7 @@ export const getDatabaseMetrics = async () => {
       ORDER BY tablename, attname
       LIMIT 10
     `
-    
+
     return result
   } catch (error) {
     console.error('Failed to get database metrics:', error)

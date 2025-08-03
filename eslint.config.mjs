@@ -21,6 +21,7 @@ const eslintConfig = [
       "react-hooks": (await import("eslint-plugin-react-hooks")).default,
       "jsx-a11y": (await import("eslint-plugin-jsx-a11y")).default,
       "tailwindcss": (await import("eslint-plugin-tailwindcss")).default,
+      "next": (await import("eslint-config-next")).default,
     },
     rules: {
       // TypeScript specific rules
@@ -43,6 +44,7 @@ const eslintConfig = [
       "@typescript-eslint/no-explicit-any": "warn",
       "@typescript-eslint/prefer-nullish-coalescing": "error",
       "@typescript-eslint/prefer-optional-chain": "error",
+      "@typescript-eslint/no-non-null-assertion": "warn",
 
       // React specific rules
       "react/jsx-curly-brace-presence": [
@@ -57,6 +59,7 @@ const eslintConfig = [
       "react/jsx-no-useless-fragment": "error",
       "react/self-closing-comp": "error",
       "react/hook-use-state": "error",
+      "react/no-unescaped-entities": "error",
 
       // React Hooks rules
       "react-hooks/rules-of-hooks": "error",
@@ -94,6 +97,13 @@ const eslintConfig = [
       // Next.js specific
       "@next/next/no-img-element": "error",
       "@next/next/no-html-link-for-pages": "error",
+      "@next/next/no-head-element": "error",
+      "@next/next/no-sync-scripts": "error",
+      "@next/next/no-page-custom-font": "error",
+      "@next/next/no-css-tags": "error",
+      "@next/next/no-title-in-document-head": "error",
+      "@next/next/no-typos": "error",
+      "@next/next/no-unwanted-polyfillio": "error",
     },
   },
   {

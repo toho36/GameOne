@@ -34,7 +34,7 @@ export function AuthGuard({
 
     // Show loading state
     if (isLoading) {
-        return fallback || (
+        return fallback ?? (
             <div className="flex items-center justify-center p-8">
                 <div className="flex flex-col items-center gap-4">
                     <LoadingSpinner size="lg" />
@@ -46,8 +46,8 @@ export function AuthGuard({
 
     // Show error state
     if (error) {
-        return fallback || (
-            <Alert variant="destructive" className="m-4">
+        return fallback ?? (
+            <Alert variant="error" className="m-4">
                 <AlertTitle>Authentication Error</AlertTitle>
                 <AlertDescription>
                     {error}. Please try refreshing the page or contact support if the problem persists.
@@ -68,7 +68,7 @@ export function AuthGuard({
             return null;
         }
 
-        return fallback || (
+        return fallback ?? (
             <div className="flex flex-col items-center justify-center space-y-4 p-8">
                 <Alert variant="default" className="max-w-md border-amber-200 bg-amber-50">
                     <AlertTitle className="text-amber-800">Authentication Required</AlertTitle>
@@ -92,11 +92,11 @@ export function AuthGuard({
                 return null;
             }
 
-            return fallback || (
-                <Alert variant="destructive" className="m-4">
+            return fallback ?? (
+                <Alert variant="error" className="m-4">
                     <AlertTitle>Insufficient Permissions</AlertTitle>
                     <AlertDescription>
-                        You don't have the required permissions to access this content.
+                        You don&apos;t have the required permissions to access this content.
                         Required permissions: {requirePermissions.join(", ")}
                     </AlertDescription>
                 </Alert>
@@ -105,7 +105,7 @@ export function AuthGuard({
     }
 
     // User is authenticated and has required permissions
-    return <>{children}</>;
+    return children;
 }
 
 /**
@@ -155,7 +155,7 @@ export function withAuthGuard<P extends object>(
         );
     };
 
-    AuthGuardedComponent.displayName = `withAuthGuard(${Component.displayName || Component.name})`;
+    AuthGuardedComponent.displayName = `withAuthGuard(${Component.displayName ?? Component.name})`;
     return AuthGuardedComponent;
 }
 
@@ -178,7 +178,7 @@ export function ConditionalAuth({
     const { isAuthenticated, isLoading, error } = useSession();
 
     if (isLoading) {
-        return loading || (
+        return loading ?? (
             <div className="flex items-center gap-2">
                 <LoadingSpinner size="sm" />
                 <span className="text-sm text-gray-600">Loading...</span>
@@ -187,8 +187,8 @@ export function ConditionalAuth({
     }
 
     if (error) {
-        return errorComponent || (
-            <Alert variant="destructive">
+        return errorComponent ?? (
+            <Alert variant="error">
                 <AlertTitle>Error</AlertTitle>
                 <AlertDescription>{error}</AlertDescription>
             </Alert>
@@ -196,8 +196,8 @@ export function ConditionalAuth({
     }
 
     if (isAuthenticated) {
-        return authenticated || null;
+        return authenticated ?? null;
     }
 
-    return unauthenticated || null;
+    return unauthenticated ?? null;
 }

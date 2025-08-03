@@ -8,7 +8,7 @@ import { NextResponse } from "next/server";
 export async function GET() {
     try {
         const { getPermissions, isAuthenticated } = getKindeServerSession();
-        
+
         const authenticated = await isAuthenticated();
         if (!authenticated) {
             return NextResponse.json(
@@ -20,8 +20,8 @@ export async function GET() {
         const permissions = await getPermissions();
 
         return NextResponse.json({
-            permissions: permissions?.permissions || [],
-            orgCode: permissions?.orgCode || null
+            permissions: permissions?.permissions ?? [],
+            orgCode: permissions?.orgCode ?? null
         });
     } catch (error) {
         console.error("Error fetching user permissions:", error);

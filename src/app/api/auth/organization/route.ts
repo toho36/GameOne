@@ -8,7 +8,7 @@ import { NextResponse } from "next/server";
 export async function GET() {
     try {
         const { getOrganization, isAuthenticated } = getKindeServerSession();
-        
+
         const authenticated = await isAuthenticated();
         if (!authenticated) {
             return NextResponse.json(
@@ -22,7 +22,7 @@ export async function GET() {
         return NextResponse.json({
             organization: organization ? {
                 orgCode: organization.orgCode,
-                orgName: organization.orgName || "Default Organization"
+                orgName: organization.orgName ?? "Default Organization"
             } : null
         });
     } catch (error) {

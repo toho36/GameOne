@@ -12,8 +12,8 @@ interface AuthStatusProps {
     showOrganization?: boolean;
 }
 
-export function AuthStatus({ 
-    className, 
+export function AuthStatus({
+    className,
     showDetails = false,
     showPermissions = false,
     showOrganization = false
@@ -31,7 +31,7 @@ export function AuthStatus({
 
     if (error) {
         return (
-            <Alert variant="destructive" className={className}>
+            <Alert variant="error" className={className}>
                 <AlertTitle>Authentication Error</AlertTitle>
                 <AlertDescription>{error}</AlertDescription>
             </Alert>

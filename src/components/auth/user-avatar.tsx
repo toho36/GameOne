@@ -54,7 +54,7 @@ export function UserAvatar({ user, size = "md", className }: UserAvatarProps) {
         )}>
             {shouldShowImage ? (
                 <Image
-                    src={user.picture!}
+                    src={user.picture ?? ''}
                     alt="User Avatar"
                     width={size === "sm" ? 32 : size === "md" ? 48 : 64}
                     height={size === "sm" ? 32 : size === "md" ? 48 : 64}
