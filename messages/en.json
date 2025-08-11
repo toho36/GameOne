@@ -1,14 +1,67 @@
 {
   "HomePage": {
-    "title": "Welcome to BunPlate",
-    "description": "A comprehensive modern web application boilerplate built with Bun runtime and optimized for Vercel deployment.",
+    "title": "Welcome to GameOne",
+    "description": "The ultimate event management platform for modern teams. Create, manage, and track events with ease.",
     "getStarted": "Get Started",
-    "learnMore": "Learn More"
+    "learnMore": "Learn More",
+    "welcomeBack": "Welcome back, {name}!",
+    "readyToManage": "Ready to manage your events and projects?",
+    "goToDashboard": "Go to Dashboard",
+    "getStartedToday": "Get Started Today",
+    "joinThousands": "Join thousands of users managing their events with GameOne",
+    "whyChoose": "Why Choose GameOne?",
+    "powerfulTools": "Powerful event management tools designed for modern teams",
+    "eventManagement": "Event Management",
+    "eventManagementDesc": "Create and manage events with our intuitive tools. From small meetups to large conferences.",
+    "registrationSystem": "Registration System",
+    "registrationSystemDesc": "Streamlined registration and ticketing system with automated confirmations and reminders.",
+    "analytics": "Analytics",
+    "analyticsDesc": "Comprehensive insights and reporting to help you understand your events and attendees better.",
+    "readyToStart": "Ready to Get Started?",
+    "trustGameOne": "Join thousands of users who trust GameOne for their event management needs.",
+    "activeUsers": "Active Users",
+    "eventsCreated": "Events Created",
+    "uptime": "Uptime",
+    "support": "Support"
+  },
+  "Dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome back,",
+    "userInfo": "User Information",
+    "email": "Email",
+    "name": "Name",
+    "userId": "User ID",
+    "actions": "Quick Actions",
+    "signOut": "Sign Out",
+    "goHome": "Go Home",
+    "authenticated": "Authenticated",
+    "authStatus": "You are successfully logged in and can access all features.",
+    "online": "Online",
+    "accountStatus": "Account Status",
+    "active": "Active",
+    "manageEvents": "Manage Events",
+    "manageEventsDesc": "Create and organize events",
+    "viewRegistrations": "View Registrations",
+    "viewRegistrationsDesc": "Check event registrations",
+    "analyticsDesc": "View insights and reports",
+    "dashboardError": "Dashboard Error",
+    "errorMessage": "There was an error loading the dashboard. Please try again or contact support if the problem persists.",
+    "loginAgain": "Login Again"
   },
   "Navigation": {
     "home": "Home",
-    "about": "About",
-    "contact": "Contact"
+    "dashboard": "Dashboard"
+  },
+  "Auth": {
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "signOut": "Sign Out",
+    "loading": "Loading...",
+    "checkingAuth": "Checking authentication...",
+    "notAuthenticated": "Not Authenticated",
+    "notAuthenticatedDesc": "You are not currently logged in. Please sign in to access the dashboard.",
+    "authenticated": "Authenticated",
+    "authenticatedDesc": "You are successfully logged in."
   },
   "Common": {
     "loading": "Loading...",
@@ -16,6 +69,11 @@
     "retry": "Try again",
     "cancel": "Cancel",
     "save": "Save",
-    "close": "Close"
+    "close": "Close",
+    "goHome": "Go Home"
+  },
+  "Language": {
+    "switchTo": "Switch to {language}",
+    "currentLanguage": "Current language: {language}"
   }
 }

@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // eslint-disable-next-line no-console
+     
     console.log('🧹 Starting database cleanup job...');
     const startTime = Date.now();
 
@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
       results: cleanupResults,
     };
 
-    // eslint-disable-next-line no-console
+     
     console.log('✅ Database cleanup completed:', response);
 
     return NextResponse.json(response, { status: 200 });

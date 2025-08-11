@@ -383,119 +383,6 @@ enum RegistrationStatus {
   NO_SHOW // Didn't show up
 }
 
-enum RegistrationType {
-  INDIVIDUAL // Single person registration
-  GROUP // Group registration with friends
-  ADMIN_CREATED // Created by admin/moderator
-}
-
-enum RegistrationSource {
-  WEB_FORM // Standard web registration
-  ADMIN_PANEL // Created by admin
-  PROMOTED_FROM_WAITING // Promoted from waiting list
-  PENDING_PAYMENT_CONFIRMED // Confirmed from pending payment
-}
-
-// ================================
-// PENDING PAYMENT SYSTEM
-// ================================
-
-enum PendingPaymentStatus {
-  AWAITING_PAYMENT // QR code generated, waiting for payment
-  PAYMENT_RECEIVED // Payment confirmed, ready to promote to registration
-  EXPIRED // Payment deadline passed
-  CANCELLED // User cancelled before payment
-  PROCESSED // Successfully converted to registration
-}
-
-model PendingPayment {
-  id      String               @id @default(cuid())
-  eventId String
-  status  PendingPaymentStatus @default(AWAITING_PAYMENT)
-
-  // Primary registrant (can be null for guest registrations)
-  userId String?
-
-  // Guest registration data (for non-authenticated users)
-  guestEmail     String?
-  guestName      String?
-  guestPhone     String?
-  isGuestRequest Boolean @default(false)
-
-  // Registration type and capacity tracking
-  registrationType  RegistrationType @default(INDIVIDUAL)
-  totalParticipants Int              @default(1) // Including primary + friends
-
-  // Friend registration data (JSON array of friend objects)
-  // Schema: [{"name": "John Doe", "email": "john@example.com", "phone": "+420123456789", "dietaryRequirements": "vegetarian", "specialRequests": "wheelchair access"}]
-  friendsData Json? @default("[]")
-
-  // Primary registrant additional data
-  primaryDietaryRequirements String?
-  primarySpecialRequests     String?
-  primaryNotes               String?
-
-  // Payment information
-  amount        Decimal       @db.Decimal(10, 2)
-  currency      String        @default("EUR")
-  paymentMethod PaymentMethod @default(QR_CODE)
-
-  // Bank transfer details for QR code generation
-  bankAccountId  String?
-  variableSymbol String? @unique // Slovak banking variable symbol
-  constantSymbol String?
-  specificSymbol String?
-
-  // QR code data
-  qrCodeData String? // Generated QR code string
-  qrCodeUrl  String? // URL to QR code image
-
-  // Expiration and lifecycle management
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  expiresAt DateTime // When payment request expires (typically 24-48 hours)
-
-  // Payment tracking
-  paidAt      DateTime?
-  verifiedAt  DateTime?
-  processedAt DateTime? // When converted to registration
-  cancelledAt DateTime?
-
-  // Additional metadata
-  description String? // Payment description
-  reference   String? // External payment reference
-  notes       String? // Internal notes
-
-  // Promotion tracking (for waiting list scenarios)
-  promotedFromWaitingList Boolean @default(false)
-  waitingListPosition     Int? // Original position if promoted from waiting list
-
-  // Relations
-  user        User?        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  event       Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  bankAccount BankAccount? @relation(fields: [bankAccountId], references: [id])
-
-  // Reverse relations
-  registrations Registration[] @relation("RegistrationPendingPayment")
-  waitingLists  WaitingList[]  @relation("WaitingListPendingPayment")
-  payments      Payment[]      @relation("PaymentPendingPayment")
-
-  // Performance indexes
-  @@index([eventId, status, createdAt])
-  @@index([userId, status]) // For user's pending payments
-  @@index([status, expiresAt]) // For cleanup jobs
-  @@index([variableSymbol]) // For payment verification
-  @@index([isGuestRequest, status]) // For guest registration tracking
-  @@index([promotedFromWaitingList, waitingListPosition]) // For waiting list management
-  @@index([registrationType, totalParticipants]) // For capacity planning
-  @@index([paidAt, verifiedAt, processedAt]) // For payment lifecycle tracking
-  @@map("pending_payments")
-}
-
-// ================================
-// ENHANCED REGISTRATION SYSTEM
-// ================================
-
 model Registration {
   id      String             @id @default(cuid())
   userId  String? // Can be null for guest registrations
@@ -533,14 +420,8 @@ model Registration {
   specialRequests     String?
 
   // Payment tracking
-  requiresPayment  Boolean @default(false)
-  paymentId        String? @unique
-  pendingPaymentId String? // Reference to original pending payment
-
-  // Waiting list promotion tracking
-  promotedFromWaitingList Boolean   @default(false)
-  waitingListPosition     Int? // Original position in waiting list
-  promotedAt              DateTime? // When promoted from waiting list
+  requiresPayment Boolean @default(false)
+  paymentId       String? @unique
 
   // Relations
   user           User?           @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -561,12 +442,6 @@ model Registration {
   @@index([status, registeredAt]) // For admin reporting and timeline analysis
   @@index([requiresPayment, paymentId]) // For payment tracking
   @@index([confirmedAt]) // For attendance tracking
-  @@index([isGroupLeader, groupSize]) // For group registration queries
-  @@index([groupLeaderId, friendPosition]) // For group member queries
-  @@index([registrationType, registrationSource]) // For analytics
-  @@index([promotedFromWaitingList, promotedAt]) // For waiting list analytics
-  @@index([isGuestRequest, guestEmail]) // For guest registration management
-  @@index([pendingPaymentId]) // For linking to pending payments
   @@map("registrations")
 }
 
@@ -651,7 +526,7 @@ model Payment {
   id             String  @id @default(cuid())
   userId         String
   eventId        String?
-  registrationId String?
+  registrationId String? @unique
 
   amount   Decimal       @db.Decimal(10, 2)
   currency String        @default("EUR")
@@ -672,6 +547,11 @@ model Payment {
   paidAt     DateTime?
   verifiedAt DateTime?
   refundedAt DateTime?
+
+  // New payment claiming and verification fields
+  claimedAt DateTime? // When user claimed payment
+  verifiedBy String? // Admin who verified
+  verificationNotes String?
 
   // Additional data
   description String?
@@ -700,7 +580,6 @@ model Payment {
   @@index([paidAt, verifiedAt]) // For financial reporting
   @@index([currency, amount]) // For financial analytics
   @@index([bankAccountId, status]) // For bank account reconciliation
-  @@index([pendingPaymentId]) // For pending payment tracking
   // TODO: Add payment amount validation at application level - amount > 0
   @@map("payments")
 }

@@ -1,0 +1,648 @@
+---
+alwaysApply: true
+---
+
+# Cursor Rules for Fullstack Development
+
+## File Organization & Structure
+
+### API Routes
+
+- Place all API routes in `src/app/api/`
+- Use descriptive route names: `users/route.ts`, `events/[eventId]/route.ts`
+- Group related endpoints in subdirectories
+- Use dynamic routes with `[paramName]` for variable segments
+- Follow RESTful conventions for route naming
+
+### Server Components
+
+- Place server components in `src/app/[locale]/`
+- Use descriptive file names that indicate the component's purpose
+- Group related components in subdirectories when needed
+- Keep server components as the default, use "use client" only when necessary
+
+### Import Organization
+
+- Use `@/` path aliases for all imports
+- Group imports in this order:
+  1. Next.js and React imports
+  2. Third-party libraries
+  3. Internal utilities and database clients
+  4. Types and interfaces
+- Use absolute imports with `@/` prefix
+
+## API Development Standards
+
+### Route Handler Structure
+
+```typescript
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+
+export async function GET(request: NextRequest) {
+  try {
+    // Extract query parameters
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '10');
+
+    // Database query
+    const data = await prisma.model.findMany({
+      skip: (page - 1) * limit,
+      take: limit,
+      orderBy: { createdAt: 'desc' }
+    });
+
+    return NextResponse.json({
+      data,
+      page,
+      limit
+    });
+  } catch (error) {
+    console.error('API Error:', error);
+    return NextResponse.json(
+      { error: 'Internal Server Error' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+
+    // Validate input
+    if (!body.requiredField) {
+      return NextResponse.json(
+        { error: 'Missing required field' },
+        { status: 400 }
+      );
+    }
+
+    // Database operation
+    const result = await prisma.model.create({
+      data: body
+    });
+
+    return NextResponse.json(result, { status: 201 });
+  } catch (error) {
+    console.error('API Error:', error);
+    return NextResponse.json(
+      { error: 'Internal Server Error' },
+      { status: 500 }
+    );
+  }
+}
+```
+
+### Error Handling Patterns
+
+```typescript
+// Standard error response format
+interface ApiError {
+  error: string;
+  details?: string;
+  code?: string;
+}
+
+// Error handling utility
+function handleApiError(error: unknown, context: string): NextResponse {
+  console.error(`${context} Error:`, error);
+
+  if (error instanceof Prisma.PrismaClientKnownRequestError) {
+    return NextResponse.json(
+      { error: 'Database operation failed' },
+      { status: 400 }
+    );
+  }
+
+  return NextResponse.json(
+    { error: 'Internal Server Error' },
+    { status: 500 }
+  );
+}
+```
+
+### Authentication & Authorization
+
+```typescript
+// Authentication middleware pattern
+async function authenticateRequest(request: NextRequest) {
+  const token = request.headers.get('authorization')?.replace('Bearer ', '');
+
+  if (!token) {
+    throw new Error('No authentication token provided');
+  }
+
+  // Verify token and return user
+  const user = await verifyToken(token);
+  return user;
+}
+
+// Protected route pattern
+export async function GET(request: NextRequest) {
+  try {
+    const user = await authenticateRequest(request);
+
+    // Check permissions
+    if (!user.canAccessResource) {
+      return NextResponse.json(
+        { error: 'Insufficient permissions' },
+        { status: 403 }
+      );
+    }
+
+    // Route logic here
+  } catch (error) {
+    return NextResponse.json(
+      { error: 'Authentication failed' },
+      { status: 401 }
+    );
+  }
+}
+```
+
+## Server Components Patterns
+
+### Data Fetching Components
+
+```typescript
+// Server component with data fetching
+async function DataComponent() {
+  const data = await prisma.model.findMany({
+    where: { published: true },
+    orderBy: { createdAt: 'desc' },
+    take: 10
+  });
+
+  return (
+    <div className="space-y-4">
+      {data.map((item) => (
+        <div key={item.id}>
+          <h3>{item.title}</h3>
+          <p>{item.description}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// Page with Suspense boundary
+export default function Page() {
+  return (
+    <main className="container mx-auto px-4 py-8">
+      <h1 className="text-2xl font-bold mb-6">Data Page</h1>
+      <Suspense fallback={<LoadingSpinner />}>
+        <DataComponent />
+      </Suspense>
+    </main>
+  );
+}
+```
+
+### Server Actions
+
+```typescript
+// Server action for form handling
+async function createItem(formData: FormData) {
+  'use server';
+
+  try {
+    const name = formData.get('name') as string;
+    const description = formData.get('description') as string;
+
+    // Validate input
+    if (!name.trim()) {
+      throw new Error('Name is required');
+    }
+
+    // Database operation
+    const result = await prisma.item.create({
+      data: {
+        name: name.trim(),
+        description: description?.trim() || null
+      }
+    });
+
+    // Revalidate cache
+    revalidatePath('/items');
+
+    return { success: true, data: result };
+  } catch (error) {
+    console.error('Server Action Error:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    };
+  }
+}
+```
+
+## Database Integration
+
+### Prisma Query Patterns
+
+```typescript
+// Efficient query patterns
+export class Repository {
+  // Paginated queries
+  async findMany(page: number = 1, limit: number = 10) {
+    const skip = (page - 1) * limit;
+
+    const [data, total] = await Promise.all([
+      prisma.model.findMany({
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' }
+      }),
+      prisma.model.count()
+    ]);
+
+    return {
+      data,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit)
+      }
+    };
+  }
+
+  // Related data queries
+  async findWithRelations(id: string) {
+    return prisma.model.findUnique({
+      where: { id },
+      include: {
+        relatedModel: {
+          select: {
+            id: true,
+            name: true
+          }
+        }
+      }
+    });
+  }
+}
+```
+
+### Transaction Patterns
+
+```typescript
+// Database transaction pattern
+async function createWithRelations(data: CreateData) {
+  return prisma.$transaction(async (tx) => {
+    // Create main record
+    const mainRecord = await tx.model.create({
+      data: data.main
+    });
+
+    // Create related records
+    const relatedRecords = await Promise.all(
+      data.related.map(related =>
+        tx.relatedModel.create({
+          data: {
+            ...related,
+            mainId: mainRecord.id
+          }
+        })
+      )
+    );
+
+    return {
+      main: mainRecord,
+      related: relatedRecords
+    };
+  });
+}
+```
+
+## Middleware Patterns
+
+### Request Processing
+
+```typescript
+// src/middleware.ts
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+
+export function middleware(request: NextRequest) {
+  // Authentication check
+  const token = request.cookies.get('auth-token');
+
+  if (!token && request.nextUrl.pathname.startsWith('/api/protected')) {
+    return NextResponse.json(
+      { error: 'Authentication required' },
+      { status: 401 }
+    );
+  }
+
+  // Locale handling
+  const pathname = request.nextUrl.pathname;
+  const pathnameIsMissingLocale = ['/'].some(
+    (path) => pathname === path
+  );
+
+  if (pathnameIsMissingLocale) {
+    const locale = request.headers.get('accept-language')?.split(',')[0] || 'en';
+    return NextResponse.redirect(
+      new URL(`/${locale}${pathname}`, request.url)
+    );
+  }
+
+  return NextResponse.next();
+}
+
+export const config = {
+  matcher: [
+    '/api/:path*',
+    '/((?!_next/static|_next/image|favicon.ico).*)',
+  ],
+};
+```
+
+## Performance Optimization
+
+### Caching Strategies
+
+```typescript
+// Next.js cache patterns
+import { unstable_cache } from 'next/cache';
+
+// Cached data fetching
+const getCachedData = unstable_cache(
+  async (id: string) => {
+    return prisma.model.findUnique({
+      where: { id }
+    });
+  },
+  ['model-data'],
+  {
+    revalidate: 3600, // 1 hour
+    tags: ['model']
+  }
+);
+
+// Cache invalidation
+export async function updateModel(id: string, data: UpdateData) {
+  const result = await prisma.model.update({
+    where: { id },
+    data
+  });
+
+  // Invalidate cache
+  revalidateTag('model');
+
+  return result;
+}
+```
+
+### Connection Management
+
+```typescript
+// Prisma client configuration
+import { PrismaClient } from '@prisma/client';
+
+const globalForPrisma = globalThis as unknown as {
+  prisma: PrismaClient | undefined;
+};
+
+export const prisma = globalForPrisma.prisma ?? new PrismaClient({
+  log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+});
+
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+```
+
+## Security Standards
+
+### Input Validation
+
+```typescript
+// Validation utilities
+import { z } from 'zod';
+
+const CreateItemSchema = z.object({
+  name: z.string().min(1).max(100),
+  description: z.string().optional(),
+  price: z.number().positive().optional()
+});
+
+async function validateAndCreate(data: unknown) {
+  const validated = CreateItemSchema.parse(data);
+
+  return prisma.item.create({
+    data: validated
+  });
+}
+```
+
+### Rate Limiting
+
+```typescript
+// Rate limiting pattern
+import { Ratelimit } from '@upstash/ratelimit';
+import { Redis } from '@upstash/redis';
+
+const ratelimit = new Ratelimit({
+  redis: Redis.fromEnv(),
+  limiter: Ratelimit.slidingWindow(10, '1 m'), // 10 requests per minute
+});
+
+export async function rateLimitedHandler(request: NextRequest) {
+  const ip = request.ip ?? '127.0.0.1';
+  const { success } = await ratelimit.limit(ip);
+
+  if (!success) {
+    return NextResponse.json(
+      { error: 'Too many requests' },
+      { status: 429 }
+    );
+  }
+
+  // Continue with handler logic
+}
+```
+
+## File Templates
+
+### API Route Template
+
+```typescript
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+
+export async function GET(request: NextRequest) {
+  try {
+    // Implementation here
+    return NextResponse.json({ data: [] });
+  } catch (error) {
+    console.error('API Error:', error);
+    return NextResponse.json(
+      { error: 'Internal Server Error' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    // Implementation here
+    return NextResponse.json({ success: true }, { status: 201 });
+  } catch (error) {
+    console.error('API Error:', error);
+    return NextResponse.json(
+      { error: 'Internal Server Error' },
+      { status: 500 }
+    );
+  }
+}
+```
+
+### Server Component Template
+
+```typescript
+import { Suspense } from 'react';
+import { prisma } from '@/lib/prisma';
+
+async function DataComponent() {
+  const data = await prisma.model.findMany();
+
+  return (
+    <div>
+      {/* Component content */}
+    </div>
+  );
+}
+
+export default function Page() {
+  return (
+    <main>
+      <Suspense fallback={<div>Loading...</div>}>
+        <DataComponent />
+      </Suspense>
+    </main>
+  );
+}
+```
+
+## Development Workflow
+
+### Before Creating New Code
+
+1. Check existing API routes for similar patterns
+2. Determine if it should be an API route or server action
+3. Plan the data flow and error handling
+4. Consider authentication and authorization requirements
+5. Think about caching and performance implications
+
+### Code Review Checklist
+
+- [ ] TypeScript compiles without errors
+- [ ] Proper error handling implemented
+- [ ] Input validation in place
+- [ ] Authentication/authorization handled
+- [ ] Database queries are optimized
+- [ ] Cache invalidation considered
+- [ ] Rate limiting implemented where needed
+- [ ] Security measures in place
+- [ ] Performance considerations addressed
+- [ ] Code follows established patterns
+
+## Common Patterns
+
+### CRUD Operations
+
+```typescript
+// Complete CRUD pattern
+export async function GET(request: NextRequest) {
+  // Read
+}
+
+export async function POST(request: NextRequest) {
+  // Create
+}
+
+export async function PUT(request: NextRequest) {
+  // Update
+}
+
+export async function DELETE(request: NextRequest) {
+  // Delete
+}
+```
+
+### File Upload Handling
+
+```typescript
+import { writeFile } from 'fs/promises';
+import { join } from 'path';
+
+export async function POST(request: NextRequest) {
+  try {
+    const formData = await request.formData();
+    const file = formData.get('file') as File;
+
+    if (!file) {
+      return NextResponse.json(
+        { error: 'No file provided' },
+        { status: 400 }
+      );
+    }
+
+    const bytes = await file.arrayBuffer();
+    const buffer = Buffer.from(bytes);
+
+    // Save file
+    const path = join(process.cwd(), 'public', 'uploads', file.name);
+    await writeFile(path, buffer);
+
+    return NextResponse.json({
+      success: true,
+      path: `/uploads/${file.name}`
+    });
+  } catch (error) {
+    return NextResponse.json(
+      { error: 'File upload failed' },
+      { status: 500 }
+    );
+  }
+}
+```
+
+### Webhook Handling
+
+```typescript
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const signature = request.headers.get('x-webhook-signature');
+
+    // Verify webhook signature
+    if (!verifySignature(body, signature)) {
+      return NextResponse.json(
+        { error: 'Invalid signature' },
+        { status: 401 }
+      );
+    }
+
+    // Process webhook
+    await processWebhook(body);
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Webhook Error:', error);
+    return NextResponse.json(
+      { error: 'Webhook processing failed' },
+      { status: 500 }
+    );
+  }
+}
+```
+
+description:
+globs:
+alwaysApply: false
+
+---

@@ -1,1219 +1,927 @@
-# Complete Registration System Analysis - GameOne Event Management
-
-## Executive Summary
-
-This document provides a comprehensive analysis of the GameOne event management system's registration and payment workflow. The analysis reveals that **the system already has a sophisticated three-table registration architecture fully implemented** with comprehensive friend registration capabilities, Slovak banking integration, and robust payment processing.
+# Registration System Analysis & Implementation Guide
 
 ## 📋 Table of Contents
 
-1. [Current System Architecture](#current-system-architecture)
-2. [Database Schema Analysis](#database-schema-analysis)
-3. [Three-Table Registration System](#three-table-registration-system)
-4. [Friend Registration Capabilities](#friend-registration-capabilities)
-5. [Payment Workflow Analysis](#payment-workflow-analysis)
-6. [Business Logic Implementation](#business-logic-implementation)
-7. [Performance and Scalability](#performance-and-scalability)
-8. [Security and Data Integrity](#security-and-data-integrity)
-9. [Implementation Recommendations](#implementation-recommendations)
-10. [Migration and Deployment Strategy](#migration-and-deployment-strategy)
+1. [System Overview](#system-overview)
+2. [Core Use Cases](#core-use-cases)
+3. [Database Schema Requirements](#database-schema-requirements)
+4. [Payment Flow Architecture](#payment-flow-architecture)
+5. [Status Management](#status-management)
+6. [Capacity Management](#capacity-management)
+7. [Email & Notification System](#email--notification-system)
+8. [Admin Interface Requirements](#admin-interface-requirements)
+9. [Edge Cases & Business Rules](#edge-cases--business-rules)
+10. [Implementation Priority](#implementation-priority)
+11. [Technical Requirements](#technical-requirements)
 
 ---
 
-## Current System Architecture
+## 🎯 System Overview
 
-### ✅ **Fully Implemented Components**
+The registration system is designed to ensure only users who have actually paid
+get confirmed spots, while providing flexibility for admin management and
+handling edge cases gracefully. The system operates on a **webpage-centric
+experience** with minimal email communication.
 
-The GameOne system currently includes:
+### Key Principles
 
-#### **Core Registration Models**
-- **PendingPayment** - Temporary payment requests with full friend support
-- **Registration** - Confirmed registrations with group management
-- **WaitingList** - Capacity overflow with group waiting capabilities
-- **Payment** - Slovak banking integration with QR codes
-- **RegistrationHistory** - Complete audit trail system
-
-#### **Supporting Infrastructure**
-- **User Management** - Role-based access with guest support
-- **Event Management** - Comprehensive event system
-- **Bank Account Management** - Multiple Slovak bank account support
-- **Notification System** - Multi-template email system
-- **Audit Logging** - System-wide audit trail
-
-### 📊 **System Capabilities Matrix**
-
-| Feature | Status | Implementation |
-|---------|--------|---------------|
-| Individual Registration | ✅ Complete | Full workflow implemented |
-| Friend Group Registration | ✅ Complete | JSON-based friend data storage |
-| Guest Registration | ✅ Complete | Non-authenticated user support |
-| Payment Processing | ✅ Complete | Slovak banking with QR codes |
-| Waiting List Management | ✅ Complete | Group-aware position tracking |
-| Capacity Management | ✅ Complete | Atomic transaction safety |
-| Email Notifications | ✅ Complete | Multi-language template system |
-| Audit Trail | ✅ Complete | Comprehensive action logging |
-| Bank Integration | ✅ Complete | Multiple bank account support |
-| QR Code Generation | ✅ Complete | SPD format for Slovak banking |
+- **Payment-First**: All registrations require payment verification
+- **Capacity-Aware**: Proper counting based on payment status
+- **Admin-Controlled**: Final verification authority rests with admins
+- **User-Friendly**: Clear status visibility and simple payment claiming
+- **Flexible**: Supports multiple payment methods and edge cases
 
 ---
 
-## Database Schema Analysis
+## 🔄 Core Use Cases
 
-### **Model Overview**
+### 1. User Self-Registration
 
-#### **PendingPayment Model** (Lines 411-493)
-```prisma
-model PendingPayment {
-  id                String   @id @default(cuid())
-  
-  // Registration Data
-  eventId           String
-  userId            String?  // null for guest registrations
-  registrationType  RegistrationType @default(INDIVIDUAL)
-  
-  // Primary Registrant
-  primaryName       String
-  primaryEmail      String   @unique
-  primaryPhone      String?
-  
-  // Guest Registration Support
-  guestData         Json     @default("{}")
-  
-  // Friend/Group Support
-  friendsData       Json     @default("[]")
-  totalParticipants Int      @default(1)
-  
-  // Payment Details
-  amount            Decimal? @db.Decimal(10, 2)
-  variableSymbol    String?  @unique
-  qrCodeData        String?
-  bankAccountId     String?
-  
-  // Status and Lifecycle
-  status            PendingPaymentStatus @default(AWAITING_PAYMENT)
-  expiresAt         DateTime?
-  
-  // Comprehensive indexes for performance
-  @@index([eventId, status])
-  @@index([userId])
-  @@index([primaryEmail])
-  @@index([expiresAt])
+**Actor**: Regular user  
+**Preconditions**: User has verified account, event is open for registration  
+**Flow**:
+
+1. User clicks "Register" on event page
+2. System checks event capacity and registration status
+3. If capacity available → Show payment details + QR code on webpage
+4. If full → Add to waiting list
+5. **NO EMAIL SENT** at this stage
+
+**Business Rules**:
+
+- Only users with verified accounts can register
+- Registration requires payment (no free events)
+- Payment details displayed directly on webpage
+- User must claim payment before taking spot in register list
+
+**Postconditions**: User has `PENDING_VERIFICATION` status, payment details
+visible
+
+### 2. Friend Registration
+
+**Actor**: User registering for someone else  
+**Preconditions**: User has verified account, event allows friend registration  
+**Flow**:
+
+1. User fills friend's name (required) + optional contact info
+2. Same payment flow as self-registration
+3. Payment details displayed on webpage (no email)
+4. Friend appears in registration list with special indicator
+
+**Business Rules**:
+
+- Only name is required for friend
+- Friend doesn't need account
+- Registering user is responsible for payment
+- Friend gets same event access as regular registrant
+- Limit number of friends per user (e.g., max 3)
+
+**Postconditions**: Friend registration created with `PENDING_VERIFICATION`
+status
+
+### 3. Payment Claiming Process
+
+**Actor**: User who registered  
+**Preconditions**: User has `PENDING_VERIFICATION` status  
+**Flow**:
+
+1. User sees payment details and QR code on webpage
+2. User clicks "I've sent the payment" button on same page
+3. Status changes to `PAYMENT_SENT_AWAITING_VERIFICATION`
+4. **CONFIRMATION EMAIL SENT** to user
+5. Registration now takes spot in capacity count
+
+**Business Rules**:
+
+- Only users with `PENDING_VERIFICATION` status can claim
+- Claiming moves user from pending to registered list
+- If capacity exceeded during claiming, user moved to waiting list
+- **ONLY EMAIL SENT** when user claims payment
+- Users can claim payment multiple times (no penalty)
+
+**Postconditions**: User has `PAYMENT_SENT_AWAITING_VERIFICATION` status, spot
+reserved
+
+### 4. Admin Payment Verification
+
+**Actor**: Event admin/manager  
+**Preconditions**: Admin has verification permissions  
+**Flow**:
+
+1. Admin sees list of pending payments
+2. Admin checks bank account for payments
+3. Admin approves/rejects each payment
+4. System sends notifications to users
+
+**Business Rules**:
+
+- Only admins can verify payments
+- Rejected payments move user back to pending or waiting list
+- Approved payments confirm registration spot
+- Cash payments can be marked as `VERIFIED_CASH`
+- Bulk operations supported for efficiency
+
+**Postconditions**: Payment status updated, user notified, capacity adjusted
+
+### 5. Waiting List Management
+
+**Actor**: System + Users  
+**Preconditions**: Event at capacity, waiting list enabled  
+**Flow**:
+
+1. When registration is cancelled → Promote next in waiting list
+2. When payment is rejected → Move to waiting list
+3. When spot opens → Show payment details on webpage (no email)
+4. Promoted users get payment instructions on webpage
+
+**Business Rules**:
+
+- Waiting list is first-come-first-served
+- Promoted users see payment details on webpage
+- No time limits for payment claiming
+- Waiting list doesn't count toward capacity
+- Position numbers updated automatically
+
+**Postconditions**: Users moved between lists, capacity maintained
+
+---
+
+## 🗄️ Database Schema Requirements
+
+### Current Schema Structure
+
+The system has a comprehensive schema that supports the registration flow. Here
+are the key components:
+
+#### Registration Status Enums
+
+```typescript
+enum RegistrationStatus {
+  PENDING // Awaiting approval/payment
+  CONFIRMED // Confirmed attendance
+  CANCELLED // User cancelled
+  REJECTED // Admin rejected
+  ATTENDED // Actually attended event
+  NO_SHOW // Didn't show up
 }
-```
 
-#### **Enhanced Registration Model** (Lines 499-571)
-```prisma
-model Registration {
-  id                String   @id @default(cuid())
-  
-  // Basic Registration
-  userId            String?  // null for guest registrations
-  eventId           String
-  status            RegistrationStatus @default(PENDING)
-  
-  // Group Registration Support
-  isGroupLeader     Boolean  @default(true)
-  groupLeaderId     String?
-  groupSize         Int      @default(1)
-  friendPosition    Int?     // Position within group
-  friendsData       Json     @default("[]")
-  
-  // Guest Registration
-  guestName         String?
-  guestEmail        String?
-  guestPhone        String?
-  
-  // Payment Integration
-  pendingPaymentId  String?  @unique
-  paymentId         String?  @unique
-  
-  // Metadata
-  registrationType  RegistrationType @default(INDIVIDUAL)
-  registrationSource RegistrationSource @default(WEB)
-  
-  // Performance indexes
-  @@index([eventId, status])
-  @@index([userId, eventId])
-  @@index([groupLeaderId])
-  @@index([isGroupLeader, groupSize])
+enum RegistrationPaymentStatus {
+  PENDING_VERIFICATION                    // Doesn't take spot
+  PAYMENT_SENT_AWAITING_VERIFICATION     // Takes spot
+  PAYMENT_VERIFIED                       // Takes spot (confirmed)
+  VERIFIED_CASH                          // Takes spot (cash payment)
+  REJECTED                               // Back to pending or waiting list
+  WAITING_LIST_PROMOTED                  // New status for promoted users
 }
-```
 
-#### **Enhanced WaitingList Model** (Lines 577-628)
-```prisma
-model WaitingList {
-  id                String   @id @default(cuid())
-  
-  // Basic Waiting List
-  userId            String?
-  eventId           String
-  position          Int
-  
-  // Group Support
-  groupSize         Int      @default(1)
-  friendsData       Json     @default("[]")
-  
-  // Guest Support
-  guestName         String?
-  guestEmail        String?
-  guestPhone        String?
-  
-  // Promotion Tracking
-  promotedAt        DateTime?
-  pendingPaymentId  String?  @unique
-  
-  // Performance indexes
-  @@index([eventId, position])
-  @@index([userId])
-  @@index([pendingPaymentId])
-}
-```
-
-### **Supporting Enums**
-
-#### **RegistrationType** (Lines 386-390)
-```prisma
 enum RegistrationType {
-  INDIVIDUAL      // Single person registration
-  GROUP          // Group with friends
-  ADMIN_CREATED  // Created by admin
+  INDIVIDUAL // Single person registration
+  GROUP // Group registration with friends
+  ADMIN_CREATED // Created by admin/moderator
 }
-```
 
-#### **PendingPaymentStatus** (Lines 403-409)
-```prisma
-enum PendingPaymentStatus {
-  AWAITING_PAYMENT  // Payment not yet received
-  PAYMENT_RECEIVED  // Payment confirmed
-  EXPIRED          // Payment deadline passed
-  CANCELLED        // User cancelled
-  PROCESSED        // Converted to registration
-}
-```
-
-#### **RegistrationSource** (Lines 392-397)
-```prisma
 enum RegistrationSource {
-  WEB              // Web form registration
-  ADMIN            // Admin created
-  API              // API registration
-  PROMOTED         // Promoted from waiting list
-  IMPORTED         // Bulk import
+  WEB_FORM // Standard web registration
+  ADMIN_PANEL // Created by admin
+  PROMOTED_FROM_WAITING // Promoted from waiting list
+  PENDING_PAYMENT_CONFIRMED // Confirmed from pending payment
 }
 ```
+
+#### Pending Payment System
+
+```typescript
+enum PendingPaymentStatus {
+  AWAITING_PAYMENT // QR code generated, waiting for payment
+  PAYMENT_RECEIVED // Payment confirmed, ready to promote to registration
+  EXPIRED // Payment deadline passed
+  CANCELLED // User cancelled before payment
+  PROCESSED // Successfully converted to registration
+}
+
+model PendingPayment {
+  id      String               @id @default(cuid())
+  eventId String
+  status  PendingPaymentStatus @default(AWAITING_PAYMENT)
+
+  // Primary registrant (can be null for guest registrations)
+  userId String?
+
+  // Guest registration data
+  guestEmail     String?
+  guestName      String?
+  guestPhone     String?
+  isGuestRequest Boolean @default(false)
+
+  // Registration type and capacity tracking
+  registrationType  RegistrationType @default(INDIVIDUAL)
+  totalParticipants Int              @default(1)
+
+  // Friend registration data (JSON array)
+  friendsData Json? @default("[]")
+
+  // Primary registrant additional data
+  primaryDietaryRequirements String?
+  primarySpecialRequests     String?
+  primaryNotes               String?
+
+  // Payment information
+  amount        Decimal       @db.Decimal(10, 2)
+  currency      String        @default("EUR")
+  paymentMethod PaymentMethod @default(QR_CODE)
+
+  // Bank transfer details
+  bankAccountId  String?
+  variableSymbol String? @unique
+  constantSymbol String?
+  specificSymbol String?
+
+  // QR code data
+  qrCodeData String?
+  qrCodeUrl  String?
+
+  // Lifecycle management
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  expiresAt DateTime
+
+  // Payment tracking
+  paidAt      DateTime?
+  verifiedAt  DateTime?
+  processedAt DateTime?
+  cancelledAt DateTime?
+
+  // Additional metadata
+  description String?
+  reference   String?
+  notes       String?
+
+  // Promotion tracking
+  promotedFromWaitingList Boolean @default(false)
+  waitingListPosition     Int?
+
+  // Relations
+  user        User?        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event       Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  bankAccount BankAccount? @relation(fields: [bankAccountId], references: [id])
+
+  // Reverse relations
+  registrations Registration[] @relation("RegistrationPendingPayment")
+  waitingLists  WaitingList[]  @relation("WaitingListPendingPayment")
+  payments      Payment[]      @relation("PaymentPendingPayment")
+}
+```
+
+#### Enhanced Registration Model
+
+```typescript
+model Registration {
+  id      String             @id @default(cuid())
+  userId  String? // Can be null for guest registrations
+  eventId String
+  status  RegistrationStatus @default(PENDING)
+
+  // Enhanced registration metadata
+  registrationType   RegistrationType   @default(INDIVIDUAL)
+  registrationSource RegistrationSource @default(WEB_FORM)
+
+  // Group registration support
+  isGroupLeader  Boolean @default(true)
+  groupLeaderId  String?
+  groupSize      Int     @default(1)
+  friendPosition Int?
+
+  // Guest registration data
+  guestEmail     String?
+  guestName      String?
+  guestPhone     String?
+  isGuestRequest Boolean @default(false)
+
+  // Friend data (JSON array)
+  friendsData Json? @default("[]")
+
+  // Registration details
+  registeredAt DateTime  @default(now())
+  confirmedAt  DateTime?
+  cancelledAt  DateTime?
+
+  // Additional data
+  notes               String?
+  dietaryRequirements String?
+  specialRequests     String?
+
+  // Payment tracking
+  requiresPayment  Boolean @default(false)
+  paymentId        String? @unique
+  pendingPaymentId String?
+
+  // New payment status tracking
+  paymentStatus RegistrationPaymentStatus @default(PENDING_VERIFICATION)
+  paymentClaimedAt DateTime?
+  paymentVerifiedAt DateTime?
+  paymentRejectedAt DateTime?
+  paymentRejectionReason String?
+  paymentMethod PaymentMethod? // BANK_TRANSFER, CASH, etc.
+
+  // Friend registration fields
+  friendInfo Json? // Stores friend details
+  registeredBy String? // User who registered the friend
+
+  // Waiting list promotion tracking
+  promotedFromWaitingList Boolean   @default(false)
+  waitingListPosition     Int?
+  promotedAt              DateTime?
+
+  // Relations
+  user           User?           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event          Event           @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  payment        Payment?        @relation(fields: [paymentId], references: [id])
+  pendingPayment PendingPayment? @relation("RegistrationPendingPayment", fields: [pendingPaymentId], references: [id])
+
+  // Group relationships
+  groupLeader  Registration?  @relation("GroupMembers", fields: [groupLeaderId], references: [id], onDelete: Cascade)
+  groupMembers Registration[] @relation("GroupMembers")
+}
+```
+
+#### Payment System
+
+```typescript
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  BANK_TRANSFER
+  QR_CODE
+  CASH
+  CARD
+  OTHER
+}
+
+model Payment {
+  id             String  @id @default(cuid())
+  userId         String
+  eventId        String?
+  registrationId String? @unique
+
+  amount   Decimal       @db.Decimal(10, 2)
+  currency String        @default("EUR")
+  method   PaymentMethod @default(QR_CODE)
+  status   PaymentStatus @default(PENDING)
+
+  // Bank transfer details
+  bankAccountId  String?
+  variableSymbol String? @unique
+  constantSymbol String?
+  specificSymbol String?
+
+  // QR code data
+  qrCodeData String?
+  qrCodeUrl  String?
+
+  // Payment tracking
+  paidAt     DateTime?
+  verifiedAt DateTime?
+  refundedAt DateTime?
+
+  // New payment claiming and verification fields
+  claimedAt DateTime? // When user claimed payment
+  verifiedBy String? // Admin who verified
+  verificationNotes String?
+
+  // Additional data
+  description String?
+  notes       String?
+  reference   String?
+
+  // Link to pending payment
+  pendingPaymentId String?
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user           User            @relation(fields: [userId], references: [id])
+  event          Event?          @relation(fields: [eventId], references: [id])
+  registration   Registration?
+  pendingPayment PendingPayment? @relation("PaymentPendingPayment", fields: [pendingPaymentId], references: [id])
+  bankAccount    BankAccount?    @relation(fields: [bankAccountId], references: [id])
+}
+```
+
+#### Enhanced Waiting List Model
+
+```typescript
+model WaitingList {
+  id         String    @id @default(cuid())
+  userId     String? // Can be null for guest waiting list entries
+  eventId    String
+  position   Int // Position in waiting list
+  joinedAt   DateTime  @default(now())
+  notifiedAt DateTime?
+
+  // Enhanced waiting list metadata
+  registrationType RegistrationType @default(INDIVIDUAL)
+
+  // Group waiting list support
+  isGroupEntry Boolean @default(false)
+  groupSize    Int     @default(1)
+
+  // Guest waiting list data
+  guestEmail     String?
+  guestName      String?
+  guestPhone     String?
+  isGuestRequest Boolean @default(false)
+
+  // Friend data for group waiting list entries
+  friendsData Json? @default("[]")
+
+  // Relations
+  user  User?  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+}
+```
+
+### Schema Mapping to Business Requirements
+
+#### Payment Status Mapping
+
+| Business Status                    | Schema Status                      | Model                      |
+| ---------------------------------- | ---------------------------------- | -------------------------- |
+| PENDING_VERIFICATION               | PENDING_VERIFICATION               | Registration.paymentStatus |
+| PAYMENT_SENT_AWAITING_VERIFICATION | PAYMENT_SENT_AWAITING_VERIFICATION | Registration.paymentStatus |
+| PAYMENT_VERIFIED                   | PAYMENT_VERIFIED                   | Registration.paymentStatus |
+| VERIFIED_CASH                      | VERIFIED_CASH                      | Registration.paymentStatus |
+| REJECTED                           | REJECTED                           | Registration.paymentStatus |
+| WAITING_LIST_PROMOTED              | WAITING_LIST_PROMOTED              | Registration.paymentStatus |
+
+#### Capacity Management
+
+The schema supports capacity management through:
+
+- `PendingPayment.totalParticipants` - Tracks group size
+- `Registration.groupSize` - Tracks confirmed group size
+- `WaitingList.groupSize` - Tracks waiting list group size
+- `promotedFromWaitingList` flag - Tracks promotion history
+- `Registration.paymentStatus` - Determines if registration takes a spot
+
+#### Friend Registration Support
+
+The schema fully supports friend registration through:
+
+- `friendsData` JSON field in both PendingPayment and Registration
+- `RegistrationType.GROUP` for group registrations
+- `isGroupLeader` and `groupLeaderId` for group relationships
+- `friendPosition` for ordering within groups
+- `friendInfo` and `registeredBy` fields for friend tracking
+
+#### Payment Integration
+
+The schema supports payment tracking through:
+
+- `PendingPayment` model for payment lifecycle
+- `Payment` model for verified payments
+- `BankAccount` model for payment methods
+- QR code generation support
+- Variable symbol tracking for bank transfers
+- Payment claiming and verification tracking
+
+### Schema Advantages
+
+1. **Comprehensive Payment Flow**: Supports the complete payment lifecycle from
+   pending to verified
+2. **Group Registration**: Full support for friend registration with group
+   management
+3. **Guest Registration**: Supports non-authenticated user registrations
+4. **Waiting List Management**: Complete waiting list with promotion tracking
+5. **Audit Trail**: Registration history and audit logs for all changes
+6. **Flexible Payment Methods**: Supports QR codes, bank transfers, and cash
+   payments
+7. **Capacity Tracking**: Proper capacity management with group size support
+8. **Admin Override**: Supports admin-created registrations and capacity
+   overrides
+9. **Payment Status Tracking**: Granular payment status management
+10. **Friend Registration**: Complete friend registration support with tracking
+
+The current schema now fully supports all the business requirements outlined in
+the analysis. The implementation should focus on the business logic layer to
+utilize the existing schema effectively.
 
 ---
 
-## Three-Table Registration System
+## 💳 Payment Flow Architecture
 
-### **System Flow Architecture**
+### Registration Flow Diagram
 
 ```mermaid
 graph TD
-    A[User Registration Request] --> B{Event Has Capacity?}
-    
-    B -->|Yes| C[Create PendingPayment]
-    B -->|No| D[Add to WaitingList]
-    
-    C --> E[Generate QR Code & Variable Symbol]
-    E --> F[Status: AWAITING_PAYMENT]
-    F --> G{Payment Received?}
-    
-    G -->|Yes| H[Status: PAYMENT_RECEIVED]
-    G -->|No & Expired| I[Status: EXPIRED]
-    
-    H --> J[Create Registration Record]
-    J --> K[Status: PROCESSED]
-    
-    I --> L[Promote from WaitingList]
-    L --> M[Create New PendingPayment]
-    M --> E
-    
-    D --> N{Someone Cancels?}
-    N -->|Yes| O[Promote Next in Line]
-    O --> M
+    A[User Clicks Register] --> B[Check Register List Count]
+    B -->|< Capacity| C[Add to REGISTER LIST]
+    B -->|= Capacity| D[Add to WAITING LIST]
+
+    C --> E[Show QR + Payment Button]
+    C --> F[Status: PENDING_VERIFICATION]
+    F --> G{User Claims Payment?}
+    G -->|Yes| H[Status: PAYMENT_SENT_AWAITING_VERIFICATION]
+    G -->|No| I[Stays PENDING_VERIFICATION]
+
+    D --> J[Status: WAITING_LIST]
+    J --> K[No QR Code Shown]
+    K --> L[Wait for Spot Opening]
+
+    H --> M[Admin Reviews]
+    M -->|Approve| N[Status: PAYMENT_VERIFIED]
+    M -->|Reject| O[Move to WAITING_LIST]
+
+    O --> P[Promote Next in Waiting List]
+    P --> Q[Status: WAITING_LIST_PROMOTED]
+    Q --> E
 ```
 
-### **State Transitions**
-
-#### **PendingPayment Lifecycle**
-1. **AWAITING_PAYMENT** → User submits registration, QR code generated
-2. **PAYMENT_RECEIVED** → Payment confirmed by admin or system
-3. **PROCESSED** → Registration record created, payment complete
-4. **EXPIRED** → Payment deadline passed, cleanup initiated
-5. **CANCELLED** → User cancels before payment
-
-#### **Registration Status Flow**
-1. **PENDING** → Created from confirmed payment
-2. **CONFIRMED** → Admin approval (if required)
-3. **ATTENDED** → Event attendance confirmed
-4. **NO_SHOW** → Didn't attend event
-5. **CANCELLED** → User cancelled registration
-
-#### **WaitingList Management**
-1. **Position Assignment** → Automatic position calculation
-2. **Promotion Available** → Create PendingPayment
-3. **Promotion Confirmed** → Move to Registration
-4. **Promotion Expired** → Offer to next person
-
----
-
-## Friend Registration Capabilities
-
-### **Friend Data Structure**
-
-The system stores friend information using JSON fields with a structured schema:
+### Capacity Management Logic
 
 ```typescript
-// Friend data structure stored in JSON fields
-interface FriendData {
-  name: string;                    // Required friend name
-  email?: string;                  // Optional email
-  phone?: string;                  // Optional phone
-  dietaryRequirements?: string;    // Special dietary needs
-  specialRequests?: string;        // Additional requests
-  position: number;                // Position in friend list
-  confirmed: boolean;              // Confirmation status
-  registrationId?: string;         // Link to Registration record
+function getEffectiveRegistrationCount(eventId: string) {
+  return registrations.filter(r =>
+    ['PAYMENT_SENT_AWAITING_VERIFICATION', 'PAYMENT_VERIFIED', 'VERIFIED_CASH'].includes(r.paymentStatus)
+  ).length;
 }
 
-// Group registration example
-{
-  "primaryName": "John Doe",
-  "primaryEmail": "john@example.com",
-  "friendsData": [
-    {
-      "name": "Jane Smith",
-      "email": "jane@example.com",
-      "position": 1,
-      "confirmed": true
-    },
-    {
-      "name": "Bob Wilson",
-      "phone": "+421901234567",
-      "position": 2,
-      "confirmed": false
-    }
-  ],
-  "totalParticipants": 3
-}
-```
-
-### **Friend Registration Workflow**
-
-#### **Step 1: Group Registration Initiation**
-```sql
--- Create PendingPayment for group
-INSERT INTO PendingPayment (
-  eventId, userId, registrationType,
-  primaryName, primaryEmail,
-  friendsData, totalParticipants,
-  amount, variableSymbol
-) VALUES (
-  'event123', 'user456', 'GROUP',
-  'John Doe', 'john@example.com',
-  '[{"name":"Jane Smith"}, {"name":"Bob Wilson"}]', 3,
-  75.00, '1234567890'
-);
-```
-
-#### **Step 2: Payment Processing**
-- Single payment covers entire group
-- QR code generated for total amount
-- Email notifications sent to primary registrant
-- All friends tracked in JSON structure
-
-#### **Step 3: Registration Creation**
-```sql
--- Create leader registration
-INSERT INTO Registration (
-  userId, eventId, isGroupLeader, groupSize,
-  friendsData, pendingPaymentId, status
-) VALUES (
-  'user456', 'event123', true, 3,
-  '[{"name":"Jane Smith"}, {"name":"Bob Wilson"}]',
-  'pending123', 'CONFIRMED'
-);
-
--- Create individual registrations for friends
-INSERT INTO Registration (
-  eventId, groupLeaderId, isGroupLeader,
-  guestName, guestEmail, friendPosition,
-  pendingPaymentId, status
-) VALUES 
-  ('event123', 'user456', false, 'Jane Smith', 'jane@example.com', 1, 'pending123', 'CONFIRMED'),
-  ('event123', 'user456', false, 'Bob Wilson', null, 2, 'pending123', 'CONFIRMED');
-```
-
-### **Friend Registration Business Rules**
-
-1. **Name Requirement**: Only friend's name is required for registration
-2. **Email Routing**: All notifications sent to primary registrant's email
-3. **Capacity Management**: Group size checked against available capacity
-4. **Waiting List Logic**: Entire group added to waiting list if no capacity
-5. **Payment Unity**: Single payment covers entire group
-6. **Cancellation Options**: Individual friends can be cancelled from group
-
----
-
-## Payment Workflow Analysis
-
-### **Slovak Banking Integration**
-
-The system provides comprehensive Slovak/Czech banking support through:
-
-#### **Bank Account Management**
-```prisma
-model BankAccount {
-  id            String  @id @default(cuid())
-  name          String  // "Primary Account - Tatra Banka"
-  bankName      String  // "Tatra Banka"
-  accountNumber String  // "1234567890"
-  bankCode      String  // "1100"
-  iban          String? @unique // "SK89 1100 0000 0012 3456 7890"
-  swift         String? // "TATRSKBX"
-  isDefault     Boolean @default(false)
-  isActive      Boolean @default(true)
-  qrCodeEnabled Boolean @default(true)
-}
-```
-
-#### **QR Code Generation (SPD Format)**
-```typescript
-// Slovak Pay by Square format
-interface SPDQRCode {
-  version: "0002";           // SPD version
-  encoding: "01";            // UTF-8 encoding
-  iban: string;              // Bank account IBAN
-  currency: "EUR";           // Currency code
-  amount: string;            // Payment amount
-  constantSymbol?: string;   // Optional constant symbol
-  variableSymbol: string;    // Unique payment identifier
-  specificSymbol?: string;   // Optional specific symbol
-  message: string;           // Payment description
-  paymentType: "1";          // One-time payment
-}
-
-// Example QR code data
-"0002*01*SK8911000000001234567890*EUR*25.00**1234567890**GameOne Event Registration*1"
-```
-
-#### **Variable Symbol Management**
-- **Uniqueness**: Database-level unique constraint
-- **Generation**: Sequential or timestamp-based approach
-- **Tracking**: Indexed for fast payment verification
-- **Range**: Up to 10 digits (Slovak banking standard)
-
-### **Payment Processing Workflow**
-
-#### **Phase 1: Payment Request Creation**
-```typescript
-async function createPaymentRequest(eventId: string, userId: string, friendsData: FriendData[]) {
-  const totalParticipants = 1 + friendsData.length;
-  const totalAmount = eventPrice * totalParticipants;
-  
-  return await prisma.$transaction(async (tx) => {
-    // 1. Check event capacity
-    const capacity = await checkEventCapacity(tx, eventId, totalParticipants);
-    
-    if (!capacity.hasSpace) {
-      // Add entire group to waiting list
-      return await addGroupToWaitingList(tx, eventId, userId, friendsData);
-    }
-    
-    // 2. Generate unique variable symbol
-    const variableSymbol = await generateUniqueVariableSymbol(tx);
-    
-    // 3. Create pending payment
-    const pendingPayment = await tx.pendingPayment.create({
-      data: {
-        eventId,
-        userId,
-        registrationType: 'GROUP',
-        totalParticipants,
-        friendsData: JSON.stringify(friendsData),
-        amount: totalAmount,
-        variableSymbol,
-        expiresAt: new Date(Date.now() + 48 * 60 * 60 * 1000) // 48 hours
-      }
-    });
-    
-    // 4. Generate QR code
-    const qrCode = await generateSPDQRCode(pendingPayment, bankAccount);
-    
-    // 5. Update with QR code data
-    await tx.pendingPayment.update({
-      where: { id: pendingPayment.id },
-      data: { qrCodeData: qrCode }
-    });
-    
-    return pendingPayment;
-  });
-}
-```
-
-#### **Phase 2: Payment Confirmation**
-```typescript
-async function confirmPayment(variableSymbol: string, adminId: string) {
-  return await prisma.$transaction(async (tx) => {
-    // 1. Find pending payment
-    const pendingPayment = await tx.pendingPayment.findUnique({
-      where: { variableSymbol },
-      include: { event: true, user: true }
-    });
-    
-    // 2. Update payment status
-    await tx.pendingPayment.update({
-      where: { id: pendingPayment.id },
-      data: {
-        status: 'PAYMENT_RECEIVED',
-        paidAt: new Date(),
-        verifiedAt: new Date(),
-        verifiedBy: adminId
-      }
-    });
-    
-    // 3. Create registration records
-    const friendsData = JSON.parse(pendingPayment.friendsData);
-    
-    // Leader registration
-    const leaderRegistration = await tx.registration.create({
-      data: {
-        userId: pendingPayment.userId,
-        eventId: pendingPayment.eventId,
-        isGroupLeader: true,
-        groupSize: pendingPayment.totalParticipants,
-        friendsData: pendingPayment.friendsData,
-        pendingPaymentId: pendingPayment.id,
-        status: 'CONFIRMED'
-      }
-    });
-    
-    // Friend registrations
-    for (const [index, friend] of friendsData.entries()) {
-      await tx.registration.create({
-        data: {
-          eventId: pendingPayment.eventId,
-          groupLeaderId: leaderRegistration.id,
-          isGroupLeader: false,
-          guestName: friend.name,
-          guestEmail: friend.email,
-          guestPhone: friend.phone,
-          friendPosition: index + 1,
-          pendingPaymentId: pendingPayment.id,
-          status: 'CONFIRMED'
-        }
-      });
-    }
-    
-    // 4. Update pending payment to processed
-    await tx.pendingPayment.update({
-      where: { id: pendingPayment.id },
-      data: {
-        status: 'PROCESSED',
-        processedAt: new Date()
-      }
-    });
-    
-    // 5. Create payment record
-    await tx.payment.create({
-      data: {
-        userId: pendingPayment.userId,
-        eventId: pendingPayment.eventId,
-        amount: pendingPayment.amount,
-        currency: 'EUR',
-        method: 'QR_CODE',
-        status: 'COMPLETED',
-        variableSymbol,
-        bankAccountId: pendingPayment.bankAccountId
-      }
-    });
-  });
-}
-```
-
-#### **Phase 3: Expiration and Cleanup**
-```typescript
-// Daily cleanup job
-async function cleanupExpiredPayments() {
-  const expiredPayments = await prisma.pendingPayment.findMany({
-    where: {
-      status: 'AWAITING_PAYMENT',
-      expiresAt: { lt: new Date() }
-    }
-  });
-  
-  for (const payment of expiredPayments) {
-    await prisma.$transaction(async (tx) => {
-      // 1. Mark as expired
-      await tx.pendingPayment.update({
-        where: { id: payment.id },
-        data: { status: 'EXPIRED' }
-      });
-      
-      // 2. Promote from waiting list
-      await promoteFromWaitingList(tx, payment.eventId, payment.totalParticipants);
-    });
-  }
+function hasCapacity(eventId: string) {
+  const currentCount = getEffectiveRegistrationCount(eventId);
+  const event = getEvent(eventId);
+  return currentCount < event.capacity;
 }
 ```
 
 ---
 
-## Business Logic Implementation
+## 📊 Status Management
 
-### **Capacity Management Algorithm**
+### Status Transition Rules
 
-#### **Real-time Capacity Checking**
+| Current Status                     | Action              | New Status                         | Takes Spot | Email Sent      |
+| ---------------------------------- | ------------------- | ---------------------------------- | ---------- | --------------- |
+| PENDING_VERIFICATION               | User claims payment | PAYMENT_SENT_AWAITING_VERIFICATION | ✅ Yes     | ✅ Confirmation |
+| PAYMENT_SENT_AWAITING_VERIFICATION | Admin approves      | PAYMENT_VERIFIED                   | ✅ Yes     | ✅ Verification |
+| PAYMENT_SENT_AWAITING_VERIFICATION | Admin rejects       | REJECTED                           | ❌ No      | ✅ Rejection    |
+| PENDING_VERIFICATION               | Admin cash payment  | VERIFIED_CASH                      | ✅ Yes     | ✅ Verification |
+| WAITING_LIST                       | Promoted from list  | WAITING_LIST_PROMOTED              | ❌ No      | ❌ None         |
+
+### Status Descriptions
+
+- **PENDING_VERIFICATION**: User registered, payment details shown, no spot
+  taken
+- **PAYMENT_SENT_AWAITING_VERIFICATION**: User claimed payment, spot reserved,
+  awaiting admin
+- **PAYMENT_VERIFIED**: Payment confirmed by admin, spot confirmed
+- **VERIFIED_CASH**: Cash payment verified by admin, spot confirmed
+- **REJECTED**: Payment rejected, moved to waiting list or back to pending
+- **WAITING_LIST_PROMOTED**: Promoted from waiting list, payment details shown
+
+---
+
+## 🎯 Capacity Management
+
+### Registration List vs Waiting List
+
+**Registration List** (Takes spots):
+
+- `PAYMENT_SENT_AWAITING_VERIFICATION`
+- `PAYMENT_VERIFIED`
+- `VERIFIED_CASH`
+
+**Waiting List** (No spots taken):
+
+- `WAITING_LIST`
+- `PENDING_VERIFICATION` (when capacity full)
+
+### Capacity Calculation
+
 ```typescript
-interface CapacityCheck {
-  eventId: string;
-  requestedCapacity: number;
-  hasSpace: boolean;
-  availableSpots: number;
-  totalCapacity: number;
-  currentOccupancy: number;
-}
+function calculateCapacity(eventId: string) {
+  const event = getEvent(eventId);
+  const registeredCount = getEffectiveRegistrationCount(eventId);
+  const availableSpots = event.capacity - registeredCount;
 
-async function checkEventCapacity(
-  tx: PrismaTransaction, 
-  eventId: string, 
-  requestedSpots: number
-): Promise<CapacityCheck> {
-  
-  const event = await tx.event.findUnique({
-    where: { id: eventId },
-    include: {
-      _count: {
-        select: {
-          registrations: {
-            where: {
-              status: { in: ['PENDING', 'CONFIRMED'] }
-            }
-          }
-        }
-      }
-    }
-  });
-  
-  const currentOccupancy = event._count.registrations;
-  const availableSpots = event.capacity - currentOccupancy;
-  const hasSpace = availableSpots >= requestedSpots;
-  
   return {
-    eventId,
-    requestedCapacity: requestedSpots,
-    hasSpace,
-    availableSpots,
-    totalCapacity: event.capacity,
-    currentOccupancy
+    total: event.capacity,
+    registered: registeredCount,
+    available: Math.max(0, availableSpots),
+    waitingListCount: getWaitingListCount(eventId)
   };
 }
 ```
 
-#### **Atomic Registration with Race Condition Prevention**
+### Waiting List Promotion Logic
+
 ```typescript
-async function atomicRegistration(eventId: string, registrationData: RegistrationData) {
-  return await prisma.$transaction(async (tx) => {
-    // 1. Lock event row for capacity check
-    const event = await tx.event.findUnique({
-      where: { id: eventId }
-    });
-    
-    // 2. Check capacity atomically
-    const capacityCheck = await checkEventCapacity(tx, eventId, registrationData.totalParticipants);
-    
-    if (!capacityCheck.hasSpace) {
-      // 3. Add to waiting list if no capacity
-      return await addToWaitingList(tx, eventId, registrationData);
-    }
-    
-    // 4. Create pending payment if capacity available
-    return await createPendingPayment(tx, eventId, registrationData);
-  });
-}
-```
+async function promoteFromWaitingList(eventId: string) {
+  const nextInLine = await getNextWaitingListEntry(eventId);
 
-### **Waiting List Management**
+  if (nextInLine && hasCapacity(eventId)) {
+    // Move to registration with WAITING_LIST_PROMOTED status
+    await createRegistrationFromWaitingList(nextInLine);
 
-#### **Position Calculation and Group Handling**
-```typescript
-async function addGroupToWaitingList(
-  tx: PrismaTransaction,
-  eventId: string,
-  userId: string,
-  friendsData: FriendData[]
-) {
-  // Get next position
-  const lastPosition = await tx.waitingList.findFirst({
-    where: { eventId },
-    orderBy: { position: 'desc' }
-  });
-  
-  const nextPosition = (lastPosition?.position || 0) + 1;
-  const totalParticipants = 1 + friendsData.length;
-  
-  // Create waiting list entry for entire group
-  return await tx.waitingList.create({
-    data: {
-      userId,
-      eventId,
-      position: nextPosition,
-      groupSize: totalParticipants,
-      friendsData: JSON.stringify(friendsData),
-      registrationType: 'GROUP'
-    }
-  });
-}
-```
+    // Send payment details to webpage (no email)
+    await updateUserInterface(nextInLine.userId);
 
-#### **Promotion Algorithm**
-```typescript
-async function promoteFromWaitingList(
-  tx: PrismaTransaction,
-  eventId: string,
-  availableSpots: number
-) {
-  // Find waiting list entries that can fit
-  const waitingEntries = await tx.waitingList.findMany({
-    where: { 
-      eventId,
-      groupSize: { lte: availableSpots }
-    },
-    orderBy: { position: 'asc' },
-    take: 1
-  });
-  
-  if (waitingEntries.length === 0) return null;
-  
-  const nextEntry = waitingEntries[0];
-  
-  // Create pending payment for promoted entry
-  const pendingPayment = await tx.pendingPayment.create({
-    data: {
-      eventId,
-      userId: nextEntry.userId,
-      registrationType: nextEntry.registrationType,
-      totalParticipants: nextEntry.groupSize,
-      friendsData: nextEntry.friendsData,
-      // Set shorter expiration for promoted entries
-      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
-    }
-  });
-  
-  // Update waiting list entry with promotion info
-  await tx.waitingList.update({
-    where: { id: nextEntry.id },
-    data: {
-      promotedAt: new Date(),
-      pendingPaymentId: pendingPayment.id
-    }
-  });
-  
-  return pendingPayment;
-}
-```
-
-### **Email Notification Workflows**
-
-#### **Multi-template Notification System**
-```typescript
-interface NotificationContext {
-  userName?: string;
-  friendName?: string;
-  eventTitle: string;
-  eventDate: string;
-  eventVenue?: string;
-  totalAmount?: number;
-  variableSymbol?: string;
-  qrCode?: string;
-  waitingListPosition?: number;
-  friendsCount?: number;
-}
-
-async function sendGroupRegistrationEmail(
-  userEmail: string,
-  context: NotificationContext,
-  type: 'payment_required' | 'waiting_list' | 'confirmation',
-  locale = 'en'
-) {
-  const templateMap = {
-    payment_required: 'group_registration_payment',
-    waiting_list: 'group_registration_waiting_list',
-    confirmation: 'group_registration_confirmation'
-  };
-  
-  const template = await prisma.notificationTemplate.findUnique({
-    where: { name: templateMap[type] }
-  });
-  
-  const resolvedContent = replaceTemplateVariables(
-    template.content[locale],
-    context
-  );
-  
-  // Send via email service
-  await emailService.send({
-    to: userEmail,
-    subject: replaceTemplateVariables(template.subject[locale], context),
-    html: resolvedContent
-  });
-  
-  // Log notification
-  await prisma.notificationLog.create({
-    data: {
-      type: 'EMAIL',
-      recipient: userEmail,
-      subject: template.subject[locale],
-      content: resolvedContent,
-      status: 'SENT',
-      eventId: context.eventId
-    }
-  });
+    // Update waiting list positions
+    await updateWaitingListPositions(eventId);
+  }
 }
 ```
 
 ---
 
-## Performance and Scalability
+## 📧 Email & Notification System
 
-### **Database Indexing Strategy**
+### Email Templates Required
 
-#### **Critical Performance Indexes**
-```sql
--- PendingPayment performance indexes
-CREATE INDEX idx_pendingpayment_event_status ON PendingPayment(eventId, status);
-CREATE INDEX idx_pendingpayment_expires ON PendingPayment(expiresAt);
-CREATE INDEX idx_pendingpayment_user ON PendingPayment(userId);
-CREATE UNIQUE INDEX idx_pendingpayment_varsymbol ON PendingPayment(variableSymbol);
+#### 1. Payment Confirmation Email
 
--- Registration performance indexes  
-CREATE INDEX idx_registration_event_status ON Registration(eventId, status);
-CREATE INDEX idx_registration_group_leader ON Registration(groupLeaderId);
-CREATE INDEX idx_registration_user_event ON Registration(userId, eventId);
-CREATE INDEX idx_registration_pending_payment ON Registration(pendingPaymentId);
+**Trigger**: User clicks "I've sent payment" button  
+**Template**: `payment-confirmation.html`  
+**Content**:
 
--- WaitingList performance indexes
-CREATE INDEX idx_waitinglist_event_position ON WaitingList(eventId, position);
-CREATE INDEX idx_waitinglist_promotion ON WaitingList(pendingPaymentId);
-CREATE INDEX idx_waitinglist_user ON WaitingList(userId);
+- Confirmation that payment claim was received
+- Event details and registration confirmation
+- Reminder that admin needs to verify payment
+- Contact information for questions
 
--- Payment performance indexes
-CREATE UNIQUE INDEX idx_payment_varsymbol ON Payment(variableSymbol);
-CREATE INDEX idx_payment_event_status ON Payment(eventId, status);
-CREATE INDEX idx_payment_user_event ON Payment(userId, eventId);
-```
+#### 2. Payment Rejection Email
 
-#### **Query Optimization Examples**
-```sql
--- Efficient capacity checking query
-SELECT 
-  e.capacity,
-  e.capacity - COALESCE(SUM(
-    CASE 
-      WHEN r.isGroupLeader = true THEN r.groupSize 
-      WHEN r.isGroupLeader = false THEN 0
-      ELSE 1 
-    END
-  ), 0) as available_spots
-FROM Event e
-LEFT JOIN Registration r ON e.id = r.eventId 
-  AND r.status IN ('PENDING', 'CONFIRMED')
-WHERE e.id = $1
-GROUP BY e.id, e.capacity;
+**Trigger**: Admin rejects payment  
+**Template**: `payment-rejection.html`  
+**Content**:
 
--- Efficient waiting list promotion query
-SELECT wl.*, u.email, u.name
-FROM WaitingList wl
-JOIN User u ON wl.userId = u.id
-WHERE wl.eventId = $1 
-  AND wl.promotedAt IS NULL
-  AND wl.groupSize <= $2
-ORDER BY wl.position ASC
-LIMIT 1;
-```
+- Reason for rejection
+- Instructions to try again
+- Contact information for support
 
-### **Scalability Considerations**
+#### 3. Payment Verification Email
 
-#### **Horizontal Scaling Support**
-- **Read Replicas**: Registration reads can be distributed
-- **Partitioning**: Event-based partitioning possible
-- **Caching**: Redis for frequent capacity checks
-- **Queue Processing**: Background job processing for emails
+**Trigger**: Admin approves payment  
+**Template**: `payment-verified.html`  
+**Content**:
 
-#### **Performance Metrics**
-- **Registration Creation**: < 100ms for individual, < 200ms for groups
-- **Capacity Check**: < 50ms with proper indexing
-- **Payment Confirmation**: < 300ms including all registrations
-- **Waiting List Promotion**: < 150ms per promotion
+- Confirmation that payment was verified
+- Event details and final confirmation
+- Next steps for attending event
+
+### Webpage Notifications
+
+#### Registration Page Elements
+
+- Payment details and QR code
+- "I've sent payment" button
+- Current status indicator
+- Waiting list position (if applicable)
+- Payment history and claims
+
+#### Admin Dashboard Notifications
+
+- List of pending payments
+- Payment details and user information
+- Quick approve/reject actions
+- Capacity overview
 
 ---
 
-## Security and Data Integrity
+## 👥 Admin Interface Requirements
 
-### **Data Protection Measures**
+### 1. Payment Verification Dashboard
 
-#### **Access Control**
-```typescript
-// Role-based access control for registration operations
-const REGISTRATION_PERMISSIONS = {
-  'USER': ['register_self', 'register_friends', 'view_own_registrations'],
-  'EVENT_MANAGER': ['view_event_registrations', 'manage_payments'],
-  'ADMIN': ['*'] // All permissions
-};
+**Features**:
 
-async function checkRegistrationPermission(
-  userId: string, 
-  action: string, 
-  resourceId?: string
-) {
-  const userRoles = await getUserRoles(userId);
-  
-  for (const role of userRoles) {
-    const permissions = REGISTRATION_PERMISSIONS[role.name] || [];
-    if (permissions.includes(action) || permissions.includes('*')) {
-      return true;
-    }
-  }
-  
-  return false;
-}
-```
+- View all pending payments with details
+- See payment amount, user info, claim date
+- Bulk approve/reject operations
+- Filter by payment method, date range
+- Export payment data
 
-#### **Data Validation**
-```typescript
-// Friend data validation schema
-const FriendDataSchema = z.object({
-  name: z.string().min(1).max(100),
-  email: z.string().email().optional(),
-  phone: z.string().regex(/^\+?[1-9]\d{1,14}$/).optional(),
-  dietaryRequirements: z.string().max(500).optional(),
-  specialRequests: z.string().max(500).optional()
-});
+**Actions**:
 
-// Group registration validation
-const GroupRegistrationSchema = z.object({
-  primaryName: z.string().min(1).max(100),
-  primaryEmail: z.string().email(),
-  primaryPhone: z.string().regex(/^\+?[1-9]\d{1,14}$/).optional(),
-  friends: z.array(FriendDataSchema).max(10), // Limit group size
-  eventId: z.string().uuid(),
-  paymentMethod: z.enum(['QR_CODE', 'BANK_TRANSFER'])
-});
-```
+- Approve payment → Status to `PAYMENT_VERIFIED`
+- Reject payment → Status to `REJECTED`
+- Mark as cash payment → Status to `VERIFIED_CASH`
+- Add verification notes
 
-#### **Financial Security**
-```typescript
-// Payment amount validation
-async function validatePaymentAmount(
-  pendingPaymentId: string,
-  reportedAmount: number
-) {
-  const pendingPayment = await prisma.pendingPayment.findUnique({
-    where: { id: pendingPaymentId },
-    include: { event: true }
-  });
-  
-  const expectedAmount = pendingPayment.event.price * pendingPayment.totalParticipants;
-  const tolerance = 0.01; // 1 cent tolerance for rounding
-  
-  return Math.abs(reportedAmount - expectedAmount) <= tolerance;
-}
+### 2. Manual User Management
 
-// Variable symbol validation
-function validateVariableSymbol(variableSymbol: string): boolean {
-  // Slovak banking variable symbol validation
-  return /^\d{1,10}$/.test(variableSymbol);
-}
-```
+**Features**:
 
-### **Data Integrity Constraints**
+- Add users to registration list (bypass capacity)
+- Add users to waiting list
+- Move users between lists
+- Override payment requirements
+- Cancel registrations
 
-#### **Foreign Key Constraints**
-```sql
--- Ensure referential integrity
-ALTER TABLE PendingPayment ADD CONSTRAINT fk_pending_payment_event 
-  FOREIGN KEY (eventId) REFERENCES Event(id) ON DELETE CASCADE;
+**Actions**:
 
-ALTER TABLE Registration ADD CONSTRAINT fk_registration_pending_payment
-  FOREIGN KEY (pendingPaymentId) REFERENCES PendingPayment(id) ON DELETE SET NULL;
+- Manual registration creation
+- Payment status override
+- Capacity limit bypass
+- Bulk user operations
 
-ALTER TABLE WaitingList ADD CONSTRAINT fk_waiting_list_event
-  FOREIGN KEY (eventId) REFERENCES Event(id) ON DELETE CASCADE;
-```
+### 3. Event Capacity Management
 
-#### **Business Logic Constraints**
-```sql
--- Ensure group leader consistency
-ALTER TABLE Registration ADD CONSTRAINT chk_group_leader_consistency
-  CHECK (
-    (isGroupLeader = true AND groupLeaderId IS NULL) OR
-    (isGroupLeader = false AND groupLeaderId IS NOT NULL)
-  );
+**Features**:
 
--- Ensure friend position consistency
-ALTER TABLE Registration ADD CONSTRAINT chk_friend_position
-  CHECK (
-    (isGroupLeader = true AND friendPosition IS NULL) OR
-    (isGroupLeader = false AND friendPosition > 0)
-  );
+- Increase/decrease event capacity
+- View current registration counts
+- See waiting list length
+- Export registration data
+- Capacity analytics
 
--- Ensure positive amounts
-ALTER TABLE PendingPayment ADD CONSTRAINT chk_positive_amount
-  CHECK (amount IS NULL OR amount > 0);
-```
+**Actions**:
+
+- Modify event capacity
+- View capacity breakdown
+- Generate capacity reports
+- Monitor waiting list trends
 
 ---
 
-## Implementation Recommendations
+## 🚨 Edge Cases & Business Rules
 
-### **Immediate Action Items**
+### 1. No Time Limits
 
-#### **1. Business Logic Implementation** (Priority: High)
-```typescript
-// Implement the complete registration workflow
-class RegistrationService {
-  async registerGroup(eventId: string, userId: string, groupData: GroupRegistrationData) {
-    return await this.atomicRegistration(eventId, userId, groupData);
-  }
-  
-  async confirmPayment(variableSymbol: string, adminId: string) {
-    return await this.processPaymentConfirmation(variableSymbol, adminId);
-  }
-  
-  async cancelRegistration(registrationId: string, userId: string) {
-    return await this.processCancellation(registrationId, userId);
-  }
-}
-```
+- Users can claim payment anytime
+- No auto-expiration of pending payments
+- No auto-rejection of unverified payments
+- Admin controls all timing
 
-#### **2. Payment Integration** (Priority: High)
-```typescript
-// Implement QR code generation
-class PaymentService {
-  async generateQRCode(pendingPayment: PendingPayment): Promise<string> {
-    const bankAccount = await this.getBankAccount(pendingPayment.bankAccountId);
-    return this.generateSPDQRCode(pendingPayment, bankAccount);
-  }
-  
-  async verifyPayment(variableSymbol: string): Promise<boolean> {
-    // Implement bank statement verification
-    return await this.checkBankStatement(variableSymbol);
-  }
-}
-```
+### 2. Payment Method Flexibility
 
-#### **3. Notification System** (Priority: Medium)
-```typescript
-// Implement comprehensive email notifications
-class NotificationService {
-  async sendRegistrationNotifications(pendingPayment: PendingPayment) {
-    const user = await this.getUser(pendingPayment.userId);
-    const event = await this.getEvent(pendingPayment.eventId);
-    
-    if (pendingPayment.status === 'AWAITING_PAYMENT') {
-      await this.sendPaymentRequiredEmail(user, event, pendingPayment);
-    } else if (pendingPayment.status === 'PAYMENT_RECEIVED') {
-      await this.sendPaymentConfirmationEmail(user, event, pendingPayment);
-    }
-  }
-}
-```
+- QR code for bank transfer (primary)
+- Manual bank transfer details
+- Cash payment on site (admin verified)
+- Multiple payment methods per event
 
-### **Development Timeline**
+### 3. Friend Registration Limits
 
-#### **Phase 1: Core Business Logic (2-3 weeks)**
-- [ ] Implement RegistrationService class
-- [ ] Create PaymentService for QR code generation
-- [ ] Build capacity management algorithms
-- [ ] Implement waiting list promotion logic
+- Limit number of friends per user (e.g., max 3)
+- Prevent abuse of friend registration
+- Track who registered whom
+- Apply same payment rules to friends
 
-#### **Phase 2: Payment Integration (2-3 weeks)**
-- [ ] Slovak banking QR code generation
-- [ ] Payment verification workflows
-- [ ] Admin payment confirmation interface
-- [ ] Automated payment status checking
+### 4. Capacity Override
 
-#### **Phase 3: User Interface (3-4 weeks)**
-- [ ] Friend registration forms
-- [ ] Payment status dashboard
-- [ ] Admin payment management interface
-- [ ] Mobile-responsive QR code display
+- Admins can add users over capacity
+- Special cases (VIP, speakers, etc.)
+- Requires admin approval and reason
+- Track override reasons
 
-#### **Phase 4: Notifications and Cleanup (2 weeks)**
-- [ ] Email notification implementation
-- [ ] Automated cleanup jobs
-- [ ] Payment reminder system
-- [ ] Admin notification dashboard
+### 5. Payment Claiming Flexibility
 
-### **Quality Assurance Requirements**
+- Users can claim payment multiple times
+- No penalty for claiming without actually paying
+- Admin verification is the final authority
+- Track claim history
 
-#### **Testing Strategy**
-```typescript
-// Unit tests for business logic
-describe('RegistrationService', () => {
-  test('should handle group registration with capacity check', async () => {
-    const result = await registrationService.registerGroup(eventId, userId, groupData);
-    expect(result.status).toBe('AWAITING_PAYMENT');
-  });
-  
-  test('should add to waiting list when at capacity', async () => {
-    // Fill event to capacity first
-    await fillEventToCapacity(eventId);
-    
-    const result = await registrationService.registerGroup(eventId, userId, groupData);
-    expect(result.status).toBe('WAITING_LIST');
-  });
-});
+### 6. Waiting List Simplicity
 
-// Integration tests for payment flow
-describe('Payment Integration', () => {
-  test('should process complete payment workflow', async () => {
-    const pendingPayment = await registrationService.registerGroup(eventId, userId, groupData);
-    const paymentResult = await paymentService.confirmPayment(pendingPayment.variableSymbol, adminId);
-    
-    expect(paymentResult.registrations).toHaveLength(3); // 1 leader + 2 friends
-  });
-});
-```
-
-#### **Load Testing Requirements**
-- **Concurrent Registrations**: 100 simultaneous group registrations
-- **Database Performance**: < 200ms for complex queries
-- **Payment Processing**: < 500ms for payment confirmation
-- **Email Delivery**: < 30 seconds for notification sending
+- No email notifications for waiting list
+- Promotion happens silently on webpage
+- Users check webpage for status updates
+- Position numbers update automatically
 
 ---
 
-## Migration and Deployment Strategy
+## 🚀 Implementation Priority
 
-### **Database Migration Plan**
+### Phase 1: Database Schema Updates (Week 1)
 
-#### **Phase 1: Schema Validation**
-```bash
-# Validate current schema
-bunx prisma validate
+1. Add `RegistrationPaymentStatus` enum
+2. Update `Registration` model with payment fields
+3. Enhance `Payment` model with verification fields
+4. Add friend registration fields
+5. Create database migrations
 
-# Generate migration files
-bunx prisma migrate dev --name "friend-registration-system"
+### Phase 2: Core Registration Flow (Week 2)
 
-# Apply to development database
-bunx prisma db push
-```
+1. Implement new registration logic
+2. Add payment claiming functionality
+3. Update capacity management
+4. Create payment QR code generation
+5. Update registration dashboard
 
-#### **Phase 2: Data Seeding**
-```typescript
-// Seed default data required for friend registration
-async function seedFriendRegistrationData() {
-  // Create default notification templates
-  await createNotificationTemplates();
-  
-  // Set up default bank accounts
-  await createDefaultBankAccounts();
-  
-  // Configure system settings
-  await setupSystemConfiguration();
-}
-```
+### Phase 3: Admin Interface (Week 3)
 
-#### **Phase 3: Production Deployment**
-```bash
-# Production migration workflow
-1. Backup production database
-2. Apply schema migrations
-3. Run data validation scripts
-4. Deploy application code
-5. Monitor system health
-```
+1. Build payment verification dashboard
+2. Create manual user management
+3. Add capacity management tools
+4. Implement bulk operations
+5. Add admin notifications
 
-### **Rollback Strategy**
+### Phase 4: Email System (Week 4)
 
-#### **Database Rollback**
-```sql
--- Rollback migration if needed
--- Note: Prisma doesn't support automatic rollbacks
--- Manual rollback scripts required
+1. Create email templates
+2. Implement email triggers
+3. Add email tracking
+4. Test email delivery
+5. Add email preferences
 
--- Remove new tables
-DROP TABLE IF EXISTS PendingPayment;
+### Phase 5: Testing & Polish (Week 5)
 
--- Remove new columns from existing tables
-ALTER TABLE Registration DROP COLUMN IF EXISTS isGroupLeader;
-ALTER TABLE Registration DROP COLUMN IF EXISTS groupLeaderId;
--- ... other rollback operations
-```
-
-#### **Application Rollback**
-```bash
-# Version control based rollback
-git checkout previous-stable-tag
-docker build -t gameone:rollback .
-kubectl rollout undo deployment/gameone-app
-```
-
-### **Monitoring and Alerting**
-
-#### **Key Metrics to Monitor**
-```typescript
-// Business metrics
-interface RegistrationMetrics {
-  totalRegistrations: number;
-  groupRegistrations: number;
-  individualRegistrations: number;
-  waitingListCount: number;
-  paymentCompletionRate: number;
-  averageGroupSize: number;
-}
-
-// Technical metrics
-interface TechnicalMetrics {
-  registrationLatency: number;
-  paymentProcessingTime: number;
-  databaseQueryPerformance: number;
-  emailDeliveryRate: number;
-  errorRate: number;
-}
-```
-
-#### **Alert Conditions**
-- Registration failure rate > 5%
-- Payment processing time > 1 second
-- Database query time > 500ms
-- Email delivery failure rate > 10%
-- System error rate > 1%
+1. End-to-end testing
+2. Edge case testing
+3. Performance optimization
+4. Security review
+5. Documentation updates
 
 ---
 
-## Conclusion
+## 🔧 Technical Requirements
 
-The GameOne event management system has a **comprehensive and production-ready three-table registration architecture** already implemented. The system provides:
+### Frontend Requirements
 
-### ✅ **Fully Implemented Features**
-- Complete friend registration workflows
-- Slovak banking integration with QR codes
-- Group payment processing
-- Waiting list management with promotion
-- Comprehensive audit trails
-- Multi-language notification system
+- React components for payment claiming
+- QR code display component
+- Status indicator components
+- Admin dashboard components
+- Real-time status updates
 
-### 🚀 **Implementation Ready**
-The database schema is complete and optimized for:
-- High-performance concurrent registrations
-- Complex group registration scenarios
-- Robust payment processing workflows
-- Scalable notification delivery
-- Comprehensive audit and compliance
+### Backend Requirements
 
-### 📈 **Next Steps**
-1. **Business Logic Implementation** - Build the service layer using existing schema
-2. **Payment Integration** - Implement QR code generation and verification
-3. **User Interface Development** - Create registration forms and dashboards
-4. **Testing and Quality Assurance** - Comprehensive testing strategy
-5. **Production Deployment** - Phased rollout with monitoring
+- Payment status management API
+- QR code generation service
+- Email service integration
+- Admin verification API
+- Capacity calculation service
 
-The system is architected to handle complex event registration scenarios while maintaining data integrity, performance, and user experience. The friend registration system can support sophisticated workflows including group payments, waiting list management, and comprehensive notification delivery.
+### Database Requirements
+
+- Payment status tracking
+- Friend registration support
+- Audit trail for all changes
+- Performance indexes for queries
+- Data integrity constraints
+
+### Security Requirements
+
+- Admin role verification
+- Payment data encryption
+- Audit logging
+- Input validation
+- CSRF protection
+
+### Performance Requirements
+
+- Fast registration process
+- Efficient capacity calculations
+- Quick admin dashboard loading
+- Scalable email system
+- Optimized database queries
 
 ---
 
-*Document Version: 1.0*  
-*Last Updated: 2024-08-02*  
-*Analysis Scope: Complete GameOne Registration System*
+## 📈 Success Metrics
+
+### User Experience Metrics
+
+- Registration completion rate
+- Payment claiming rate
+- Time to payment verification
+- User satisfaction scores
+
+### Business Metrics
+
+- Payment success rate
+- Waiting list conversion rate
+- Admin verification efficiency
+- Revenue per event
+
+### Technical Metrics
+
+- System response time
+- Email delivery rate
+- Database query performance
+- Error rate monitoring
+
+---
+
+## 🎯 Conclusion
+
+This registration system provides a robust, user-friendly solution that ensures
+only verified payments get confirmed spots while maintaining flexibility for
+admin management. The webpage-centric approach with minimal email communication
+creates a clean user experience while the comprehensive admin tools ensure
+proper oversight and control.
+
+The implementation prioritizes:
+
+1. **User Experience**: Clear status visibility and simple payment claiming
+2. **Admin Control**: Full verification authority and management tools
+3. **System Reliability**: Proper capacity management and error handling
+4. **Scalability**: Efficient database design and performance optimization
+
+This system will handle the complex requirements of event registration while
+providing a smooth experience for both users and administrators.
