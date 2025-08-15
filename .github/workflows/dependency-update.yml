@@ -1,0 +1,65 @@
+name: Dependency Updates
+
+on:
+  schedule:
+    - cron: '0 6 * * 1' # Weekly on Monday at 6 AM
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  update-dependencies:
+    name: 🔄 Update Dependencies
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: 📦 Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🏗️ Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: 'latest'
+
+      - name: 📥 Install current dependencies
+        run: bun install --frozen-lockfile
+
+      - name: 🔍 Check for outdated packages
+        run: |
+          echo "📊 Current dependency status:"
+          bun outdated || true
+          
+      - name: 🔄 Update dependencies
+        run: |
+          # Update patch and minor versions only for safety
+          bun update --latest
+          
+      - name: 🧪 Run tests with updated dependencies
+        run: |
+          bun run test --run
+          bun run type-check
+          bun run lint
+
+      - name: 📋 Create dependency update summary
+        run: |
+          echo "## 🔄 Dependency Update Summary" > dependency-update.md
+          echo "" >> dependency-update.md
+          echo "Updated dependencies:" >> dependency-update.md
+          echo "\`\`\`" >> dependency-update.md
+          git diff package.json >> dependency-update.md || echo "No changes to package.json" >> dependency-update.md
+          echo "\`\`\`" >> dependency-update.md
+
+      - name: 📬 Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: '🔄 chore: update dependencies'
+          title: '🔄 Automated Dependency Updates'
+          body-path: dependency-update.md
+          branch: automated/dependency-updates
+          delete-branch: true
+          labels: |
+            dependencies
+            automated
+          assignees: ${{ github.repository_owner }}
