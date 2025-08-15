@@ -38,7 +38,7 @@ jobs:
     
     steps:
       - name: 📦 Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: 🟢 Setup Bun
         uses: oven-sh/setup-bun@v1
@@ -62,7 +62,7 @@ jobs:
     
     steps:
       - name: 📦 Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: 🟢 Setup Bun
         uses: oven-sh/setup-bun@v1
@@ -99,7 +99,7 @@ jobs:
     
     steps:
       - name: 📦 Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: 🚀 Deploy to Vercel
         uses: amondnet/vercel-action@v25
