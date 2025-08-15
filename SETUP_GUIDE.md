@@ -5,11 +5,13 @@
 ### 1. 🔧 Vercel Account Setup
 
 #### A. Create Vercel Account
+
 1. Go to [vercel.com](https://vercel.com)
 2. Sign up with your GitHub account
 3. Verify your email address
 
 #### B. Import Your Repository
+
 1. In Vercel dashboard, click **"New Project"**
 2. Import your `GameOne` repository from GitHub
 3. Configure project settings:
@@ -19,6 +21,7 @@
    - **Output Directory**: `.next`
 
 #### C. Get Vercel Tokens & IDs
+
 1. Go to [Vercel Settings > Tokens](https://vercel.com/account/tokens)
 2. Click **"Create Token"**
 3. Name it "GitHub Actions CI/CD"
@@ -36,20 +39,23 @@
 ### 2. 🔑 Configure GitHub Repository Secrets
 
 #### A. Access Repository Secrets
+
 1. Go to your GitHub repository
 2. Click **Settings** tab
 3. In the left sidebar, click **Secrets and variables**
 4. Click **Actions**
 
 #### B. Add Required Secrets
+
 Click **"New repository secret"** for each of these:
 
 ##### Essential Secrets (Required):
+
 ```
 Name: VERCEL_TOKEN
 Value: [Your Vercel token from step 1C]
 
-Name: VERCEL_ORG_ID  
+Name: VERCEL_ORG_ID
 Value: [Your Vercel organization/team ID]
 
 Name: VERCEL_PROJECT_ID
@@ -57,6 +63,7 @@ Value: [Your Vercel project ID]
 ```
 
 ##### Optional Secrets (Recommended):
+
 ```
 Name: CODECOV_TOKEN
 Value: [Get from codecov.io after signing up]
@@ -66,9 +73,11 @@ Value: [Get from semgrep.dev after signing up]
 ```
 
 #### C. Verify Secrets Configuration
+
 After adding secrets, you should see:
+
 - ✅ VERCEL_TOKEN
-- ✅ VERCEL_ORG_ID  
+- ✅ VERCEL_ORG_ID
 - ✅ VERCEL_PROJECT_ID
 - ✅ CODECOV_TOKEN (optional)
 - ✅ SEMGREP_APP_TOKEN (optional)
@@ -76,6 +85,7 @@ After adding secrets, you should see:
 ### 3. 🌍 Configure Environment Variables in Vercel
 
 #### A. Access Vercel Environment Variables
+
 1. Go to your Vercel project dashboard
 2. Click **Settings** tab
 3. Click **Environment Variables** in sidebar
@@ -83,6 +93,7 @@ After adding secrets, you should see:
 #### B. Add Environment Variables by Environment
 
 ##### Production Environment:
+
 ```bash
 # Application
 NODE_ENV=production
@@ -118,6 +129,7 @@ JWT_SECRET=your-production-jwt-secret
 ```
 
 ##### Preview/Staging Environment:
+
 ```bash
 # Same as production but with staging values
 NODE_ENV=production
@@ -129,19 +141,23 @@ DATABASE_URL=postgresql://user:password@host:5432/gameone_staging
 ### 4. 🗄️ Database Setup
 
 #### A. Choose a Database Provider
+
 Recommended options:
+
 - **[Neon](https://neon.tech)** - PostgreSQL with branching
 - **[Supabase](https://supabase.com)** - PostgreSQL with additional features
 - **[PlanetScale](https://planetscale.com)** - MySQL alternative
 - **[Railway](https://railway.app)** - Simple PostgreSQL hosting
 
 #### B. Create Production Database
+
 1. Sign up for your chosen provider
 2. Create a new database project
 3. Get the connection string
 4. Add it to Vercel environment variables as `DATABASE_URL`
 
 #### C. Run Database Migrations
+
 ```bash
 # Set your DATABASE_URL locally for setup
 export DATABASE_URL="your_production_database_url"
@@ -159,16 +175,18 @@ bun run db:seed
 ### 5. 🔐 Authentication Setup (Kinde)
 
 #### A. Create Kinde Account
+
 1. Go to [kinde.com](https://kinde.com)
 2. Sign up for an account
 3. Create a new application
 
 #### B. Configure Kinde Application
+
 1. In Kinde dashboard, go to **Applications**
 2. Create new application or use existing
 3. Configure settings:
    - **Application type**: Regular web application
-   - **Allowed callback URLs**: 
+   - **Allowed callback URLs**:
      - `https://your-domain.vercel.app/api/auth/kinde_callback`
      - `http://localhost:3000/api/auth/kinde_callback` (for development)
    - **Allowed logout redirect URLs**:
@@ -176,6 +194,7 @@ bun run db:seed
      - `http://localhost:3000` (for development)
 
 #### C. Get Kinde Credentials
+
 1. Copy **Client ID**
 2. Copy **Client Secret**
 3. Copy **Domain** (your Kinde issuer URL)
@@ -184,17 +203,20 @@ bun run db:seed
 ### 6. 📧 Email Setup (Resend)
 
 #### A. Create Resend Account
+
 1. Go to [resend.com](https://resend.com)
 2. Sign up for an account
 3. Verify your email
 
 #### B. Configure Domain (Optional but Recommended)
+
 1. In Resend dashboard, go to **Domains**
 2. Add your domain
 3. Configure DNS records as shown
 4. Verify domain
 
 #### C. Get API Key
+
 1. Go to **API Keys** in Resend dashboard
 2. Create new API key
 3. Copy the key (starts with `re_`)
@@ -203,6 +225,7 @@ bun run db:seed
 ### 7. ✅ Test Your Configuration
 
 #### A. Test Local Development
+
 ```bash
 # Copy environment variables locally
 cp .env.example .env.local
@@ -216,6 +239,7 @@ bun run dev
 ```
 
 #### B. Test Staging Deployment
+
 ```bash
 # Push to develop branch to trigger staging deployment
 git checkout develop
@@ -226,6 +250,7 @@ git push origin develop
 ```
 
 #### C. Test Production Deployment
+
 ```bash
 # Push to master branch to trigger production deployment
 git checkout master
@@ -241,6 +266,7 @@ git push origin master
 Before going live, verify:
 
 #### GitHub Actions ✅
+
 - [ ] CI workflow runs successfully
 - [ ] Type checking passes
 - [ ] Tests pass
@@ -249,6 +275,7 @@ Before going live, verify:
 - [ ] Deployment completes
 
 #### Vercel Deployment ✅
+
 - [ ] Application loads successfully
 - [ ] Authentication works (login/logout)
 - [ ] Database connection works
@@ -257,6 +284,7 @@ Before going live, verify:
 - [ ] No console errors
 
 #### Security ✅
+
 - [ ] HTTPS is enabled
 - [ ] Security headers are present
 - [ ] Environment variables are secure
@@ -266,23 +294,27 @@ Before going live, verify:
 ### 🆘 Troubleshooting Common Issues
 
 #### Deployment Fails
+
 1. **Check GitHub Actions logs** for detailed error messages
 2. **Verify all secrets** are correctly configured
 3. **Check Vercel function logs** for runtime errors
 4. **Ensure environment variables** match between local and production
 
 #### Authentication Issues
+
 1. **Verify Kinde callback URLs** match your deployment URLs
 2. **Check Kinde credentials** are correct in environment variables
 3. **Ensure HTTPS** is used for production callbacks
 
 #### Database Connection Issues
+
 1. **Verify DATABASE_URL** format and credentials
 2. **Check database provider** status and IP restrictions
 3. **Run migrations** on production database
 4. **Test connection** using database provider's tools
 
 #### Email Issues
+
 1. **Verify Resend API key** is correct and active
 2. **Check domain configuration** if using custom domain
 3. **Test email sending** through Resend dashboard
@@ -301,6 +333,7 @@ If you encounter issues:
 ### 🎉 Success!
 
 Once everything is configured, you'll have:
+
 - ✅ Automated CI/CD pipeline
 - ✅ Multi-environment deployments
 - ✅ Secure secret management
@@ -311,4 +344,5 @@ Your application is now ready for production use with enterprise-grade CI/CD! �
 
 ---
 
-**Next Steps**: Follow this guide step by step, then test your deployment end-to-end.
+**Next Steps**: Follow this guide step by step, then test your deployment
+end-to-end.

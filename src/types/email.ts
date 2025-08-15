@@ -2,7 +2,7 @@
  * Email service types and interfaces for Resend integration
  */
 
-import type React from 'react';
+import type React from "react";
 
 /**
  * Email address type - can be string or object with name and email
@@ -100,9 +100,7 @@ export interface EmailSendError {
 /**
  * Result wrapper for email operations
  */
-export type EmailResult<T> = 
-  | { success: true; data: T }
-  | { success: false; error: EmailSendError };
+export type EmailResult<T> = { success: true; data: T } | { success: false; error: EmailSendError };
 
 /**
  * Email validation result
@@ -118,26 +116,26 @@ export interface EmailValidationResult {
  * Email template types supported by the application
  */
 export const EmailTemplateType = {
-  WELCOME: 'welcome',
-  PASSWORD_RESET: 'password-reset',
-  EMAIL_VERIFICATION: 'email-verification',
-  NOTIFICATION: 'notification',
-  INVITATION: 'invitation',
-  RECEIPT: 'receipt',
+  WELCOME: "welcome",
+  PASSWORD_RESET: "password-reset",
+  EMAIL_VERIFICATION: "email-verification",
+  NOTIFICATION: "notification",
+  INVITATION: "invitation",
+  RECEIPT: "receipt",
 } as const;
 
-export type EmailTemplateType = typeof EmailTemplateType[keyof typeof EmailTemplateType];
+export type EmailTemplateType = (typeof EmailTemplateType)[keyof typeof EmailTemplateType];
 
 /**
  * Email priority levels
  */
 export const EmailPriority = {
-  LOW: 'low',
-  NORMAL: 'normal',
-  HIGH: 'high',
+  LOW: "low",
+  NORMAL: "normal",
+  HIGH: "high",
 } as const;
 
-export type EmailPriority = typeof EmailPriority[keyof typeof EmailPriority];
+export type EmailPriority = (typeof EmailPriority)[keyof typeof EmailPriority];
 
 /**
  * Extended email configuration with additional metadata
