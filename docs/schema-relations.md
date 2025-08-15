@@ -3,6 +3,7 @@
 ## Core Models Overview
 
 ### User Management
+
 ```
 User
 ├── Profile (1:1)
@@ -21,6 +22,7 @@ Role
 ```
 
 ### Event Management
+
 ```
 Event
 ├── Registration (1:many)
@@ -33,6 +35,7 @@ Event
 ```
 
 ### Registration System
+
 ```
 Registration
 ├── User (many:1)
@@ -45,6 +48,7 @@ WaitingList
 ```
 
 ### Payment System
+
 ```
 Payment
 ├── User (many:1)
@@ -58,6 +62,7 @@ BankAccount
 ```
 
 ### Audit & History
+
 ```
 RegistrationHistory
 ├── User (many:1 as user)
@@ -69,6 +74,7 @@ AuditLog
 ```
 
 ### Notifications
+
 ```
 NotificationTemplate
 └── NotificationLog (1:many)
@@ -80,19 +86,24 @@ NotificationLog
 
 ## Key Relationships
 
-1. **User-centric**: Users are central to most operations (registrations, payments, audit trails)
-2. **Event-centric**: Events connect to registrations, waiting lists, payments, and history
+1. **User-centric**: Users are central to most operations (registrations,
+   payments, audit trails)
+2. **Event-centric**: Events connect to registrations, waiting lists, payments,
+   and history
 3. **Payment Flow**: Registration → Payment (optional 1:1 relationship)
-4. **Audit Trail**: All major actions tracked in RegistrationHistory and AuditLog
+4. **Audit Trail**: All major actions tracked in RegistrationHistory and
+   AuditLog
 5. **Role-based Access**: Users have roles with permissions for authorization
-6. **Internationalization**: Ready for multi-language support in events and notifications
+6. **Internationalization**: Ready for multi-language support in events and
+   notifications
 
 ## Database Constraints
 
-- **Unique Constraints**: 
+- **Unique Constraints**:
   - User email, Registration (user+event), WaitingList (user+event)
   - Payment variableSymbol, Role name
-- **Cascading Deletes**: 
+- **Cascading Deletes**:
   - User deletion cascades to Profile, UserRole, Registration, WaitingList
   - Event deletion cascades to Registration, WaitingList
-- **Indexes**: Optimized for common queries (user lookups, event searches, payment tracking)
+- **Indexes**: Optimized for common queries (user lookups, event searches,
+  payment tracking)

@@ -2,9 +2,12 @@
 
 ## 📋 **PROJECT OVERVIEW**
 
-This is a modern Next.js 15+ application with Bun runtime, featuring internationalization, TypeScript, and Tailwind CSS. The project uses specialized AI agents for coordinated development.
+This is a modern Next.js 15+ application with Bun runtime, featuring
+internationalization, TypeScript, and Tailwind CSS. The project uses specialized
+AI agents for coordinated development.
 
 ### **Current Tech Stack**
+
 - **Runtime**: Bun (optimized performance)
 - **Framework**: Next.js 15+ with App Router
 - **Language**: TypeScript (strict mode)
@@ -14,6 +17,7 @@ This is a modern Next.js 15+ application with Bun runtime, featuring internation
 - **Deployment**: Optimized for Vercel
 
 ### **Specialized Development Agents**
+
 - 🎨 **Frontend Agent** - React/Next.js UI development
 - 🔧 **Fullstack Agent** - APIs and server-side logic
 - 🧪 **Testing Agent** - Quality assurance and test automation
@@ -26,6 +30,7 @@ This is a modern Next.js 15+ application with Bun runtime, featuring internation
 ## 🚀 **DEVELOPMENT PHASES**
 
 ### **Phase 1: Foundation Setup** ✅
+
 - [x] Next.js 15+ project structure
 - [x] Bun runtime configuration
 - [x] TypeScript strict mode setup
@@ -35,6 +40,7 @@ This is a modern Next.js 15+ application with Bun runtime, featuring internation
 - [x] Development agent ecosystem
 
 ### **Phase 2: Development Infrastructure** 🔄
+
 - [ ] **DevOps Agent**: Set up CI/CD pipeline with GitHub Actions
 - [ ] **DevOps Agent**: Configure Vercel deployment optimization
 - [ ] **Testing Agent**: Initialize Vitest testing framework
@@ -43,6 +49,7 @@ This is a modern Next.js 15+ application with Bun runtime, featuring internation
 - [ ] **DevOps Agent**: Implement automated type checking and linting
 
 ### **Phase 3: Core Application Development** 📋
+
 - [ ] **Project Manager**: Define application requirements and features
 - [ ] **Frontend Agent**: Create base UI components and layouts
 - [ ] **Fullstack Agent**: Set up API route structure
@@ -51,6 +58,7 @@ This is a modern Next.js 15+ application with Bun runtime, featuring internation
 - [ ] **Testing Agent**: Create component and API tests
 
 ### **Phase 4: Feature Implementation** 🛠️
+
 - [ ] **Frontend Agent**: Build main application features
 - [ ] **Fullstack Agent**: Implement business logic and APIs
 - [ ] **Testing Agent**: Comprehensive test coverage
@@ -59,6 +67,7 @@ This is a modern Next.js 15+ application with Bun runtime, featuring internation
 - [ ] **Fullstack Agent**: Database integration (if needed)
 
 ### **Phase 5: Quality Assurance** 🔍
+
 - [ ] **Testing Agent**: End-to-end testing setup
 - [ ] **Code Review Agent**: Security vulnerability assessment
 - [ ] **DevOps Agent**: Performance monitoring setup
@@ -67,6 +76,7 @@ This is a modern Next.js 15+ application with Bun runtime, featuring internation
 - [ ] **DevOps Agent**: Error tracking and logging
 
 ### **Phase 6: Production Readiness** 🚀
+
 - [ ] **DevOps Agent**: Production environment configuration
 - [ ] **DevOps Agent**: Monitoring and alerting setup
 - [ ] **Code Review Agent**: Final security review
@@ -81,6 +91,7 @@ This is a modern Next.js 15+ application with Bun runtime, featuring internation
 ### **Multi-Agent Workflows**
 
 #### **Feature Development Workflow**
+
 ```
 Project Manager → Define requirements
      ↓
@@ -96,6 +107,7 @@ DevOps Agent → Deploy and monitor
 ```
 
 #### **Bug Fix Workflow**
+
 ```
 Testing Agent → Identify and reproduce bug
      ↓
@@ -109,6 +121,7 @@ DevOps Agent → Deploy fix
 ```
 
 ### **Quality Gates**
+
 - **TypeScript**: Zero compilation errors
 - **Testing**: 80%+ code coverage
 - **Performance**: Core Web Vitals passing
@@ -120,6 +133,7 @@ DevOps Agent → Deploy fix
 ## 🛠️ **DEVELOPMENT COMMANDS**
 
 ### **Core Development**
+
 ```bash
 bun run dev          # Development server with Turbopack
 bun run build        # Production build
@@ -128,6 +142,7 @@ bun run preview      # Preview production build
 ```
 
 ### **Code Quality**
+
 ```bash
 bun run lint         # ESLint checks
 bun run lint:fix     # Auto-fix ESLint errors
@@ -136,6 +151,7 @@ bun run type-check   # TypeScript validation
 ```
 
 ### **Testing**
+
 ```bash
 bun run test         # Run Vitest tests
 bun run test:watch   # Run tests in watch mode
@@ -144,6 +160,7 @@ bun run test:coverage # Test coverage report
 ```
 
 ### **Utilities**
+
 ```bash
 bun run clean        # Clean build artifacts
 bun run analyze      # Bundle analyzer
@@ -155,6 +172,7 @@ bun run outdated     # Check for package updates
 ## 📊 **PROJECT METRICS & GOALS**
 
 ### **Performance Targets**
+
 - **First Contentful Paint**: < 1.5s
 - **Largest Contentful Paint**: < 2.5s
 - **Cumulative Layout Shift**: < 0.1
@@ -162,6 +180,7 @@ bun run outdated     # Check for package updates
 - **Bundle Size**: < 500KB initial load
 
 ### **Quality Targets**
+
 - **Test Coverage**: > 80%
 - **TypeScript Compliance**: 100%
 - **Accessibility Score**: > 95%
@@ -169,6 +188,7 @@ bun run outdated     # Check for package updates
 - **Performance Score**: > 90
 
 ### **Development Metrics**
+
 - **Build Time**: < 30 seconds
 - **CI/CD Pipeline**: < 5 minutes
 - **Hot Reload**: < 2 seconds
@@ -181,42 +201,49 @@ bun run outdated     # Check for package updates
 ### **When to Use Each Agent**
 
 #### **🎨 Frontend Agent**
+
 - UI component development
 - Styling and responsive design
 - Client-side interactions
 - Internationalization implementation
 
 #### **🔧 Fullstack Agent**
+
 - API route development
 - Server component logic
 - Database integration
 - Authentication and middleware
 
 #### **🧪 Testing Agent**
+
 - Test strategy and implementation
 - Quality assurance validation
 - Performance testing
 - CI/CD test automation
 
 #### **🔍 Code Review Agent**
+
 - Code quality assessment
 - Security vulnerability analysis
 - Performance optimization review
 - Best practices enforcement
 
 #### **🚀 DevOps Agent**
+
 - CI/CD pipeline management
 - Deployment optimization
 - Infrastructure monitoring
 - Production troubleshooting
 
 #### **📋 Project Manager Agent**
+
 - Feature planning and coordination
 - Task breakdown and estimation
 - Progress tracking and reporting
 - Risk management and mitigation
 
 ### **Collaboration Patterns**
+
 - **Sequential**: Hand-off based workflows for complex features
 - **Parallel**: Independent work on separate components
 - **Review**: Code review cycles between development and quality agents
@@ -227,24 +254,28 @@ bun run outdated     # Check for package updates
 ## 📈 **NEXT STEPS**
 
 ### **Immediate Actions**
+
 1. **DevOps Agent**: Set up GitHub Actions CI/CD pipeline
 2. **Testing Agent**: Initialize testing framework and first tests
 3. **Project Manager**: Define first feature requirements
 4. **Frontend Agent**: Create base UI component library
 
 ### **Short-term Goals (1-2 weeks)**
+
 - Complete development infrastructure setup
 - Implement core application structure
 - Establish quality gates and testing pipeline
 - Deploy initial version to staging
 
 ### **Medium-term Goals (1 month)**
+
 - Complete first major feature
 - Achieve 80%+ test coverage
 - Optimize performance metrics
 - Production deployment ready
 
 ### **Long-term Vision (3 months)**
+
 - Feature-complete application
 - Automated deployment pipeline
 - Comprehensive monitoring
@@ -255,12 +286,14 @@ bun run outdated     # Check for package updates
 ## 📚 **RESOURCES & DOCUMENTATION**
 
 ### **Project Documentation**
+
 - `CLAUDE.md` - Development guidelines and conventions
 - `.claude/agents/` - Specialized agent configurations
 - `package.json` - Dependencies and scripts
 - `README.md` - Project overview and setup
 
 ### **Key Technologies**
+
 - [Next.js 15 Documentation](https://nextjs.org/docs)
 - [Bun Runtime Guide](https://bun.sh/docs)
 - [next-intl Documentation](https://next-intl-docs.vercel.app/)
@@ -268,6 +301,7 @@ bun run outdated     # Check for package updates
 - [Shadcn/ui Components](https://ui.shadcn.com/)
 
 ### **Development Tools**
+
 - [Vitest Testing Framework](https://vitest.dev/)
 - [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/)
 - [TypeScript Handbook](https://www.typescriptlang.org/docs/)
@@ -275,4 +309,6 @@ bun run outdated     # Check for package updates
 
 ---
 
-*This roadmap is maintained by the Project Manager Agent and updated as development progresses. Each phase should be completed with appropriate agent coordination and quality validation.*
+_This roadmap is maintained by the Project Manager Agent and updated as
+development progresses. Each phase should be completed with appropriate agent
+coordination and quality validation._

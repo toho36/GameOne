@@ -17,7 +17,8 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "GameOne - Event Management Platform",
-  description: "The ultimate event management platform for modern teams. Create, manage, and track events with ease.",
+  description:
+    "The ultimate event management platform for modern teams. Create, manage, and track events with ease.",
 };
 
 interface LocaleLayoutProps {
@@ -25,10 +26,7 @@ interface LocaleLayoutProps {
   params: Promise<{ locale: string }>;
 }
 
-export default async function LocaleLayout({
-  children,
-  params,
-}: LocaleLayoutProps) {
+export default async function LocaleLayout({ children, params }: LocaleLayoutProps) {
   const { locale } = await params;
 
   // Ensure that the incoming locale is valid

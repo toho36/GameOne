@@ -1,18 +1,28 @@
 # BunPlate
 
-A comprehensive modern web application boilerplate built with Bun runtime and optimized for Vercel deployment. This boilerplate includes everything you need to build scalable, production-ready web applications with the latest technologies and best practices.
+A comprehensive modern web application boilerplate built with Bun runtime and
+optimized for Vercel deployment. This boilerplate includes everything you need
+to build scalable, production-ready web applications with the latest
+technologies and best practices.
 
 ## 🚀 Features
 
 ### Core Technologies
-- **[Bun](https://bun.sh/)** - Fast JavaScript runtime for development and build processes
-- **[Next.js 14+](https://nextjs.org/)** - React framework with App Router and Server Components
-- **[TypeScript](https://www.typescriptlang.org/)** - Type-safe JavaScript with strict configuration
-- **[Tailwind CSS](https://tailwindcss.com/)** - Utility-first CSS framework with custom design system
+
+- **[Bun](https://bun.sh/)** - Fast JavaScript runtime for development and build
+  processes
+- **[Next.js 14+](https://nextjs.org/)** - React framework with App Router and
+  Server Components
+- **[TypeScript](https://www.typescriptlang.org/)** - Type-safe JavaScript with
+  strict configuration
+- **[Tailwind CSS](https://tailwindcss.com/)** - Utility-first CSS framework
+  with custom design system
 - **[Prisma](https://prisma.io/)** - Next-generation ORM for PostgreSQL
-- **[NextAuth.js](https://next-auth.js.org/)** - Complete authentication solution
+- **[NextAuth.js](https://next-auth.js.org/)** - Complete authentication
+  solution
 
 ### Development Experience
+
 - **ESLint & Prettier** - Code linting and formatting with modern rules
 - **Vitest** - Fast unit testing with React Testing Library
 - **Playwright** - Reliable end-to-end testing
@@ -21,6 +31,7 @@ A comprehensive modern web application boilerplate built with Bun runtime and op
 - **Hot Module Replacement** - Fast development with Turbopack
 
 ### Production Ready
+
 - **Vercel Optimization** - Configured for Vercel's edge network
 - **Docker Support** - Multi-stage builds for development and production
 - **CI/CD Pipeline** - GitHub Actions for testing and deployment
@@ -30,6 +41,7 @@ A comprehensive modern web application boilerplate built with Bun runtime and op
 - **Accessibility** - ARIA compliance and keyboard navigation
 
 ### UI/UX
+
 - **Shadcn/ui** - Beautiful, accessible component library
 - **Dark Mode** - System-aware theme switching
 - **Responsive Design** - Mobile-first approach
@@ -48,22 +60,26 @@ A comprehensive modern web application boilerplate built with Bun runtime and op
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/your-username/bunplate.git
    cd bunplate
    ```
 
 2. **Install dependencies**
+
    ```bash
    bun install
    ```
 
 3. **Set up environment variables**
+
    ```bash
    cp .env.example .env.local
    ```
-   
+
    Update the following variables in `.env.local`:
+
    ```env
    DATABASE_URL="postgresql://username:password@localhost:5432/bunplate"
    NEXTAUTH_SECRET="your-secret-key-here"
@@ -71,6 +87,7 @@ A comprehensive modern web application boilerplate built with Bun runtime and op
    ```
 
 4. **Set up the database**
+
    ```bash
    bun run db:push
    bun run db:seed
@@ -96,6 +113,7 @@ docker-compose -f docker-compose.prod.yml up -d
 ```
 
 This includes:
+
 - Next.js application
 - PostgreSQL database
 - Redis for caching
@@ -147,32 +165,32 @@ src/
 
 ### Environment Variables
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `DATABASE_URL` | PostgreSQL connection string | Yes |
-| `NEXTAUTH_SECRET` | NextAuth.js secret key | Yes |
-| `NEXTAUTH_URL` | Application URL | Yes |
-| `GITHUB_CLIENT_ID` | GitHub OAuth client ID | No |
-| `GITHUB_CLIENT_SECRET` | GitHub OAuth client secret | No |
-| `GOOGLE_CLIENT_ID` | Google OAuth client ID | No |
-| `GOOGLE_CLIENT_SECRET` | Google OAuth client secret | No |
+| Variable               | Description                  | Required |
+| ---------------------- | ---------------------------- | -------- |
+| `DATABASE_URL`         | PostgreSQL connection string | Yes      |
+| `NEXTAUTH_SECRET`      | NextAuth.js secret key       | Yes      |
+| `NEXTAUTH_URL`         | Application URL              | Yes      |
+| `GITHUB_CLIENT_ID`     | GitHub OAuth client ID       | No       |
+| `GITHUB_CLIENT_SECRET` | GitHub OAuth client secret   | No       |
+| `GOOGLE_CLIENT_ID`     | Google OAuth client ID       | No       |
+| `GOOGLE_CLIENT_SECRET` | Google OAuth client secret   | No       |
 
 ### Scripts
 
-| Command | Description |
-|---------|-------------|
-| `bun run dev` | Start development server |
-| `bun run build` | Build for production |
-| `bun run start` | Start production server |
-| `bun run lint` | Run ESLint |
-| `bun run lint:fix` | Fix ESLint errors |
-| `bun run format` | Format code with Prettier |
-| `bun run type-check` | Run TypeScript check |
-| `bun run test` | Run unit tests |
-| `bun run e2e` | Run E2E tests |
-| `bun run db:push` | Push database schema |
-| `bun run db:seed` | Seed database |
-| `bun run db:studio` | Open Prisma Studio |
+| Command              | Description               |
+| -------------------- | ------------------------- |
+| `bun run dev`        | Start development server  |
+| `bun run build`      | Build for production      |
+| `bun run start`      | Start production server   |
+| `bun run lint`       | Run ESLint                |
+| `bun run lint:fix`   | Fix ESLint errors         |
+| `bun run format`     | Format code with Prettier |
+| `bun run type-check` | Run TypeScript check      |
+| `bun run test`       | Run unit tests            |
+| `bun run e2e`        | Run E2E tests             |
+| `bun run db:push`    | Push database schema      |
+| `bun run db:seed`    | Seed database             |
+| `bun run db:studio`  | Open Prisma Studio        |
 
 ## 🚀 Deployment
 
@@ -183,6 +201,7 @@ src/
 3. **Deploy automatically** on push to main branch
 
 The project includes:
+
 - `vercel.json` configuration
 - GitHub Actions for CI/CD
 - Automatic preview deployments
@@ -212,7 +231,8 @@ The boilerplate includes several security features:
 
 ### Theme
 
-Customize the design system in `tailwind.config.ts` and `src/styles/globals.css`.
+Customize the design system in `tailwind.config.ts` and
+`src/styles/globals.css`.
 
 ### Components
 
@@ -221,6 +241,7 @@ Add new components to `src/components/ui/` following the established patterns.
 ### Database
 
 Modify `prisma/schema.prisma` and run:
+
 ```bash
 bun run db:push
 ```
@@ -245,7 +266,8 @@ The boilerplate is optimized for performance:
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
+for details.
 
 ## 🙏 Acknowledgments
 
@@ -256,5 +278,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Open source community for the amazing tools
 
 ---
+
+![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/toho36/GameOne?utm_source=oss&utm_medium=github&utm_campaign=toho36%2FGameOne&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
 
 Built with ❤️ using modern web technologies. Happy coding! 🚀

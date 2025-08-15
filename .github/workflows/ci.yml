@@ -1,0 +1,110 @@
+name: �� CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+env:
+  # Základní konfigurace
+  NODE_ENV: production
+  
+  # Kinde Auth
+  KINDE_ISSUER_URL: ${{ secrets.KINDE_ISSUER_URL }}
+  KINDE_CLIENT_ID: ${{ secrets.KINDE_CLIENT_ID }}
+  KINDE_CLIENT_SECRET: ${{ secrets.KINDE_CLIENT_SECRET }}
+  KINDE_SITE_URL: ${{ secrets.KINDE_SITE_URL }}
+  
+  # Database
+  POSTGRES_URL: ${{ secrets.POSTGRES_URL }}
+  POSTGRES_PRISMA_URL: ${{ secrets.POSTGRES_PRISMA_URL }}
+  
+  # NextAuth
+  NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+  NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
+  
+  # Vercel
+  VERCEL_URL: ${{ secrets.VERCEL_URL }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+
+jobs:
+  test:
+    name: �� Test & Quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+      - name: 📦 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: 📥 Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: �� Type check
+        run: bun run type-check
+
+      - name: 🧹 Lint code
+        run: bun run lint
+
+  build:
+    name: ��️ Build Application
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: test
+    
+    steps:
+      - name: 📦 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: 📥 Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: ��️ Build application
+        run: bun run build
+        env:
+          # Explicitně nastavit environment variables pro build
+          NODE_ENV: production
+          KINDE_ISSUER_URL: ${{ secrets.KINDE_ISSUER_URL }}
+          KINDE_CLIENT_ID: ${{ secrets.KINDE_CLIENT_ID }}
+          KINDE_CLIENT_SECRET: ${{ secrets.KINDE_CLIENT_SECRET }}
+          KINDE_SITE_URL: ${{ secrets.KINDE_SITE_URL }}
+          POSTGRES_URL: ${{ secrets.POSTGRES_URL }}
+          POSTGRES_PRISMA_URL: ${{ secrets.POSTGRES_PRISMA_URL }}
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+          NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
+          VERCEL_URL: ${{ secrets.VERCEL_URL }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+
+  deploy:
+    name: 🚀 Deploy to Vercel
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: 📦 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🚀 Deploy to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-args: '--prod'

@@ -27,7 +27,9 @@ import { SessionProvider } from "@/components/auth";
 
 function App() {
   return (
-    <SessionProvider refreshInterval={300000}> // 5 minutes
+    <SessionProvider refreshInterval={300000}>
+      {" "}
+      // 5 minutes
       {/* Your app content */}
     </SessionProvider>
   );
@@ -60,7 +62,7 @@ function MyComponent() {
     permissions,
     organization,
     refresh,
-    clearError
+    clearError,
   } = useSession();
 }
 ```
@@ -90,7 +92,7 @@ function MyComponent() {
     hasAnyPermission,
     hasAllPermissions,
     permissions,
-    organization
+    organization,
   } = useAuthorization();
 
   if (hasPermission("admin:users")) {
@@ -131,7 +133,7 @@ import { UserProfile } from "@/components/auth";
   showAvatar={true}
   showEmail={true}
   variant="default" // or "compact"
-/>
+/>;
 ```
 
 ### AuthStatus
@@ -145,7 +147,7 @@ import { AuthStatus } from "@/components/auth";
   showDetails={true}
   showPermissions={true}
   showOrganization={true}
-/>
+/>;
 ```
 
 ### Individual Buttons
@@ -202,7 +204,7 @@ import { withAuthGuard } from "@/components/auth";
 
 const ProtectedPage = withAuthGuard(MyPage, {
   requirePermissions: ["read:data"],
-  redirectTo: "/unauthorized"
+  redirectTo: "/unauthorized",
 });
 ```
 
@@ -218,7 +220,7 @@ import { ConditionalAuth } from "@/components/auth";
   error={<ErrorMessage />}
   unauthenticated={<LoginPrompt />}
   authenticated={<Dashboard />}
-/>
+/>;
 ```
 
 ## API Routes
@@ -243,9 +245,7 @@ export default function RootLayout({ children }) {
   return (
     <html>
       <body>
-        <SessionProvider>
-          {children}
-        </SessionProvider>
+        <SessionProvider>{children}</SessionProvider>
       </body>
     </html>
   );
@@ -263,7 +263,7 @@ const { user, isLoading } = useAuth();
 // ❌ Avoid
 const [user, setUser] = useState(null);
 useEffect(() => {
-  fetch('/api/auth/me').then(/* ... */);
+  fetch("/api/auth/me").then(/* ... */);
 }, []);
 ```
 
@@ -289,10 +289,12 @@ Instead of manual checks, use AuthGuard:
 // ✅ Good
 <AuthGuard requirePermissions={["admin:access"]}>
   <AdminPanel />
-</AuthGuard>
+</AuthGuard>;
 
 // ❌ Avoid
-{hasPermission("admin:access") && <AdminPanel />}
+{
+  hasPermission("admin:access") && <AdminPanel />;
+}
 ```
 
 ### 5. Optimize Re-renders
