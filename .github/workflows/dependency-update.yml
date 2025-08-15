@@ -36,7 +36,7 @@ jobs:
         continue-on-error: true
 
       - name: 📝 Create PR if updates available
-        uses: peter-evans/create-pull-request@v5
+        uses: peter-evans/create-pull-request@v7
         with:
           title: 'chore: update dependencies'
           body: 'Automated dependency updates'
