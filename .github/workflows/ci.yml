@@ -68,10 +68,10 @@ jobs:
         run: bun audit
 
       - name: 🛡️ Run security scan
-        uses: securecodewarrior/github-action-add-sarif@v1
+        uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
-          sarif-file: "security-scan-results.sarif"
+          sarif_file: "security-scan-results.sarif"
         continue-on-error: true
 
   build:
