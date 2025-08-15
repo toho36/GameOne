@@ -424,9 +424,9 @@ function generateEmailTemplate(type: EmailTemplateType, data: Record<string, any
           <h1>Welcome!</h1>
         </div>
         <div class="content">
-          <p>Hello ${data.name || 'there'},</p>
+          <p>Hello ${data['name'] || 'there'},</p>
           <p>Welcome to our platform! We're excited to have you on board.</p>
-          ${data.actionUrl ? `<a href="${data.actionUrl}" class="button">Get Started</a>` : ''}
+          ${data['actionUrl'] ? `<a href="${data['actionUrl']}" class="button">Get Started</a>` : ''}
         </div>
       `);
       
@@ -436,9 +436,9 @@ function generateEmailTemplate(type: EmailTemplateType, data: Record<string, any
           <h1>Password Reset</h1>
         </div>
         <div class="content">
-          <p>Hello ${data.name || 'there'},</p>
+          <p>Hello ${data['name'] || 'there'},</p>
           <p>You requested to reset your password. Click the button below to set a new password:</p>
-          ${data.resetUrl ? `<a href="${data.resetUrl}" class="button">Reset Password</a>` : ''}
+          ${data['resetUrl'] ? `<a href="${data['resetUrl']}" class="button">Reset Password</a>` : ''}
           <p>If you didn't request this reset, please ignore this email.</p>
         </div>
       `);
@@ -449,9 +449,9 @@ function generateEmailTemplate(type: EmailTemplateType, data: Record<string, any
           <h1>Verify Your Email</h1>
         </div>
         <div class="content">
-          <p>Hello ${data.name || 'there'},</p>
+          <p>Hello ${data['name'] || 'there'},</p>
           <p>Please verify your email address by clicking the button below:</p>
-          ${data.verificationUrl ? `<a href="${data.verificationUrl}" class="button">Verify Email</a>` : ''}
+          ${data['verificationUrl'] ? `<a href="${data['verificationUrl']}" class="button">Verify Email</a>` : ''}
         </div>
       `);
       
@@ -461,9 +461,9 @@ function generateEmailTemplate(type: EmailTemplateType, data: Record<string, any
           <h1>Notification</h1>
         </div>
         <div class="content">
-          <p>Hello ${data.name || 'there'},</p>
-          <p>${data.message || 'You have a new notification.'}</p>
-          ${data.actionUrl ? `<a href="${data.actionUrl}" class="button">View Details</a>` : ''}
+          <p>Hello ${data['name'] || 'there'},</p>
+          <p>${data['message'] || 'You have a new notification.'}</p>
+          ${data['actionUrl'] ? `<a href="${data['actionUrl']}" class="button">View Details</a>` : ''}
         </div>
       `);
       
@@ -473,9 +473,9 @@ function generateEmailTemplate(type: EmailTemplateType, data: Record<string, any
           <h1>You've Been Invited!</h1>
         </div>
         <div class="content">
-          <p>Hello ${data.name || 'there'},</p>
-          <p>${data.inviterName || 'Someone'} has invited you to ${data.platformName || 'our platform'}.</p>
-          ${data.inviteUrl ? `<a href="${data.inviteUrl}" class="button">Accept Invitation</a>` : ''}
+          <p>Hello ${data['name'] || 'there'},</p>
+          <p>${data['inviterName'] || 'Someone'} has invited you to ${data['platformName'] || 'our platform'}.</p>
+          ${data['inviteUrl'] ? `<a href="${data['inviteUrl']}" class="button">Accept Invitation</a>` : ''}
         </div>
       `);
       
@@ -485,11 +485,11 @@ function generateEmailTemplate(type: EmailTemplateType, data: Record<string, any
           <h1>Receipt</h1>
         </div>
         <div class="content">
-          <p>Hello ${data.name || 'there'},</p>
+          <p>Hello ${data['name'] || 'there'},</p>
           <p>Thank you for your purchase! Here are the details:</p>
-          <p><strong>Order ID:</strong> ${data.orderId || 'N/A'}</p>
-          <p><strong>Amount:</strong> ${data.amount || 'N/A'}</p>
-          ${data.receiptUrl ? `<a href="${data.receiptUrl}" class="button">View Full Receipt</a>` : ''}
+          <p><strong>Order ID:</strong> ${data['orderId'] || 'N/A'}</p>
+          <p><strong>Amount:</strong> ${data['amount'] || 'N/A'}</p>
+          ${data['receiptUrl'] ? `<a href="${data['receiptUrl']}" class="button">View Full Receipt</a>` : ''}
         </div>
       `);
       
@@ -499,8 +499,8 @@ function generateEmailTemplate(type: EmailTemplateType, data: Record<string, any
           <h1>Notification</h1>
         </div>
         <div class="content">
-          <p>Hello ${data.name || 'there'},</p>
-          <p>${data.message || 'You have received this email notification.'}</p>
+          <p>Hello ${data['name'] || 'there'},</p>
+          <p>${data['message'] || 'You have received this email notification.'}</p>
         </div>
       `);
   }
@@ -550,7 +550,7 @@ export function extractEmailAddress(emailAddress: EmailAddress): string {
   if (typeof emailAddress === 'string') {
     // Extract email from "Name <email@domain.com>" format if present
     const match = emailAddress.match(/<([^>]+)>/);
-    return match ? match[1] : emailAddress;
+    return match ? match[1]! : emailAddress;
   }
   
   return emailAddress.email;

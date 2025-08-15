@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "ES2022",
     "lib": ["dom", "dom.iterable", "ES6"],
-    "allowJs": true,
+    "allowJs": false, // Changed from true to false for better type safety
     "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
@@ -46,7 +46,14 @@
     "useUnknownInCatchVariables": true,
     "alwaysStrict": true,
     "noUnusedLocals": true,
-    "noUnusedParameters": true
+    "noUnusedParameters": true,
+    
+    // === DODATKOVÉ STRICT TYPE SAFETY ===
+    "exactOptionalPropertyTypes": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noUncheckedIndexedAccess": true,
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
   },
   "include": [
     "next-env.d.ts",

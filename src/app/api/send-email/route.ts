@@ -238,16 +238,16 @@ async function handleSendEmail(body: any) {
     const validatedData = sendEmailSchema.parse(body);
     
     const emailConfig: EmailConfig = {
-      from: validatedData.from || process.env.DEFAULT_FROM_EMAIL || 'noreply@yourdomain.com',
+      from: validatedData.from || process.env['DEFAULT_FROM_EMAIL'] || 'noreply@yourdomain.com',
       to: validatedData.to,
       subject: validatedData.subject,
-      text: validatedData.text,
-      html: validatedData.html,
-      cc: validatedData.cc,
-      bcc: validatedData.bcc,
-      replyTo: validatedData.replyTo,
-      tags: validatedData.tags,
-      headers: validatedData.headers as Record<string, string> | undefined,
+      ...(validatedData.text && { text: validatedData.text }),
+      ...(validatedData.html && { html: validatedData.html }),
+      ...(validatedData.cc && { cc: validatedData.cc }),
+      ...(validatedData.bcc && { bcc: validatedData.bcc }),
+      ...(validatedData.replyTo && { replyTo: validatedData.replyTo }),
+      ...(validatedData.tags && { tags: validatedData.tags }),
+      ...(validatedData.headers && { headers: validatedData.headers as Record<string, string> }),
     };
     
     const result = await sendEmail(emailConfig);
@@ -293,10 +293,10 @@ async function handleSendTemplateEmail(body: any) {
     
     const emailConfig = createEmailFromTemplate(validatedData.template, {
       to: validatedData.to,
-      subject: validatedData.subject,
-      templateData: validatedData.templateData,
-      from: validatedData.from,
-      priority: validatedData.priority,
+      ...(validatedData.subject && { subject: validatedData.subject }),
+      ...(validatedData.templateData && { templateData: validatedData.templateData }),
+      ...(validatedData.from && { from: validatedData.from }),
+      ...(validatedData.priority && { priority: validatedData.priority }),
     });
     
     const result = await sendEmail(emailConfig);
@@ -342,19 +342,19 @@ async function handleSendBatchEmails(body: any) {
     
     const batchConfig: BatchEmailConfig = {
       emails: validatedData.emails.map(email => ({
-        from: email.from || process.env.DEFAULT_FROM_EMAIL || 'noreply@yourdomain.com',
+        from: email.from || process.env['DEFAULT_FROM_EMAIL'] || 'noreply@yourdomain.com',
         to: email.to,
         subject: email.subject,
-        text: email.text,
-        html: email.html,
-        cc: email.cc,
-        bcc: email.bcc,
-        replyTo: email.replyTo,
-        tags: email.tags,
-        headers: email.headers as Record<string, string> | undefined,
+        ...(email.text && { text: email.text }),
+        ...(email.html && { html: email.html }),
+        ...(email.cc && { cc: email.cc }),
+        ...(email.bcc && { bcc: email.bcc }),
+        ...(email.replyTo && { replyTo: email.replyTo }),
+        ...(email.tags && { tags: email.tags }),
+        ...(email.headers && { headers: email.headers as Record<string, string> }),
       })),
-      maxConcurrency: validatedData.maxConcurrency,
-      batchDelay: validatedData.batchDelay,
+      ...(validatedData.maxConcurrency && { maxConcurrency: validatedData.maxConcurrency }),
+      ...(validatedData.batchDelay && { batchDelay: validatedData.batchDelay }),
     };
     
     const result = await sendBatchEmails(batchConfig);
@@ -388,16 +388,16 @@ async function handleValidateEmail(body: any) {
     const validatedData = sendEmailSchema.parse(body);
     
     const emailConfig: EmailConfig = {
-      from: validatedData.from || process.env.DEFAULT_FROM_EMAIL || 'noreply@yourdomain.com',
+      from: validatedData.from || process.env['DEFAULT_FROM_EMAIL'] || 'noreply@yourdomain.com',
       to: validatedData.to,
       subject: validatedData.subject,
-      text: validatedData.text,
-      html: validatedData.html,
-      cc: validatedData.cc,
-      bcc: validatedData.bcc,
-      replyTo: validatedData.replyTo,
-      tags: validatedData.tags,
-      headers: validatedData.headers as Record<string, string> | undefined,
+      ...(validatedData.text && { text: validatedData.text }),
+      ...(validatedData.html && { html: validatedData.html }),
+      ...(validatedData.cc && { cc: validatedData.cc }),
+      ...(validatedData.bcc && { bcc: validatedData.bcc }),
+      ...(validatedData.replyTo && { replyTo: validatedData.replyTo }),
+      ...(validatedData.tags && { tags: validatedData.tags }),
+      ...(validatedData.headers && { headers: validatedData.headers as Record<string, string> }),
     };
     
     const validation = validateEmailConfig(emailConfig);

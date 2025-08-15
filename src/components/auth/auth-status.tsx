@@ -31,7 +31,7 @@ export function AuthStatus({
 
     if (error) {
         return (
-            <Alert variant="error" className={className}>
+            <Alert variant="error" {...(className && { className })}>
                 <AlertTitle>Authentication Error</AlertTitle>
                 <AlertDescription>{error}</AlertDescription>
             </Alert>

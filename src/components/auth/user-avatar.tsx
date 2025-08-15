@@ -32,14 +32,14 @@ export function UserAvatar({ user, size = "md", className }: UserAvatarProps) {
     };
 
     const getInitials = () => {
-        if (user.given_name && user.family_name) {
+        if (user.given_name && user.family_name && user.given_name.length > 0 && user.family_name.length > 0) {
             return `${user.given_name[0]}${user.family_name[0]}`.toUpperCase();
         }
-        if (user.given_name) {
-            return user.given_name[0].toUpperCase();
+        if (user.given_name && user.given_name.length > 0) {
+            return user.given_name[0]!.toUpperCase();
         }
-        if (user.email) {
-            return user.email[0].toUpperCase();
+        if (user.email && user.email.length > 0) {
+            return user.email[0]!.toUpperCase();
         }
         return "U";
     };

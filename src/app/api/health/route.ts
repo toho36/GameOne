@@ -10,7 +10,7 @@ export async function GET() {
     const systemInfo = {
       timestamp: new Date().toISOString(),
       environment: process.env.NODE_ENV,
-      version: process.env.npm_package_version || "1.0.0",
+      version: process.env['npm_package_version'] || "1.0.0",
       uptime: process.uptime(),
       memory: process.memoryUsage(),
     };

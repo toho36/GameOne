@@ -29,6 +29,7 @@
       "Bash(cat:*)",
       "Bash(curl:*)"
     ],
-    "deny": []
+    "deny": [],
+    "defaultMode": "acceptEdits"
   }
 }

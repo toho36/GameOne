@@ -28,7 +28,7 @@ function validateApiKey(apiKey: string): boolean {
  * @returns The validated API key
  */
 function getResendApiKey(): string {
-  const apiKey = process.env.RESEND_API_KEY;
+  const apiKey = process.env['RESEND_API_KEY'];
   
   if (!apiKey) {
     throw new Error(
@@ -57,12 +57,12 @@ export function createEmailServiceConfig(): EmailServiceConfig {
   
   return {
     apiKey,
-    defaultFrom: process.env.DEFAULT_FROM_EMAIL || 'noreply@yourdomain.com',
-    defaultReplyTo: process.env.DEFAULT_REPLY_TO_EMAIL,
-    testMode: process.env.NODE_ENV === 'test' || process.env.EMAIL_TEST_MODE === 'true',
+    defaultFrom: process.env['DEFAULT_FROM_EMAIL'] || 'noreply@yourdomain.com',
+    ...(process.env['DEFAULT_REPLY_TO_EMAIL'] && { defaultReplyTo: process.env['DEFAULT_REPLY_TO_EMAIL'] }),
+    testMode: process.env.NODE_ENV === 'test' || process.env['EMAIL_TEST_MODE'] === 'true',
     rateLimit: {
-      maxRequestsPerMinute: parseInt(process.env.EMAIL_RATE_LIMIT_PER_MINUTE || '10', 10),
-      maxRequestsPerHour: parseInt(process.env.EMAIL_RATE_LIMIT_PER_HOUR || '100', 10),
+      maxRequestsPerMinute: parseInt(process.env['EMAIL_RATE_LIMIT_PER_MINUTE'] || '10', 10),
+      maxRequestsPerHour: parseInt(process.env['EMAIL_RATE_LIMIT_PER_HOUR'] || '100', 10),
     },
   };
 }

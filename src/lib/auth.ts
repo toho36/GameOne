@@ -26,9 +26,9 @@ export function getBaseUrl(): string {
       : "https://gameonebaby.vercel.app";
   }
   // Server-side
-  return process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : process.env.KINDE_SITE_URL ?? "http://localhost:3000";
+  return process.env['VERCEL_URL']
+    ? `https://${process.env['VERCEL_URL']}`
+    : process.env['KINDE_SITE_URL'] ?? "http://localhost:3000";
 }
 
 /**
@@ -39,13 +39,13 @@ export function getAuthConfig() {
 
   return {
     authUrl:
-      process.env.NEXT_PUBLIC_KINDE_AUTH_URL ?? "https://gameone.kinde.com",
+      process.env['NEXT_PUBLIC_KINDE_AUTH_URL'] ?? "https://gameone.kinde.com",
     clientId:
-      process.env.NEXT_PUBLIC_KINDE_CLIENT_ID ??
+      process.env['NEXT_PUBLIC_KINDE_CLIENT_ID'] ??
       "f5a3fab0fe644cf080282bcd90979fe4",
-    logoutUrl: process.env.NEXT_PUBLIC_KINDE_LOGOUT_URL ?? baseUrl,
+    logoutUrl: process.env['NEXT_PUBLIC_KINDE_LOGOUT_URL'] ?? baseUrl,
     redirectUrl:
-      process.env.NEXT_PUBLIC_KINDE_REDIRECT_URL ?? `${baseUrl}/dashboard`,
+      process.env['NEXT_PUBLIC_KINDE_REDIRECT_URL'] ?? `${baseUrl}/dashboard`,
     baseUrl,
   };
 }
@@ -59,7 +59,7 @@ export function getAuthConfig() {
  */
 export function getKindeRedirectUrl(): string {
   const baseUrl = getBaseUrl();
-  return process.env.NEXT_PUBLIC_KINDE_REDIRECT_URL ?? `${baseUrl}/dashboard`;
+  return process.env['NEXT_PUBLIC_KINDE_REDIRECT_URL'] ?? `${baseUrl}/dashboard`;
 }
 
 /**
@@ -67,7 +67,7 @@ export function getKindeRedirectUrl(): string {
  */
 export function getKindeLogoutUrl(): string {
   const baseUrl = getBaseUrl();
-  return process.env.NEXT_PUBLIC_KINDE_LOGOUT_URL ?? baseUrl;
+  return process.env['NEXT_PUBLIC_KINDE_LOGOUT_URL'] ?? baseUrl;
 }
 
 /**
@@ -97,12 +97,12 @@ export function isProductionRequest(request: NextRequest): boolean {
 export function getKindeConfigForRequest(request: NextRequest) {
   const isProduction = isProductionRequest(request);
   const baseUrl = isProduction 
-    ? `https://${process.env.VERCEL_URL ?? 'gameonebaby.vercel.app'}`
+    ? `https://${process.env['VERCEL_URL'] ?? 'gameonebaby.vercel.app'}`
     : 'http://localhost:3000';
 
   return {
-    authUrl: process.env.NEXT_PUBLIC_KINDE_AUTH_URL ?? "https://gameone.kinde.com",
-    clientId: process.env.NEXT_PUBLIC_KINDE_CLIENT_ID ?? "f5a3fab0fe644cf080282bcd90979fe4",
+    authUrl: process.env['NEXT_PUBLIC_KINDE_AUTH_URL'] ?? "https://gameone.kinde.com",
+    clientId: process.env['NEXT_PUBLIC_KINDE_CLIENT_ID'] ?? "f5a3fab0fe644cf080282bcd90979fe4",
     logoutUrl: isProduction ? baseUrl : 'http://localhost:3000',
     redirectUrl: isProduction ? `${baseUrl}/dashboard` : 'http://localhost:3000/dashboard',
     baseUrl,
@@ -137,7 +137,7 @@ export async function verifyVercelCronSecret(request: NextRequest): Promise<{
     const token = authHeader.replace('Bearer ', '');
     
     // Get the expected cron secret from environment
-    const expectedSecret = process.env.CRON_SECRET;
+    const expectedSecret = process.env['CRON_SECRET'];
     
     if (!expectedSecret) {
       console.warn('CRON_SECRET environment variable not set');
