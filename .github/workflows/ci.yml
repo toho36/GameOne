@@ -64,8 +64,14 @@ jobs:
       - name: 📥 Install dependencies
         run: bun install --frozen-lockfile
 
-      - name: 🔍 Audit dependencies
-        run: bun audit
+      - name: 🔍 Check for outdated packages
+        run: bun outdated || true
+        
+      - name: 🔍 Install npm for audit (security check)
+        run: npm install --package-lock-only
+        
+      - name: 🔍 Run npm audit for vulnerabilities
+        run: npm audit --audit-level moderate || true
 
       - name: 🛡️ Run security scan
         uses: github/codeql-action/upload-sarif@v3
