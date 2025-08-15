@@ -18,7 +18,7 @@
     "security:outdated": "bun outdated",
     "security:check": "echo '🛡️ Running security checks...' && bun run security:outdated",
     "security:full": "echo '🔒 Running full security scan...' && bun run security:check && bun run type-safety && echo '✅ Security scan completed!'",
-   "pre-deploy": "echo '🚀 Running pre-deployment checks...' && bun run format:check && bun run type-safety && echo '✅ All checks passed! Ready for deployment!'",
+    "pre-deploy": "echo '🚀 Running pre-deployment checks...' && bun run format:check && bun run type-safety && echo '✅ All checks passed! Ready for deployment!'",
     "test": "vitest",
     "test:watch": "vitest --watch",
     "test:coverage": "vitest --coverage",

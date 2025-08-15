@@ -66,10 +66,10 @@ jobs:
 
       - name: 🔍 Check for outdated packages
         run: bun outdated || true
-        
+
       - name: 🔍 Install npm for audit (security check)
         run: npm install --package-lock-only
-        
+
       - name: 🔍 Run npm audit for vulnerabilities
         run: npm audit --audit-level moderate || true
 
