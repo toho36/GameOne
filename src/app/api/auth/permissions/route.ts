@@ -1,5 +1,6 @@
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { NextResponse } from "next/server";
+import { logger } from "@/lib/logger";
 
 /**
  * GET /api/auth/permissions
@@ -21,7 +22,7 @@ export async function GET() {
       orgCode: permissions?.orgCode ?? null,
     });
   } catch (error) {
-    console.error("Error fetching user permissions:", error);
+    logger.error("Error fetching user permissions:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

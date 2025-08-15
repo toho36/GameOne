@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import type { KindeUser } from "@/lib/kinde-auth";
-
+import { logger } from "@/lib/logger";
 export interface SessionData {
   user: KindeUser | null;
   isAuthenticated: boolean;
@@ -97,7 +97,7 @@ export function SessionProvider({
         throw new Error(`Authentication check failed: ${response.status}`);
       }
     } catch (error) {
-      console.error("Session fetch error:", error);
+      logger.error("Session fetch error:", error);
       setSessionData({
         user: null,
         isAuthenticated: false,

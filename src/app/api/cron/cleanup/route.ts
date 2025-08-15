@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { verifyVercelCronSecret } from "@/lib/auth";
 import { performDatabaseCleanup } from "@/lib/cleanup";
-
+import { logger } from "@/lib/logger";
 /**
  * Database Cleanup Cron Job
  * Runs daily at 2:00 AM UTC
@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    console.log("🧹 Starting database cleanup job...");
+    logger.info("🧹 Starting database cleanup job...");
     const startTime = Date.now();
 
     // Perform cleanup operations
@@ -55,11 +55,11 @@ export async function GET(request: NextRequest) {
       results: cleanupResults,
     };
 
-    console.log("✅ Database cleanup completed:", response);
+    logger.info("✅ Database cleanup completed:", response);
 
     return NextResponse.json(response, { status: 200 });
   } catch (error) {
-    console.error("❌ Database cleanup failed:", error);
+    logger.error("❌ Database cleanup failed:", error);
 
     return NextResponse.json(
       {

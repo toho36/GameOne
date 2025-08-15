@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { LogoutButton } from "@/components/auth";
 import Link from "next/link";
 import { UserAvatar } from "@/components/auth/user-avatar";
+import { logger } from "@/lib/logger";
 
 export default async function DashboardPage() {
   const t = await getTranslations("Dashboard");
@@ -191,7 +192,7 @@ export default async function DashboardPage() {
       </main>
     );
   } catch (error) {
-    console.error("Error on dashboard page:", error);
+    logger.error("Error on dashboard page:", error);
     // Fallback for error or unauthenticated state
     redirect("/api/auth/login");
   }

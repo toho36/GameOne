@@ -1,5 +1,5 @@
 import type { NextRequest } from "next/server";
-
+import { logger } from "./logger";
 // ================================
 // ENVIRONMENT DETECTION
 // ================================
@@ -131,7 +131,6 @@ export async function verifyVercelCronSecret(request: NextRequest): Promise<{
     const expectedSecret = process.env["CRON_SECRET"];
 
     if (!expectedSecret) {
-      console.warn("CRON_SECRET environment variable not set");
       return {
         success: false,
         error: "Cron secret not configured",
@@ -162,7 +161,7 @@ export async function verifyVercelCronSecret(request: NextRequest): Promise<{
 
     return { success: true };
   } catch (error) {
-    console.error("Error verifying cron secret:", error);
+    logger.error("Error verifying cron secret:", error);
     return {
       success: false,
       error: "Authentication error",
@@ -200,7 +199,7 @@ export async function logCronExecution(
   };
 
   // Log to console (in production, you might want to use a proper logging service)
-  console.log("Cron job execution:", JSON.stringify(logEntry, null, 2));
+  logger.info("Cron job execution:", JSON.stringify(logEntry, null, 2));
 
   // TODO: In production, store this in your database for monitoring
   // await prisma.cronJobLog.create({ data: logEntry });

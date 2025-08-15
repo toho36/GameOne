@@ -20,7 +20,7 @@ import {
   type EmailConfig,
   type BatchEmailConfig,
 } from "@/types/email";
-
+import { logger } from "@/lib/logger";
 /**
  * Validation schema for email address
  */
@@ -205,7 +205,7 @@ export async function POST(request: NextRequest) {
     try {
       body = await request.json();
     } catch (error) {
-      console.error("JSON parsing error:", error);
+      logger.error("JSON parsing error:", error);
       return NextResponse.json(
         {
           success: false,
@@ -236,7 +236,7 @@ export async function POST(request: NextRequest) {
         );
     }
   } catch (error) {
-    console.error("Email API error:", error);
+    logger.error("Email API error:", error);
 
     return NextResponse.json(
       {

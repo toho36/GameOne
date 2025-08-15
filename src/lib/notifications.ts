@@ -1,3 +1,4 @@
+import { logger } from "./logger";
 export interface NotificationConfig {
   email?: boolean;
   push?: boolean;
@@ -27,7 +28,7 @@ export async function sendNotification(
   config: NotificationConfig = {}
 ): Promise<NotificationResult> {
   try {
-    console.log("Sending notification:", {
+    logger.info("Sending notification:", {
       title: data.title,
       message: data.message,
       type: data.type,
@@ -47,7 +48,7 @@ export async function sendNotification(
       messageId: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
     };
   } catch (error) {
-    console.error("Failed to send notification:", error);
+    logger.error("Failed to send notification:", error);
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",

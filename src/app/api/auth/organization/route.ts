@@ -1,5 +1,6 @@
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { NextResponse } from "next/server";
+import { logger } from "@/lib/logger";
 
 /**
  * GET /api/auth/organization
@@ -25,7 +26,7 @@ export async function GET() {
         : null,
     });
   } catch (error) {
-    console.error("Error fetching user organization:", error);
+    logger.error("Error fetching user organization:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

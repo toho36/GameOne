@@ -1,5 +1,6 @@
 import { getCurrentUser } from "@/lib/kinde-auth";
 import { NextResponse } from "next/server";
+import { logger } from "@/lib/logger";
 
 /**
  * GET /api/auth/me
@@ -22,7 +23,7 @@ export async function GET() {
       picture: user.picture,
     });
   } catch (error) {
-    console.error("Error fetching current user:", error);
+    logger.error("Error fetching current user:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

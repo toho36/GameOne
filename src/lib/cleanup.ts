@@ -1,4 +1,5 @@
 import { prisma } from "./prisma";
+import { logger } from "./logger";
 
 export interface CleanupOptions {
   expiredUserRoles?: boolean;
@@ -41,7 +42,7 @@ export async function performDatabaseCleanup(options: CleanupOptions): Promise<C
         });
 
         results.expiredUserRoles = deletedRoles.count;
-        console.log(`🗑️ Cleaned up ${deletedRoles.count} expired user roles`);
+        logger.info(`🗑️ Cleaned up ${deletedRoles.count} expired user roles`);
       } catch (error) {
         errors.push(`Failed to clean expired user roles: ${(error as Error).message}`);
       }
@@ -62,7 +63,7 @@ export async function performDatabaseCleanup(options: CleanupOptions): Promise<C
         });
 
         results.oldAuditLogs = deletedLogs.count;
-        console.log(`🗑️ Cleaned up ${deletedLogs.count} old audit logs`);
+        logger.info(`🗑️ Cleaned up ${deletedLogs.count} old audit logs`);
       } catch (error) {
         errors.push(`Failed to clean audit logs: ${(error as Error).message}`);
       }
@@ -84,7 +85,7 @@ export async function performDatabaseCleanup(options: CleanupOptions): Promise<C
         });
 
         results.failedPayments = deletedPayments.count;
-        console.log(`🗑️ Cleaned up ${deletedPayments.count} failed payments`);
+        logger.info(`🗑️ Cleaned up ${deletedPayments.count} failed payments`);
       } catch (error) {
         errors.push(`Failed to clean failed payments: ${(error as Error).message}`);
       }
@@ -116,7 +117,7 @@ export async function performDatabaseCleanup(options: CleanupOptions): Promise<C
           });
 
           results.expiredWaitingList = deletedWaitingList.count;
-          console.log(`🗑️ Cleaned up ${deletedWaitingList.count} expired waiting list entries`);
+          logger.info(`🗑️ Cleaned up ${deletedWaitingList.count} expired waiting list entries`);
         } else {
           results.expiredWaitingList = 0;
         }
@@ -141,7 +142,7 @@ export async function performDatabaseCleanup(options: CleanupOptions): Promise<C
         });
 
         results.cancelledRegistrations = deletedRegistrations.count;
-        console.log(`🗑️ Cleaned up ${deletedRegistrations.count} old cancelled registrations`);
+        logger.info(`🗑️ Cleaned up ${deletedRegistrations.count} old cancelled registrations`);
       } catch (error) {
         errors.push(`Failed to clean cancelled registrations: ${(error as Error).message}`);
       }
@@ -165,7 +166,7 @@ export async function performDatabaseCleanup(options: CleanupOptions): Promise<C
         });
 
         results.oldNotificationLogs = deletedNotifications.count;
-        console.log(`🗑️ Cleaned up ${deletedNotifications.count} old notification logs`);
+        logger.info(`🗑️ Cleaned up ${deletedNotifications.count} old notification logs`);
       } catch (error) {
         errors.push(`Failed to clean notification logs: ${(error as Error).message}`);
       }
@@ -176,14 +177,14 @@ export async function performDatabaseCleanup(options: CleanupOptions): Promise<C
       try {
         // Note: Prisma doesn't directly support VACUUM/ANALYZE
         // In production, you might want to use a raw query or separate script
-        console.log("🔧 Database optimization would run here (VACUUM, ANALYZE)");
+        logger.info("🔧 Database optimization would run here (VACUUM, ANALYZE)");
 
         // Example of what you could do with raw queries:
         // await prisma.$executeRawUnsafe('VACUUM ANALYZE');
 
         // For now, just update statistics
         await prisma.$executeRawUnsafe("ANALYZE");
-        console.log("📊 Database statistics updated");
+        logger.info("📊 Database statistics updated");
       } catch (error) {
         errors.push(`Failed to optimize database: ${(error as Error).message}`);
       }
@@ -196,7 +197,7 @@ export async function performDatabaseCleanup(options: CleanupOptions): Promise<C
 
     return results;
   } catch (error) {
-    console.error("Database cleanup failed:", error);
+    logger.error("Database cleanup failed:", error);
     throw new Error(`Database cleanup failed: ${(error as Error).message}`);
   }
 }

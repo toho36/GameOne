@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { checkDatabaseHealth } from "@/lib/prisma";
-
+import { logger } from "@/lib/logger";
 export async function GET() {
   try {
     // Check database health
@@ -33,7 +33,7 @@ export async function GET() {
       }
     );
   } catch (error) {
-    console.error("Health check failed:", error);
+    logger.error("Health check failed:", error);
     return NextResponse.json(
       {
         status: "unhealthy",

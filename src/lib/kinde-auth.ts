@@ -1,5 +1,6 @@
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { redirect } from "next/navigation";
+import { logger } from "./logger";
 
 export interface KindeUser {
   id: string;
@@ -25,7 +26,7 @@ export async function getCurrentUser(): Promise<KindeUser | null> {
     const user = await getUser();
     return user;
   } catch (error) {
-    console.error("Error getting current user:", error);
+    logger.error("Error getting current user:", error);
     return null;
   }
 }
@@ -49,7 +50,7 @@ export async function getSession(): Promise<KindeSession | null> {
       isAuthenticated: true,
     };
   } catch (error) {
-    console.error("Error getting session:", error);
+    logger.error("Error getting session:", error);
     return null;
   }
 }
@@ -82,7 +83,7 @@ export async function hasPermission(permission: string): Promise<boolean> {
     // Check if the permission exists in the permissions object
     return permission in permissions;
   } catch (error) {
-    console.error("Error checking permissions:", error);
+    logger.error("Error checking permissions:", error);
     return false;
   }
 }
@@ -102,7 +103,7 @@ export async function hasRole(role: string): Promise<boolean> {
     // Check if the role exists in the roles array
     return roles.some((r) => r.name === role);
   } catch (error) {
-    console.error("Error checking roles:", error);
+    logger.error("Error checking roles:", error);
     return false;
   }
 }
@@ -122,7 +123,7 @@ export async function getUserPermissions(): Promise<string[]> {
     // Convert permissions object to array of permission names
     return Object.keys(permissions);
   } catch (error) {
-    console.error("Error getting permissions:", error);
+    logger.error("Error getting permissions:", error);
     return [];
   }
 }
@@ -142,7 +143,7 @@ export async function getUserRoles(): Promise<string[]> {
     // Extract role names from the roles array
     return roles.map((role) => role.name);
   } catch (error) {
-    console.error("Error getting roles:", error);
+    logger.error("Error getting roles:", error);
     return [];
   }
 }
