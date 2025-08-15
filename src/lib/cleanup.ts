@@ -26,7 +26,6 @@ export async function performDatabaseCleanup(options: CleanupOptions): Promise<C
   const errors: string[] = [];
 
   try {
-    // Clean up expired user roles (older than 30 days past expiration)
     if (options.expiredUserRoles) {
       try {
         const thirtyDaysAgo = new Date();
