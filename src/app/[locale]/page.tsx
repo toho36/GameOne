@@ -32,9 +32,7 @@ export default async function HomePage() {
                     <h2 className="mb-2 text-xl font-semibold text-green-900">
                       {t("welcomeBack", { name: user.given_name ?? user.email ?? "User" })}
                     </h2>
-                    <p className="mb-4 text-green-700">
-                      {t("readyToManage")}
-                    </p>
+                    <p className="mb-4 text-green-700">{t("readyToManage")}</p>
                     <Link href="/dashboard">
                       <Button size="lg" className="px-8 py-3 text-lg font-semibold">
                         {t("goToDashboard")}
@@ -71,12 +69,8 @@ export default async function HomePage() {
       <section className="bg-gray-50 py-16">
         <div className="container mx-auto px-4">
           <div className="mb-12 text-center">
-            <h2 className="mb-4 text-3xl font-bold text-gray-900 md:text-4xl">
-              {t("whyChoose")}
-            </h2>
-            <p className="mx-auto max-w-2xl text-lg text-gray-600">
-              {t("powerfulTools")}
-            </p>
+            <h2 className="mb-4 text-3xl font-bold text-gray-900 md:text-4xl">{t("whyChoose")}</h2>
+            <p className="mx-auto max-w-2xl text-lg text-gray-600">{t("powerfulTools")}</p>
           </div>
 
           <div className="grid gap-8 md:grid-cols-3">
@@ -84,8 +78,18 @@ export default async function HomePage() {
             <Card className="transition-all hover:scale-105 hover:shadow-md">
               <CardHeader className="text-center">
                 <div className="mx-auto mb-6 flex size-16 items-center justify-center rounded-full bg-blue-100">
-                  <svg className="size-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  <svg
+                    className="size-8 text-blue-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    />
                   </svg>
                 </div>
                 <CardTitle>{t("eventManagement")}</CardTitle>
@@ -101,8 +105,18 @@ export default async function HomePage() {
             <Card className="transition-all hover:scale-105 hover:shadow-md">
               <CardHeader className="text-center">
                 <div className="mx-auto mb-6 flex size-16 items-center justify-center rounded-full bg-green-100">
-                  <svg className="size-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  <svg
+                    className="size-8 text-green-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                    />
                   </svg>
                 </div>
                 <CardTitle>{t("registrationSystem")}</CardTitle>
@@ -118,8 +132,18 @@ export default async function HomePage() {
             <Card className="transition-all hover:scale-105 hover:shadow-md">
               <CardHeader className="text-center">
                 <div className="mx-auto mb-6 flex size-16 items-center justify-center rounded-full bg-purple-100">
-                  <svg className="size-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  <svg
+                    className="size-8 text-purple-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                    />
                   </svg>
                 </div>
                 <CardTitle>{t("analytics")}</CardTitle>

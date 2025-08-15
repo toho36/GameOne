@@ -1,6 +1,7 @@
 # 🚀 Deployment Guide
 
-This document provides comprehensive instructions for deploying the GameOne application using the implemented CI/CD pipeline.
+This document provides comprehensive instructions for deploying the GameOne
+application using the implemented CI/CD pipeline.
 
 ## 📋 Table of Contents
 
@@ -77,7 +78,8 @@ DEFAULT_REPLY_TO_EMAIL=support@your-domain.com
 
 In your Vercel dashboard, add these environment variables:
 
-- **Production Environment**: All variables from `.env.example` with production values
+- **Production Environment**: All variables from `.env.example` with production
+  values
 - **Preview Environment**: Same as production but with staging values
 - **Development Environment**: Development-specific values
 
@@ -116,26 +118,31 @@ The CI/CD pipeline consists of several stages:
 ### Automated Workflows
 
 #### Main CI/CD Pipeline
+
 - **Trigger**: Push to master/develop, PRs to master/develop
 - **File**: `.github/workflows/ci.yml`
 
 #### Security Scanning
+
 - **Trigger**: Weekly + Push to master + PRs
 - **File**: `.github/workflows/security.yml`
 
 #### Dependency Updates
+
 - **Trigger**: Weekly + Manual trigger
 - **File**: `.github/workflows/dependency-update.yml`
 
 ## 🌐 Deployment Environments
 
 ### Staging Environment
+
 - **URL**: `https://gameone-staging.vercel.app`
 - **Branch**: `develop`
 - **Database**: Staging database
 - **Purpose**: Testing and QA
 
 ### Production Environment
+
 - **URL**: `https://your-domain.com`
 - **Branch**: `master`
 - **Database**: Production database
@@ -208,6 +215,7 @@ The `vercel.json` configuration includes:
 ### Manual Monitoring
 
 1. **Database Health**
+
    ```bash
    # Check database connection
    curl https://your-domain.com/api/health
@@ -258,10 +266,13 @@ vercel deploy --prod
 ### Common Issues
 
 #### Build Failures
+
 1. **TypeScript Errors**
+
    ```bash
    bun run type-check
    ```
+
    Fix any type errors before deployment.
 
 2. **Missing Environment Variables**
@@ -332,6 +343,7 @@ bun audit
 ## 📞 Support
 
 For deployment issues:
+
 1. Check this documentation
 2. Review GitHub Actions logs
 3. Check Vercel deployment logs
@@ -339,5 +351,4 @@ For deployment issues:
 
 ---
 
-**Last Updated**: January 2025
-**Version**: 1.0.0
+**Last Updated**: January 2025 **Version**: 1.0.0

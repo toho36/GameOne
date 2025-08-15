@@ -2,11 +2,11 @@ name: Security Scan
 
 on:
   schedule:
-    - cron: '0 2 * * 1' # Weekly on Monday at 2 AM
+    - cron: "0 2 * * 1" # Weekly on Monday at 2 AM
   push:
-    branches: [ master ]
+    branches: [master]
   pull_request:
-    branches: [ master ]
+    branches: [master]
 
 jobs:
   security-scan:
@@ -21,7 +21,7 @@ jobs:
       - name: 🏗️ Setup Bun
         uses: oven-sh/setup-bun@v1
         with:
-          bun-version: 'latest'
+          bun-version: "latest"
 
       - name: 📥 Install dependencies
         run: bun install --frozen-lockfile

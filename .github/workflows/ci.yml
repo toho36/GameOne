@@ -2,13 +2,13 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ master, develop ]
+    branches: [master, develop]
   pull_request:
-    branches: [ master, develop ]
+    branches: [master, develop]
 
 env:
-  NODE_VERSION: '20'
-  BUN_VERSION: 'latest'
+  NODE_VERSION: "20"
+  BUN_VERSION: "latest"
 
 jobs:
   test:
@@ -71,7 +71,7 @@ jobs:
         uses: securecodewarrior/github-action-add-sarif@v1
         if: always()
         with:
-          sarif-file: 'security-scan-results.sarif'
+          sarif-file: "security-scan-results.sarif"
         continue-on-error: true
 
   build:
@@ -145,7 +145,7 @@ jobs:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          vercel-args: '--prod'
+          vercel-args: "--prod"
           working-directory: ./
           scope: ${{ secrets.VERCEL_ORG_ID }}
 

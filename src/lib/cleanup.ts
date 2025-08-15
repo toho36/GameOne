@@ -1,4 +1,3 @@
- 
 import { prisma } from "./prisma";
 
 export interface CleanupOptions {
@@ -35,10 +34,10 @@ export async function performDatabaseCleanup(options: CleanupOptions): Promise<C
         const deletedRoles = await prisma.userRole.deleteMany({
           where: {
             expiresAt: {
-              lt: thirtyDaysAgo
+              lt: thirtyDaysAgo,
             },
-            isActive: false
-          }
+            isActive: false,
+          },
         });
 
         results.expiredUserRoles = deletedRoles.count;
@@ -57,9 +56,9 @@ export async function performDatabaseCleanup(options: CleanupOptions): Promise<C
         const deletedLogs = await prisma.auditLog.deleteMany({
           where: {
             timestamp: {
-              lt: ninetyDaysAgo
-            }
-          }
+              lt: ninetyDaysAgo,
+            },
+          },
         });
 
         results.oldAuditLogs = deletedLogs.count;
@@ -77,11 +76,11 @@ export async function performDatabaseCleanup(options: CleanupOptions): Promise<C
 
         const deletedPayments = await prisma.payment.deleteMany({
           where: {
-            status: 'FAILED',
+            status: "FAILED",
             createdAt: {
-              lt: sevenDaysAgo
-            }
-          }
+              lt: sevenDaysAgo,
+            },
+          },
         });
 
         results.failedPayments = deletedPayments.count;
@@ -101,19 +100,19 @@ export async function performDatabaseCleanup(options: CleanupOptions): Promise<C
         const expiredEvents = await prisma.event.findMany({
           where: {
             endDate: {
-              lt: sevenDaysAgo
-            }
+              lt: sevenDaysAgo,
+            },
           },
-          select: { id: true }
+          select: { id: true },
         });
 
         if (expiredEvents.length > 0) {
           const deletedWaitingList = await prisma.waitingList.deleteMany({
             where: {
               eventId: {
-                in: expiredEvents.map(e => e.id)
-              }
-            }
+                in: expiredEvents.map((e) => e.id),
+              },
+            },
           });
 
           results.expiredWaitingList = deletedWaitingList.count;
@@ -126,7 +125,6 @@ export async function performDatabaseCleanup(options: CleanupOptions): Promise<C
       }
     }
 
-
     // Clean up old cancelled registrations (older than 30 days)
     if (options.cancelledRegistrations) {
       try {
@@ -135,11 +133,11 @@ export async function performDatabaseCleanup(options: CleanupOptions): Promise<C
 
         const deletedRegistrations = await prisma.registration.deleteMany({
           where: {
-            status: 'CANCELLED',
+            status: "CANCELLED",
             cancelledAt: {
-              lt: thirtyDaysAgo
-            }
-          }
+              lt: thirtyDaysAgo,
+            },
+          },
         });
 
         results.cancelledRegistrations = deletedRegistrations.count;
@@ -158,12 +156,12 @@ export async function performDatabaseCleanup(options: CleanupOptions): Promise<C
         const deletedNotifications = await prisma.notificationLog.deleteMany({
           where: {
             createdAt: {
-              lt: sixtyDaysAgo
+              lt: sixtyDaysAgo,
             },
             status: {
-              in: ['SENT', 'DELIVERED', 'FAILED', 'BOUNCED']
-            }
-          }
+              in: ["SENT", "DELIVERED", "FAILED", "BOUNCED"],
+            },
+          },
         });
 
         results.oldNotificationLogs = deletedNotifications.count;
@@ -178,14 +176,14 @@ export async function performDatabaseCleanup(options: CleanupOptions): Promise<C
       try {
         // Note: Prisma doesn't directly support VACUUM/ANALYZE
         // In production, you might want to use a raw query or separate script
-        console.log('🔧 Database optimization would run here (VACUUM, ANALYZE)');
-        
+        console.log("🔧 Database optimization would run here (VACUUM, ANALYZE)");
+
         // Example of what you could do with raw queries:
         // await prisma.$executeRawUnsafe('VACUUM ANALYZE');
-        
+
         // For now, just update statistics
-        await prisma.$executeRawUnsafe('ANALYZE');
-        console.log('📊 Database statistics updated');
+        await prisma.$executeRawUnsafe("ANALYZE");
+        console.log("📊 Database statistics updated");
       } catch (error) {
         errors.push(`Failed to optimize database: ${(error as Error).message}`);
       }
@@ -197,9 +195,8 @@ export async function performDatabaseCleanup(options: CleanupOptions): Promise<C
     }
 
     return results;
-
   } catch (error) {
-    console.error('Database cleanup failed:', error);
+    console.error("Database cleanup failed:", error);
     throw new Error(`Database cleanup failed: ${(error as Error).message}`);
   }
 }

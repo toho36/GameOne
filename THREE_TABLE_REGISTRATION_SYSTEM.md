@@ -2,7 +2,10 @@
 
 ## Overview
 
-This document outlines the complete three-table registration system schema design for the GameOne event management platform. The system supports individual and group registrations, friend registration workflows, guest registrations, and comprehensive payment processing with QR code generation.
+This document outlines the complete three-table registration system schema
+design for the GameOne event management platform. The system supports individual
+and group registrations, friend registration workflows, guest registrations, and
+comprehensive payment processing with QR code generation.
 
 ## System Architecture
 
@@ -10,16 +13,22 @@ The three-table registration system consists of:
 
 1. **PendingPayment** - Temporary payment requests with friend data storage
 2. **Registration** - Confirmed registrations (enhanced from original)
-3. **WaitingList** - Group-aware waiting list management (enhanced from original)
+3. **WaitingList** - Group-aware waiting list management (enhanced from
+   original)
 
 ## Table Definitions
 
 ### 1. PendingPayment Model
 
-The `PendingPayment` table serves as the initial entry point for all registration requests that require payment or involve friends. It temporarily stores all registration data while awaiting payment confirmation or admin approval.
+The `PendingPayment` table serves as the initial entry point for all
+registration requests that require payment or involve friends. It temporarily
+stores all registration data while awaiting payment confirmation or admin
+approval.
 
 #### Key Features:
-- **Friend Data Storage**: JSON field for storing friend registration information
+
+- **Friend Data Storage**: JSON field for storing friend registration
+  information
 - **Guest Registration Support**: Allows non-authenticated users to register
 - **QR Code Generation**: Built-in support for Slovak/Czech banking QR codes
 - **Expiration Management**: Automatic cleanup of expired payment requests
@@ -58,7 +67,7 @@ model PendingPayment {
   amount           Decimal       @db.Decimal(10, 2)
   currency         String        @default("EUR")
   paymentMethod    PaymentMethod @default(QR_CODE)
-  
+
   // Bank transfer details for QR code generation
   bankAccountId  String?
   variableSymbol String? @unique
@@ -73,13 +82,13 @@ model PendingPayment {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   expiresAt DateTime
-  
+
   // Payment tracking
   paidAt      DateTime?
   verifiedAt  DateTime?
   processedAt DateTime?
   cancelledAt DateTime?
-  
+
   // Promotion tracking (for waiting list scenarios)
   promotedFromWaitingList Boolean @default(false)
   waitingListPosition     Int?
@@ -87,6 +96,7 @@ model PendingPayment {
 ```
 
 #### Friend Data JSON Schema:
+
 ```json
 [
   {
@@ -101,24 +111,34 @@ model PendingPayment {
 
 ### 2. Enhanced Registration Model
 
-The enhanced `Registration` table stores confirmed registrations that have completed the payment process or been approved by admins. It includes comprehensive group registration support and links back to the original pending payment.
+The enhanced `Registration` table stores confirmed registrations that have
+completed the payment process or been approved by admins. It includes
+comprehensive group registration support and links back to the original pending
+payment.
 
 #### Key Features:
-- **Group Registration Support**: Hierarchical structure for group leaders and members
+
+- **Group Registration Support**: Hierarchical structure for group leaders and
+  members
 - **Guest Registration**: Support for non-authenticated users
 - **Payment Linking**: References to both Payment and PendingPayment records
 - **Waiting List Promotion**: Tracks registrations promoted from waiting list
 - **Friend Data Storage**: JSON storage for group leader's friend information
 
 #### Group Registration Structure:
+
 - **Group Leader**: `isGroupLeader = true`, contains `friendsData` JSON
-- **Group Members**: `isGroupLeader = false`, linked to leader via `groupLeaderId`
+- **Group Members**: `isGroupLeader = false`, linked to leader via
+  `groupLeaderId`
 
 ### 3. Enhanced WaitingList Model
 
-The enhanced `WaitingList` table supports group waiting list entries where multiple people can be added to the waiting list as a single unit and promoted together when sufficient capacity becomes available.
+The enhanced `WaitingList` table supports group waiting list entries where
+multiple people can be added to the waiting list as a single unit and promoted
+together when sufficient capacity becomes available.
 
 #### Key Features:
+
 - **Group Waiting List**: Support for groups requiring multiple spots
 - **Guest Waiting List**: Non-authenticated users can join waiting list
 - **Friend Data Storage**: JSON storage for group waiting list entries
@@ -187,6 +207,7 @@ The enhanced `WaitingList` table supports group waiting list entries where multi
 ## Supporting Enums and Types
 
 ### Enhanced RegistrationStatus Enum
+
 ```prisma
 enum RegistrationStatus {
   PENDING     // Awaiting approval/payment
@@ -199,6 +220,7 @@ enum RegistrationStatus {
 ```
 
 ### New RegistrationType Enum
+
 ```prisma
 enum RegistrationType {
   INDIVIDUAL    // Single person registration
@@ -208,6 +230,7 @@ enum RegistrationType {
 ```
 
 ### New RegistrationSource Enum
+
 ```prisma
 enum RegistrationSource {
   WEB_FORM                  // Standard web registration
@@ -218,6 +241,7 @@ enum RegistrationSource {
 ```
 
 ### PendingPaymentStatus Enum
+
 ```prisma
 enum PendingPaymentStatus {
   AWAITING_PAYMENT   // QR code generated, waiting for payment
@@ -251,14 +275,17 @@ enum PendingPaymentStatus {
 
 ### Cascade Behaviors
 
-- **User Deletion**: Cascade to all related records (preserves guest registrations)
+- **User Deletion**: Cascade to all related records (preserves guest
+  registrations)
 - **Event Deletion**: Cascade to all registration-related records
 - **Payment Deletion**: Set null in Registration (preserves registration data)
-- **Group Leader Deletion**: Cascade to group members (maintains group integrity)
+- **Group Leader Deletion**: Cascade to group members (maintains group
+  integrity)
 
 ## Index Strategy for Performance
 
 ### PendingPayment Indexes
+
 ```prisma
 @@index([eventId, status, createdAt])           // Event management queries
 @@index([userId, status])                       // User's pending payments
@@ -271,6 +298,7 @@ enum PendingPaymentStatus {
 ```
 
 ### Registration Indexes
+
 ```prisma
 @@index([eventId, status])                     // Event participant queries
 @@index([userId, status])                      // User's registrations
@@ -283,6 +311,7 @@ enum PendingPaymentStatus {
 ```
 
 ### WaitingList Indexes
+
 ```prisma
 @@index([eventId, position])                   // Waiting list order
 @@index([isGroupEntry, groupSize])             // Group waiting list management
@@ -293,16 +322,19 @@ enum PendingPaymentStatus {
 ## Race Condition Prevention
 
 ### Concurrent Registration Prevention
+
 - Use database transactions for all multi-table operations
 - Implement optimistic locking on capacity-critical operations
 - Use unique constraints on user-event combinations
 
 ### Payment Processing Safety
+
 - Unique constraint on `variableSymbol` prevents duplicate payments
 - Status-based state machine prevents invalid transitions
 - Transaction isolation ensures atomic payment confirmation
 
 ### Waiting List Position Management
+
 - Use sequential position assignment with gap handling
 - Implement position recalculation on deletions
 - Use advisory locks for position modifications
@@ -312,10 +344,11 @@ enum PendingPaymentStatus {
 ### Automated Cleanup Jobs
 
 1. **Expired Pending Payments**
+
    ```sql
-   UPDATE pending_payments 
-   SET status = 'EXPIRED' 
-   WHERE status = 'AWAITING_PAYMENT' 
+   UPDATE pending_payments
+   SET status = 'EXPIRED'
+   WHERE status = 'AWAITING_PAYMENT'
    AND expiresAt < NOW()
    ```
 
@@ -330,17 +363,20 @@ enum PendingPaymentStatus {
 ## Migration Strategy
 
 ### Phase 1: Schema Migration
+
 1. Add new tables (`PendingPayment`)
 2. Add new columns to existing tables
 3. Add new enums and constraints
 4. Create new indexes
 
 ### Phase 2: Data Migration
+
 1. Migrate existing registrations to new structure
 2. Update payment references
 3. Recalculate group relationships if needed
 
 ### Phase 3: Application Updates
+
 1. Update API endpoints to use new schema
 2. Implement new business logic
 3. Update UI components for friend registration
@@ -349,18 +385,23 @@ enum PendingPaymentStatus {
 ## Business Rules Implementation
 
 ### Capacity Management
+
 - Check total capacity including pending payments and confirmed registrations
 - Reserve spots for pending payments to prevent overbooking
 - Handle group registrations atomically (all or none)
 
 ### Payment Validation
+
 - Verify payment amounts match event pricing × participant count
 - Validate bank account assignments
 - Ensure QR code generation includes all required fields
 
 ### Friend Data Validation
+
 - Validate friend email formats and phone numbers
 - Check for duplicate friends within the same registration
 - Ensure friend data completeness before QR code generation
 
-This comprehensive three-table registration system provides a robust foundation for managing complex registration workflows while maintaining data integrity and supporting the full range of business requirements for the GameOne platform.
+This comprehensive three-table registration system provides a robust foundation
+for managing complex registration workflows while maintaining data integrity and
+supporting the full range of business requirements for the GameOne platform.

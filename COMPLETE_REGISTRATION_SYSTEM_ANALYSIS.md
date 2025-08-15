@@ -548,8 +548,12 @@ graph TD
 
 ```typescript
 function getEffectiveRegistrationCount(eventId: string) {
-  return registrations.filter(r =>
-    ['PAYMENT_SENT_AWAITING_VERIFICATION', 'PAYMENT_VERIFIED', 'VERIFIED_CASH'].includes(r.paymentStatus)
+  return registrations.filter((r) =>
+    [
+      "PAYMENT_SENT_AWAITING_VERIFICATION",
+      "PAYMENT_VERIFIED",
+      "VERIFIED_CASH",
+    ].includes(r.paymentStatus)
   ).length;
 }
 
@@ -614,7 +618,7 @@ function calculateCapacity(eventId: string) {
     total: event.capacity,
     registered: registeredCount,
     available: Math.max(0, availableSpots),
-    waitingListCount: getWaitingListCount(eventId)
+    waitingListCount: getWaitingListCount(eventId),
   };
 }
 ```

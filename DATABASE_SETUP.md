@@ -1,16 +1,19 @@
 # GameOne Database Setup Guide
 
-Complete guide for setting up PostgreSQL database with Neon on Vercel for the GameOne event management application.
+Complete guide for setting up PostgreSQL database with Neon on Vercel for the
+GameOne event management application.
 
 ## 🏗️ Architecture Overview
 
 ### Technology Stack
+
 - **Database**: Neon PostgreSQL (Serverless)
 - **ORM**: Prisma with optimized serverless configuration
 - **Deployment**: Vercel with automatic deployments
 - **Runtime**: Bun for enhanced performance
 
 ### Connection Strategy
+
 - **Development**: Direct connection to Neon with pooling
 - **Production**: Serverless-optimized connections with connection pooling
 - **Migrations**: Direct (non-pooled) connections for schema changes
@@ -18,6 +21,7 @@ Complete guide for setting up PostgreSQL database with Neon on Vercel for the Ga
 ## 🚀 Quick Start
 
 ### 1. Database Setup (Already Completed)
+
 You have already set up Neon PostgreSQL with the following configuration:
 
 ```env
@@ -56,6 +60,7 @@ bun run db:studio
 ## 📋 Available Scripts
 
 ### Development Scripts
+
 ```bash
 # Basic database operations
 bun run db:generate          # Generate Prisma client
@@ -79,6 +84,7 @@ bun run db:dev:refresh       # Refresh development database
 ```
 
 ### Production Scripts
+
 ```bash
 # Deployment scripts
 bun run db:deploy            # Deploy migrations and seed production
@@ -90,6 +96,7 @@ bun run vercel:deploy        # Deploy to Vercel with verification
 ## 🔧 Environment Configuration
 
 ### Development (.env.local)
+
 ```env
 # Neon Database URLs
 DATABASE_URL="postgres://neondb_owner:npg_LoO5Kg4yMPiQ@ep-ancient-base-a2km2l61-pooler.eu-central-1.aws.neon.tech/neondb?sslmode=require"
@@ -101,6 +108,7 @@ PRISMA_DEBUG="true"
 ```
 
 ### Production (Vercel Dashboard)
+
 Set these environment variables in your Vercel project dashboard:
 
 ```env
@@ -115,8 +123,9 @@ PRISMA_DEBUG="false"
 ## 🚀 Deployment Workflow
 
 ### Automatic Deployment
+
 1. **Push to Git**: Any push to main branch triggers Vercel deployment
-2. **Build Process**: 
+2. **Build Process**:
    - Vercel runs `bun run vercel:build`
    - Prisma client is generated
    - Next.js application is built
@@ -124,6 +133,7 @@ PRISMA_DEBUG="false"
 4. **Health Check**: Verify deployment at `/api/health`
 
 ### Manual Deployment
+
 ```bash
 # 1. Verify local changes
 bun run db:verify
@@ -142,6 +152,7 @@ bun run vercel:deploy
 The GameOne application includes comprehensive schemas for:
 
 ### Core Features
+
 - **User Management**: Users, roles, profiles with role-based permissions
 - **Event Management**: Events, categories, registrations, waiting lists
 - **Payment Processing**: Payments, bank accounts, Slovak banking integration
@@ -150,6 +161,7 @@ The GameOne application includes comprehensive schemas for:
 - **Audit Logging**: Comprehensive activity tracking
 
 ### Key Optimizations
+
 - **Indexes**: Strategic indexing for query performance
 - **Connection Pooling**: Optimized for serverless environments
 - **Data Types**: Efficient data types for Slovak/Czech markets
@@ -158,17 +170,20 @@ The GameOne application includes comprehensive schemas for:
 ## 🔍 Monitoring & Health Checks
 
 ### Health Check Endpoint
+
 ```bash
 curl https://your-app.vercel.app/api/health
 ```
 
 Response includes:
+
 - Database connectivity status
 - Application health metrics
 - Memory and performance data
 - Environment information
 
 ### Prisma Studio Access
+
 ```bash
 # Local development
 bun run db:studio
@@ -182,6 +197,7 @@ bun run db:studio
 ### Common Issues
 
 #### Connection Errors
+
 ```bash
 # Check connection string format
 echo $DATABASE_URL
@@ -194,6 +210,7 @@ bun run db:migrate:status
 ```
 
 #### Migration Issues
+
 ```bash
 # Reset migrations (DESTRUCTIVE - Development only)
 bun run db:migrate:reset
@@ -203,6 +220,7 @@ bunx prisma migrate resolve --applied "migration_name"
 ```
 
 #### Performance Issues
+
 ```bash
 # Check connection pooling
 echo $DATABASE_URL | grep "connection_limit"
@@ -214,11 +232,13 @@ curl localhost:3000/api/health | jq '.metrics'
 ### Environment-Specific Issues
 
 #### Development
+
 - Ensure `.env.local` has correct Neon credentials
 - Check Neon dashboard for connection limits
 - Verify local Bun installation
 
 #### Production
+
 - Verify environment variables in Vercel dashboard
 - Check Vercel function logs for database errors
 - Monitor Neon dashboard for performance metrics
@@ -226,16 +246,19 @@ curl localhost:3000/api/health | jq '.metrics'
 ## 🔐 Security Best Practices
 
 ### Connection Security
+
 - All connections use SSL/TLS encryption
 - Environment variables are securely managed
 - No credentials in source code
 
 ### Access Control
+
 - Role-based permission system
 - Audit logging for all database changes
 - Rate limiting on API endpoints
 
 ### Data Protection
+
 - Input validation with Prisma
 - SQL injection protection
 - GDPR-compliant data handling
@@ -243,11 +266,13 @@ curl localhost:3000/api/health | jq '.metrics'
 ## 📈 Performance Optimization
 
 ### Database Level
+
 - **Connection Pooling**: Configured for serverless
 - **Query Optimization**: Strategic indexes and query patterns
 - **Caching**: Application-level caching for frequently accessed data
 
 ### Application Level
+
 - **Prisma Configuration**: Optimized for serverless environments
 - **Connection Management**: Proper connection lifecycle
 - **Error Handling**: Retry logic for transient failures
@@ -255,9 +280,11 @@ curl localhost:3000/api/health | jq '.metrics'
 ## 🔄 Backup & Recovery
 
 ### Automatic Backups
+
 Neon provides automatic backups with point-in-time recovery.
 
 ### Manual Backup
+
 ```bash
 # Create manual backup
 bun run db:backup
@@ -268,16 +295,19 @@ bun run db:backup
 ## 📞 Support & Resources
 
 ### Documentation Links
+
 - [Neon Documentation](https://neon.tech/docs)
 - [Prisma Documentation](https://www.prisma.io/docs)
 - [Vercel Documentation](https://vercel.com/docs)
 
 ### Monitoring
+
 - **Neon Dashboard**: Monitor database performance
 - **Vercel Dashboard**: Application and function metrics
 - **Health Endpoint**: `/api/health` for status monitoring
 
 ### Emergency Contacts
+
 - **Database Issues**: Neon support through dashboard
 - **Deployment Issues**: Vercel support
 - **Application Issues**: Check Vercel function logs
@@ -297,4 +327,6 @@ bun run db:backup
 
 ---
 
-*This setup provides a production-ready, scalable database configuration optimized for the Slovak/Czech event management market with proper internationalization and payment processing support.*
+_This setup provides a production-ready, scalable database configuration
+optimized for the Slovak/Czech event management market with proper
+internationalization and payment processing support._

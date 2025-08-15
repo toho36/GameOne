@@ -27,31 +27,30 @@ export async function sendNotification(
   config: NotificationConfig = {}
 ): Promise<NotificationResult> {
   try {
-    console.log('Sending notification:', {
+    console.log("Sending notification:", {
       title: data.title,
       message: data.message,
       type: data.type,
       recipientId: data.recipientId,
       recipientEmail: data.recipientEmail,
-      config
+      config,
     });
 
     // TODO: Implement actual notification sending logic
     // This is a placeholder implementation
-    
+
     // Simulate async operation
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
     return {
       success: true,
-      messageId: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      messageId: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
     };
-
   } catch (error) {
-    console.error('Failed to send notification:', error);
+    console.error("Failed to send notification:", error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: error instanceof Error ? error.message : "Unknown error",
     };
   }
 }
