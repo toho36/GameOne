@@ -30,27 +30,27 @@
   - Add validation helpers for Slovak banking integration
   - _Requirements: 1.3, 2.2, 4.4_
 
-- [ ] 2. Build event creation interface
+- [x] 2. Build event creation interface
   - Create multi-step event creation form component
   - Implement language tabs for Czech/English content
   - Add real-time form validation and error handling
   - _Requirements: 1.1, 1.2, 4.1, 4.2_
 
-- [ ] 2.1 Create EventCreateForm component with multi-step navigation
+- [x] 2.1 Create EventCreateForm component with multi-step navigation
   - Build form component with React Hook Form integration
   - Implement step navigation with validation checkpoints
   - Add form state persistence across steps
   - Create form submission handler with optimistic updates
   - _Requirements: 1.1, 1.2, 1.4_
 
-- [ ] 2.2 Implement language tabs for internationalized content
+- [x] 2.2 Implement language tabs for internationalized content
   - Create LanguageTabs component for Czech/English switching
   - Implement translation field management in form state
   - Add validation for required translations per language
   - Create translation preview functionality
   - _Requirements: 4.1, 4.2, 4.4, 4.5_
 
-- [ ] 2.3 Build registration and payment configuration sections
+- [x] 2.3 Build registration and payment configuration sections
   - Create RegistrationSettings component with date pickers and capacity
     controls
   - Implement PaymentSettings component with bank account selection
