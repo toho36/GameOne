@@ -48,6 +48,59 @@
     "errorMessage": "Při načítání nástěnky došlo k chybě. Zkuste to prosím znovu nebo kontaktujte podporu, pokud problém přetrvává.",
     "loginAgain": "Přihlásit se znovu"
   },
+  "EventManagement": {
+    "title": "Správa událostí",
+    "subtitle": "Vytvářejte, spravujte a sledujte své události",
+    "createEvent": "Vytvořit událost",
+    "searchEvents": "Hledat události...",
+    "noEvents": "Nebyly nalezeny žádné události",
+    "noEventsDesc": "Začněte vytvořením své první události",
+    "loading": "Načítání událostí...",
+    "error": "Chyba při načítání událostí",
+    "errorDesc": "Při načítání vašich událostí došlo k problému. Zkuste to prosím znovu.",
+    "filters": {
+      "title": "Filtry",
+      "status": "Stav",
+      "type": "Typ",
+      "date": "Datum",
+      "location": "Umístění",
+      "clearAll": "Vymazat vše",
+      "apply": "Použít filtry",
+      "searchEvents": "Hledat události..."
+    },
+    "pagination": {
+      "showing": "Zobrazeno {from} až {to} z {total} událostí",
+      "previous": "Předchozí",
+      "next": "Další",
+      "page": "Strana {page} z {total}"
+    }
+  },
+  "EventCard": {
+    "status": {
+      "draft": "Koncept",
+      "published": "Publikováno",
+      "cancelled": "Zrušeno",
+      "completed": "Dokončeno"
+    },
+    "actions": {
+      "edit": "Upravit",
+      "view": "Zobrazit",
+      "manage": "Spravovat",
+      "delete": "Smazat"
+    },
+    "metrics": {
+      "registrations": "{count} registrací",
+      "capacity": "Kapacita: {capacity}",
+      "available": "{available} volných míst",
+      "full": "Událost je plná",
+      "waitingList": "{count} na čekací listině"
+    },
+    "dates": {
+      "starts": "Začíná {date}",
+      "ends": "Končí {date}",
+      "registration": "Registrace {start} - {end}"
+    }
+  },
   "Navigation": {
     "home": "Domů",
     "dashboard": "Nástěnka"

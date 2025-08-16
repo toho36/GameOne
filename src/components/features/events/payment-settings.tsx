@@ -27,7 +27,7 @@ import { Button } from "@/components/ui/button";
 import { EventFormData } from "@/lib/schemas/event-schemas";
 
 interface PaymentSettingsProps {
-  form: UseFormReturn<any>;
+  form: UseFormReturn<EventFormData>;
   bankAccounts?: Array<{
     id: string;
     name: string;
@@ -52,33 +52,20 @@ export function PaymentSettings({ form, bankAccounts = [], formData }: PaymentSe
 
   const canGenerateQR = selectedCurrency?.supportsQR && formData.price && formData.price > 0;
 
-  const generateVariableSymbol = (): string => {
-    // Generate a unique variable symbol for Slovak/Czech banking
-    const timestamp = Date.now().toString().slice(-8);
-    const random = Math.floor(Math.random() * 100)
-      .toString()
-      .padStart(2, "0");
-    return `${timestamp}${random}`;
-  };
-
-  const generateQRCodeData = () => {
+  // QR code generation is now handled server-side for security
+  const getQRCodePreview = () => {
     if (!selectedBankAccount || !formData.price) return null;
 
-    const variableSymbol = generateVariableSymbol();
-
-    // Slovak QR payment format (SPAYD)
-    const qrData = {
-      iban: selectedBankAccount.iban || selectedBankAccount.accountNumber,
+    // Show preview data without exposing sensitive banking details
+    return {
       amount: formData.price,
       currency: formData.currency,
-      variableSymbol,
       message: `Payment for: ${formData.title}`,
+      note: "QR codes will be generated securely on the server for each registration",
     };
-
-    return qrData;
   };
 
-  const qrData = generateQRCodeData();
+  const qrPreviewData = getQRCodePreview();
 
   return (
     <Card>
@@ -158,7 +145,7 @@ export function PaymentSettings({ form, bankAccounts = [], formData }: PaymentSe
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Currency *</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value ?? ""}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select currency" />
@@ -199,7 +186,7 @@ export function PaymentSettings({ form, bankAccounts = [], formData }: PaymentSe
                       <Building className="h-4 w-4" />
                       Bank Account *
                     </FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value ?? ""}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select bank account for payments" />
@@ -287,36 +274,36 @@ export function PaymentSettings({ form, bankAccounts = [], formData }: PaymentSe
                   </div>
                 </div>
 
-                {showQRPreview && qrData && (
+                {showQRPreview && qrPreviewData && (
                   <div className="rounded-lg bg-muted p-4">
-                    <h4 className="mb-3 font-medium">QR Code Preview Data</h4>
+                    <h4 className="mb-3 font-medium">QR Code Preview Information</h4>
                     <div className="grid grid-cols-1 gap-4 text-sm md:grid-cols-2">
                       <div className="space-y-2">
                         <div>
-                          <span className="text-muted-foreground">IBAN:</span>
-                          <div className="font-mono text-xs">{qrData.iban}</div>
+                          <span className="text-muted-foreground">Bank Account:</span>
+                          <div className="font-medium">{selectedBankAccount?.name}</div>
                         </div>
                         <div>
                           <span className="text-muted-foreground">Amount:</span>
                           <div className="font-medium">
-                            {qrData.amount} {qrData.currency}
+                            {qrPreviewData.amount} {qrPreviewData.currency}
                           </div>
                         </div>
                       </div>
                       <div className="space-y-2">
                         <div>
-                          <span className="text-muted-foreground">Variable Symbol:</span>
-                          <div className="font-mono text-xs">{qrData.variableSymbol}</div>
+                          <span className="text-muted-foreground">Payment Message:</span>
+                          <div className="text-xs">{qrPreviewData.message}</div>
                         </div>
-                        <div>
-                          <span className="text-muted-foreground">Message:</span>
-                          <div className="text-xs">{qrData.message}</div>
+                        <div className="space-y-1">
+                          <span className="text-muted-foreground">Security:</span>
+                          <div className="rounded bg-green-50 p-2 text-xs text-green-700">
+                            🔒 QR codes generated securely on server with unique variable symbols
+                          </div>
                         </div>
                       </div>
                     </div>
-                    <div className="mt-3 text-xs text-muted-foreground">
-                      * Actual QR codes will be generated dynamically for each registration
-                    </div>
+                    <div className="mt-3 text-xs text-muted-foreground">* {qrPreviewData.note}</div>
                   </div>
                 )}
               </div>

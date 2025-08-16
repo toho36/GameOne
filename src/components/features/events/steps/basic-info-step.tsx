@@ -25,7 +25,7 @@ import { EventFormData } from "@/lib/schemas/event-schemas";
 import { LanguageTabs } from "@/components/features/events/language-tabs";
 
 interface BasicInfoStepProps {
-  form: UseFormReturn<any>;
+  form: UseFormReturn<EventFormData>;
   locale: string;
   categories?: Array<{ id: string; name: string }>;
   formData: EventFormData;
@@ -105,7 +105,7 @@ export function BasicInfoStep({ form, locale, categories = [], formData }: Basic
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Category</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
+                <Select onValueChange={field.onChange} value={field.value ?? ""}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select category" />

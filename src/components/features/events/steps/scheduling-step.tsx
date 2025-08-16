@@ -22,7 +22,7 @@ import {
 import { EventFormData } from "@/lib/schemas/event-schemas";
 
 interface SchedulingStepProps {
-  form: UseFormReturn<any>;
+  form: UseFormReturn<EventFormData>;
   locale: string;
   formData: EventFormData;
 }

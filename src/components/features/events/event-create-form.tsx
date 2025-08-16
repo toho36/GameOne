@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, lazy, Suspense } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
@@ -9,18 +9,39 @@ import { ChevronLeft, ChevronRight, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
+import { FormErrorBoundary } from "@/components/ui/form-error-boundary";
 import { useToast } from "@/hooks/use-toast";
 import { eventFormSchema, type EventFormData } from "@/lib/schemas/event-schemas";
 
-// Step components
-import {
-  BasicInfoStep,
-  SchedulingStep,
-  LocationStep,
-  RegistrationStep,
-  PaymentStep,
-  ReviewStep,
-} from "./steps";
+// Lazy-loaded step components for better performance
+const BasicInfoStep = lazy(() =>
+  import("./steps/basic-info-step").then((m) => ({ default: m.BasicInfoStep }))
+);
+const SchedulingStep = lazy(() =>
+  import("./steps/scheduling-step").then((m) => ({ default: m.SchedulingStep }))
+);
+const LocationStep = lazy(() =>
+  import("./steps/location-step").then((m) => ({ default: m.LocationStep }))
+);
+const RegistrationStep = lazy(() =>
+  import("./steps/registration-step").then((m) => ({ default: m.RegistrationStep }))
+);
+const PaymentStep = lazy(() =>
+  import("./steps/payment-step").then((m) => ({ default: m.PaymentStep }))
+);
+const ReviewStep = lazy(() =>
+  import("./steps/review-step").then((m) => ({ default: m.ReviewStep }))
+);
+
+// Loading component for step transitions
+const StepLoader = () => (
+  <div className="flex items-center justify-center py-12">
+    <div className="space-y-4 text-center">
+      <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+      <p className="text-sm text-muted-foreground">Loading step...</p>
+    </div>
+  </div>
+);
 
 interface EventCreateFormProps {
   locale: string;
@@ -47,8 +68,8 @@ export function EventCreateForm({
   const router = useRouter();
   const { toast } = useToast();
 
-  const form = useForm({
-    resolver: zodResolver(eventFormSchema),
+  const form = useForm<EventFormData>({
+    resolver: zodResolver(eventFormSchema) as any,
     defaultValues: {
       title: "",
       description: undefined,
@@ -246,13 +267,21 @@ export function EventCreateForm({
             <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
               {/* Current Step Content */}
               {CurrentStepComponent && (
-                <CurrentStepComponent
-                  form={form}
-                  locale={locale}
-                  bankAccounts={bankAccounts}
-                  categories={categories}
-                  formData={watchedValues as EventFormData}
-                />
+                <FormErrorBoundary
+                  fallbackTitle="Step Loading Error"
+                  fallbackMessage={`Failed to load ${FORM_STEPS[currentStep]?.title} step. Please try again or contact support.`}
+                  onRetry={() => window.location.reload()}
+                >
+                  <Suspense fallback={<StepLoader />}>
+                    <CurrentStepComponent
+                      form={form}
+                      locale={locale}
+                      bankAccounts={bankAccounts}
+                      categories={categories}
+                      formData={watchedValues as EventFormData}
+                    />
+                  </Suspense>
+                </FormErrorBoundary>
               )}
 
               {/* Navigation Buttons */}

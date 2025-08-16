@@ -7,7 +7,7 @@ import { EventFormData } from "@/lib/schemas/event-schemas";
 import { RegistrationSettings } from "@/components/features/events/registration-settings";
 
 interface RegistrationStepProps {
-  form: UseFormReturn<any>;
+  form: UseFormReturn<EventFormData>;
   locale: string;
   formData: EventFormData;
 }
