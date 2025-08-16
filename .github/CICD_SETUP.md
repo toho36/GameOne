@@ -22,36 +22,28 @@ Runs your comprehensive pre-push checks:
 - Database schema validation
 - Unit tests
 
-### 2. 🏗️ Build Verification (Required)
-
-- Builds the Next.js application
-- Verifies build artifacts
-- Analyzes build size
-
-### 3. 🗄️ Database Validation (Required)
+### 2. 🗄️ Database Validation (Required)
 
 - Sets up test PostgreSQL database in CI
 - Validates Prisma schema and migrations
 - Ensures database changes don't break the app
 
-### 4. 🔒 Security Audit (Optional)
+### 3. 🏗️ Build Verification (Required)
 
-- Runs security audit on dependencies
-- Won't block merges but provides warnings
-
-### 5. ✅ CI Pipeline Success (Required)
-
-- Summary job that confirms all critical checks passed
-- This is the final gate before merge is allowed
+- Builds the Next.js application
+- Verifies production build works
+- Included in the Pre-Push Validation job
 
 ## Auto-Merge Setup
 
 ### Automatic Enabling
+
 - **Repository owners**: Auto-merge enables automatically for your PRs
 - **Contributors**: Add the `auto-merge` label to enable auto-merge
 - **Non-draft PRs only**: Draft PRs won't auto-merge
 
 ### How It Works
+
 1. When you create/update a PR, auto-merge gets enabled
 2. GitHub waits for all required status checks to pass
 3. Once everything is green, GitHub automatically merges
@@ -61,7 +53,7 @@ Runs your comprehensive pre-push checks:
 
 If auto-merge fails, check:
 
-1. **Repository Settings**: 
+1. **Repository Settings**:
    - Go to Settings → General → Pull Requests
    - Enable "Allow auto-merge"
    - Enable "Allow squash merging"
@@ -74,15 +66,34 @@ If auto-merge fails, check:
    - Run the "🛡️ Setup Branch Protection" workflow first
    - Ensure all required status checks are configured
 
-## Branch Protection Rules
+## ⚠️ CRITICAL: Branch Protection Rules
 
-To activate branch protection (run once):
+**IMPORTANT**: Branch protection must be set up to prevent merging with failed
+CI checks.
+
+### Method 1: Automatic Setup (Recommended)
 
 1. Go to GitHub Actions in your repository
-2. Find "🛡️ Setup Branch Protection" workflow
-3. Click "Run workflow"
-4. Select branch (default: master)
-5. Click "Run workflow"
+2. Find "🛡️ Apply Branch Protection Now" workflow
+3. Click "Run workflow" → "Run workflow"
+4. This applies protection rules immediately
+
+### Method 2: Manual Script
+
+```bash
+# Run from repository root
+./scripts/setup-branch-protection.sh
+```
+
+### Method 3: Manual GitHub Settings
+
+1. Go to Settings → Branches
+2. Add rule for `master` branch
+3. Enable "Require status checks to pass before merging"
+4. Select this required check:
+   - 🚀 Pre-Push Validation (includes all quality checks + build)
+5. Enable "Require branches to be up to date before merging"
+6. Enable "Restrict pushes that create files"
 
 This will configure STRICT ENFORCEMENT (Solo Development Mode):
 

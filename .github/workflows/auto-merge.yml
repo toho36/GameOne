@@ -31,4 +31,4 @@ jobs:
         run: |
           echo "🤖 Auto-merge has been enabled for this PR"
           echo "🎉 The PR will automatically merge when all required checks pass"
-          echo "📋 Required checks: Pre-Push Validation, Build Verification, CI Pipeline Success"
+          echo "📋 Required checks: Pre-Push Validation (includes all quality checks + build)"
