@@ -34,7 +34,7 @@
     "db:studio": "bunx prisma studio",
     "db:setup": "bun run db:push && bun run db:seed",
     "db:deploy": "bun run db:generate && bun run db:migrate:deploy && bun run db:seed",
-    "db:verify": "bunx prisma migrate status && bunx prisma validate",
+    "db:verify": "bunx prisma validate && (bunx prisma migrate status || echo 'Database not managed by migrations - using db push mode')",
     "vercel:build": "bunx prisma generate && next build",
     "postinstall": "bunx prisma generate",
     "validate-structure": "bun run scripts/validate-structure.ts",

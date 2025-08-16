@@ -46,13 +46,33 @@ Runs your comprehensive pre-push checks:
 
 ## Auto-Merge Setup
 
-### For Repository Owners
+### Automatic Enabling
+- **Repository owners**: Auto-merge enables automatically for your PRs
+- **Contributors**: Add the `auto-merge` label to enable auto-merge
+- **Non-draft PRs only**: Draft PRs won't auto-merge
 
-PRs from the repository owner automatically enable auto-merge when checks pass.
+### How It Works
+1. When you create/update a PR, auto-merge gets enabled
+2. GitHub waits for all required status checks to pass
+3. Once everything is green, GitHub automatically merges
+4. Uses squash merge to keep history clean
 
-### For Contributors
+### Troubleshooting Auto-Merge
 
-Add the `auto-merge` label to your PR to enable automatic merging.
+If auto-merge fails, check:
+
+1. **Repository Settings**: 
+   - Go to Settings → General → Pull Requests
+   - Enable "Allow auto-merge"
+   - Enable "Allow squash merging"
+
+2. **Workflow Permissions**:
+   - Repository has Actions permissions enabled
+   - Workflows have write access to pull requests
+
+3. **Branch Protection**:
+   - Run the "🛡️ Setup Branch Protection" workflow first
+   - Ensure all required status checks are configured
 
 ## Branch Protection Rules
 

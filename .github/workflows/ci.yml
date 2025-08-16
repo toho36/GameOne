@@ -43,8 +43,8 @@ jobs:
         run: |
           # Generate Prisma client
           bunx prisma generate
-          # Push schema to test database
-          bunx prisma db push
+          # Push schema to test database (creates tables without migrations)
+          bunx prisma db push --force-reset
         env:
           DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/test_gameone"
           DIRECT_URL: "postgresql://postgres:postgres@localhost:5432/test_gameone"
