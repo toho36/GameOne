@@ -29,7 +29,8 @@
       "Bash(cat:*)",
       "Bash(curl:*)",
       "Bash(touch:*)",
-      "Bash(chmod:*)"
+      "Bash(chmod:*)",
+      "Bash(prisma validate:*)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"

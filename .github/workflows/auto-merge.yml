@@ -2,29 +2,25 @@ name: 🤖 Auto-Merge PR
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [opened, synchronize, reopened, ready_for_review]
     branches: [master]
 
+permissions:
+  contents: write
+  pull-requests: write
+  checks: read
+
 jobs:
-  auto-merge:
-    name: 🤖 Auto-Merge on Success
+  enable-auto-merge:
+    name: 🤖 Enable Auto-Merge
     runs-on: ubuntu-latest
-    if: github.event.pull_request.user.login == github.repository_owner || contains(github.event.pull_request.labels.*.name, 'auto-merge')
+    if: >
+      !github.event.pull_request.draft &&
+      (github.event.pull_request.user.login == github.repository_owner || 
+       contains(github.event.pull_request.labels.*.name, 'auto-merge'))
 
     steps:
-      - name: 📦 Checkout code
-        uses: actions/checkout@v4
-
-      - name: ⏳ Wait for CI checks
-        uses: fountainhead/action-wait-for-check@v1.2.0
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          checkName: "✅ CI Pipeline Success"
-          ref: ${{ github.event.pull_request.head.sha }}
-          timeoutSeconds: 1800 # 30 minutes max wait
-
       - name: 🤖 Enable auto-merge
-        if: success()
         uses: peter-evans/enable-pull-request-automerge@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -32,8 +28,7 @@ jobs:
           merge-method: squash
 
       - name: ✅ Auto-merge enabled
-        if: success()
         run: |
           echo "🤖 Auto-merge has been enabled for this PR"
           echo "🎉 The PR will automatically merge when all required checks pass"
-          echo "📋 Required checks: Pre-Push Validation, Build Verification"
+          echo "📋 Required checks: Pre-Push Validation, Build Verification, CI Pipeline Success"
