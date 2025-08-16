@@ -17,10 +17,10 @@ interface LanguageSwitcherProps {
   variant?: "default" | "compact";
 }
 
-export function LanguageSwitcher({ 
-  currentLocale, 
+export function LanguageSwitcher({
+  currentLocale,
   className,
-  variant = "default"
+  variant = "default",
 }: LanguageSwitcherProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -32,7 +32,12 @@ export function LanguageSwitcher({
 
   if (variant === "compact") {
     return (
-      <div className={cn("flex gap-1 rounded-md border border-gray-200 bg-white p-0.5 shadow-sm", className)}>
+      <div
+        className={cn(
+          "flex gap-1 rounded-md border border-gray-200 bg-white p-0.5 shadow-sm",
+          className
+        )}
+      >
         {routing.locales.map((locale) => (
           <Button
             key={locale}
@@ -43,7 +48,7 @@ export function LanguageSwitcher({
               "h-7 min-w-[40px] text-xs font-medium transition-all",
               locale === currentLocale
                 ? "bg-blue-600 text-white shadow-sm"
-                : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
             )}
             aria-label={t("switchTo", { language: localeNames[locale] })}
           >
@@ -55,7 +60,12 @@ export function LanguageSwitcher({
   }
 
   return (
-    <div className={cn("flex gap-1 rounded-lg border border-gray-200 bg-white p-1 shadow-sm", className)}>
+    <div
+      className={cn(
+        "flex gap-1 rounded-lg border border-gray-200 bg-white p-1 shadow-sm",
+        className
+      )}
+    >
       {routing.locales.map((locale) => (
         <Button
           key={locale}
@@ -66,7 +76,7 @@ export function LanguageSwitcher({
             "min-w-[60px] text-sm font-medium transition-all",
             locale === currentLocale
               ? "bg-blue-600 text-white shadow-sm"
-              : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+              : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
           )}
           aria-label={t("switchTo", { language: localeNames[locale] })}
         >

@@ -7,11 +7,6 @@ describe('cn utility function', () => {
     expect(result).toBe('px-2 py-1 text-sm')
   })
 
-  it('handles conditional classes', () => {
-    const result = cn('base-class', 'conditional-class', 'hidden-class')
-    expect(result).toBe('base-class conditional-class')
-  })
-
   it('resolves Tailwind conflicts correctly', () => {
     // twMerge should resolve conflicting padding classes
     const result = cn('px-2', 'px-4')

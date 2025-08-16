@@ -3,21 +3,21 @@
  * Optimized for Vercel deployment with connection pooling
  */
 
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from "@prisma/client";
 
 // Prisma client singleton
 export const prisma = new PrismaClient({
-  log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+  log: process.env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
 });
 
 // Graceful shutdown
-process.on('beforeExit', async () => {
+process.on("beforeExit", async () => {
   await prisma.$disconnect();
 });
 
 // Health check function
 export async function checkDatabaseHealth(): Promise<{
-  status: 'healthy' | 'unhealthy';
+  status: "healthy" | "unhealthy";
   responseTime: number;
   error?: string;
 }> {
@@ -26,14 +26,14 @@ export async function checkDatabaseHealth(): Promise<{
   try {
     await prisma.$queryRaw`SELECT 1`;
     return {
-      status: 'healthy',
-      responseTime: Date.now() - startTime
+      status: "healthy",
+      responseTime: Date.now() - startTime,
     };
   } catch (error) {
     return {
-      status: 'unhealthy',
+      status: "unhealthy",
       responseTime: Date.now() - startTime,
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: error instanceof Error ? error.message : "Unknown error",
     };
   }
 }
@@ -73,9 +73,9 @@ export async function paginate<T>(
       include,
       orderBy,
       skip: offset,
-      take: limit
+      take: limit,
     }),
-    model.count({ where })
+    model.count({ where }),
   ]);
 
   const totalPages = Math.ceil(total / limit);
@@ -88,7 +88,7 @@ export async function paginate<T>(
       total,
       totalPages,
       hasNext: page < totalPages,
-      hasPrev: page > 1
-    }
+      hasPrev: page > 1,
+    },
   };
 }
