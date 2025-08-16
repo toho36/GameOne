@@ -3,11 +3,11 @@
 ## Overview
 
 This repository now has a **STRICT** automated CI/CD pipeline that runs the same
-comprehensive checks as your local pre-push script. 
+comprehensive checks as your local pre-push script.
 
-🔒 **ZERO TOLERANCE**: PRs cannot be manually merged until ALL checks pass.
-🚫 **NO BYPASSING**: Even admins must follow the rules.
-✅ **AUTOMATION ONLY**: Merge only happens when everything is green.
+🔒 **ZERO TOLERANCE**: PRs cannot be manually merged until ALL checks pass. 🚫
+**NO BYPASSING**: Even admins must follow the rules. ✅ **AUTOMATION ONLY**:
+Merge only happens when everything is green.
 
 ## What Happens on Every PR
 
@@ -67,7 +67,8 @@ This will configure STRICT ENFORCEMENT (Solo Development Mode):
 - 💬 **Require conversation resolution**
 - ⚠️ **NO MANUAL MERGE BUTTON** until all CI checks pass
 
-**Solo Development Mode**: You can merge your own PRs once all CI checks are green!
+**Solo Development Mode**: You can merge your own PRs once all CI checks are
+green!
 
 ## Local Development
 
