@@ -4,9 +4,9 @@ on:
   workflow_dispatch: # Manual trigger only
     inputs:
       branch:
-        description: 'Branch to protect'
+        description: "Branch to protect"
         required: true
-        default: 'master'
+        default: "master"
 
 jobs:
   setup-protection:
@@ -21,7 +21,7 @@ jobs:
           script: |
             const { owner, repo } = context.repo;
             const branch = '${{ inputs.branch }}';
-            
+
             try {
               await github.rest.repos.updateBranchProtection({
                 owner,
