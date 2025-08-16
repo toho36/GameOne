@@ -30,9 +30,7 @@ jobs:
                 required_status_checks: {
                   strict: true,
                   contexts: [
-                    "🚀 Pre-Push Validation",
-                    "🏗️ Build Verification", 
-                    "✅ CI Pipeline Success"
+                    "🚀 Pre-Push Validation"
                   ]
                 },
                 enforce_admins: true, // Even admins must follow the rules
@@ -49,9 +47,7 @@ jobs:
               console.log(`✅ Branch protection rules updated for ${branch}`);
               console.log('🔒 STRICT MODE ENABLED - No manual merges allowed!');
               console.log('🔒 Required status checks:');
-              console.log('  - 🚀 Pre-Push Validation');
-              console.log('  - 🏗️ Build Verification'); 
-              console.log('  - ✅ CI Pipeline Success');
+              console.log('  - 🚀 Pre-Push Validation (includes all checks + build)');
               console.log('📋 Reviews: DISABLED (solo development mode)');
               console.log('🔒 Enforce for admins: YES (even admins must pass checks)');
               console.log('🚫 Force pushes: disabled');
