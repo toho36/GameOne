@@ -1,6 +1,36 @@
 #!/usr/bin/env bun
 /* eslint-disable no-console */
 
+// Load environment variables from .env file
+import { readFileSync } from "fs";
+import { resolve } from "path";
+
+// Simple .env file loader
+function loadEnvFile() {
+  try {
+    const envPath = resolve(process.cwd(), ".env");
+    const envContent = readFileSync(envPath, "utf-8");
+
+    envContent.split("\n").forEach((line) => {
+      const trimmed = line.trim();
+      if (trimmed && !trimmed.startsWith("#")) {
+        const [key, ...valueParts] = trimmed.split("=");
+        if (key && valueParts.length > 0) {
+          const value = valueParts.join("=").replace(/^["']|["']$/g, "");
+          if (!process.env[key]) {
+            process.env[key] = value;
+          }
+        }
+      }
+    });
+  } catch {
+    console.log("⚠️  No .env file found or error reading it");
+  }
+}
+
+// Load environment variables at startup
+loadEnvFile();
+
 /**
  * Comprehensive Pre-Push Checks Script
  *
@@ -43,13 +73,30 @@ class PrePushChecker {
       { name: "ESLint Code Quality", command: "lint", canFix: true, fixCommand: "lint:fix" },
       { name: "Prettier Formatting", command: "format:check", canFix: true, fixCommand: "format" },
       { name: "Project Structure", command: "validate-structure", canFix: false },
-      { name: "Database Schema", command: "db:verify", canFix: false, optional: true },
+      {
+        name: "Database Schema",
+        command: "db:verify",
+        canFix: false,
+        optional: true,
+      },
       { name: "Unit Tests", command: "test --run", canFix: false, optional: false },
     ];
 
     let allPassed = true;
 
     for (const check of checks) {
+      // Skip database checks only if missing environment variables (not in CI anymore)
+      if (check.optional && (!process.env["DATABASE_URL"] || !process.env["DIRECT_URL"])) {
+        console.log(`⏭️  Skipping ${check.name} (missing database environment variables)`);
+        this.results.push({
+          name: check.name,
+          passed: true,
+          duration: 0,
+          warning: "Skipped due to missing database environment variables",
+        });
+        continue;
+      }
+
       const result = await this.runCheck(check);
       this.results.push(result);
 

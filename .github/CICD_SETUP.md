@@ -28,12 +28,18 @@ Runs your comprehensive pre-push checks:
 - Verifies build artifacts
 - Analyzes build size
 
-### 3. 🔒 Security Audit (Optional)
+### 3. 🗄️ Database Validation (Required)
+
+- Sets up test PostgreSQL database in CI
+- Validates Prisma schema and migrations
+- Ensures database changes don't break the app
+
+### 4. 🔒 Security Audit (Optional)
 
 - Runs security audit on dependencies
 - Won't block merges but provides warnings
 
-### 4. ✅ CI Pipeline Success (Required)
+### 5. ✅ CI Pipeline Success (Required)
 
 - Summary job that confirms all critical checks passed
 - This is the final gate before merge is allowed
