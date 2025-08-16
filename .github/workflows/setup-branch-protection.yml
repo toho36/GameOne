@@ -36,12 +36,7 @@ jobs:
                   ]
                 },
                 enforce_admins: true, // Even admins must follow the rules
-                required_pull_request_reviews: {
-                  required_approving_review_count: 1,
-                  dismiss_stale_reviews: true,
-                  require_code_owner_reviews: false,
-                  require_last_push_approval: true // Require approval after latest push
-                },
+                required_pull_request_reviews: null, // Disabled for solo development
                 restrictions: null,
                 allow_force_pushes: false,
                 allow_deletions: false,
@@ -57,12 +52,12 @@ jobs:
               console.log('  - 🚀 Pre-Push Validation');
               console.log('  - 🏗️ Build Verification'); 
               console.log('  - ✅ CI Pipeline Success');
-              console.log('📋 Required: 1 approving review');
+              console.log('📋 Reviews: DISABLED (solo development mode)');
               console.log('🔒 Enforce for admins: YES (even admins must pass checks)');
-              console.log('🔒 Require approval after latest push: YES');
               console.log('🚫 Force pushes: disabled');
               console.log('💬 Require conversation resolution: enabled');
-              console.log('⚠️  NO BYPASSING ALLOWED - All checks must pass!');
+              console.log('⚠️  ONLY CI CHECKS REQUIRED - All must pass!');
+              console.log('👤 Solo dev: You can merge once CI is green');
               
             } catch (error) {
               console.error('❌ Failed to setup branch protection:', error.message);

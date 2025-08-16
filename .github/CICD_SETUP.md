@@ -58,15 +58,16 @@ To activate branch protection (run once):
 4. Select branch (default: master)
 5. Click "Run workflow"
 
-This will configure STRICT ENFORCEMENT:
+This will configure STRICT ENFORCEMENT (Solo Development Mode):
 
-- ✅ Required status checks (all CI jobs must pass)
-- 📋 Require 1 approving review
-- 🔒 **Enforce for admins** (even admins cannot bypass)
-- 🔒 **Require approval after latest push** (fresh approval needed)
-- 🚫 Block force pushes
-- 💬 Require conversation resolution
-- ⚠️ **NO MANUAL MERGE BUTTON** until all checks pass
+- ✅ **Required status checks** (all CI jobs must pass)
+- 👤 **Reviews: DISABLED** (configured for solo development)
+- 🔒 **Enforce for admins** (even admins cannot bypass CI checks)
+- 🚫 **Block force pushes**
+- 💬 **Require conversation resolution**
+- ⚠️ **NO MANUAL MERGE BUTTON** until all CI checks pass
+
+**Solo Development Mode**: You can merge your own PRs once all CI checks are green!
 
 ## Local Development
 
