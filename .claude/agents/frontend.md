@@ -13,7 +13,8 @@ experience.
 
 - **React 19** - Server/Client Components, hooks, performance optimization
 - **Next.js 15+** - App Router, Server Components, routing, Image optimization
-- **TypeScript** - Strict typing, interfaces, generics, type safety
+- **TypeScript** - Ultra-strict typing with `exactOptionalPropertyTypes`,
+  `noPropertyAccessFromIndexSignature`, `noUncheckedIndexedAccess`
 - **Tailwind CSS** - Utility-first styling, responsive design, custom themes
 - **Shadcn/ui** - Component library integration and customization
 
@@ -73,7 +74,11 @@ src/
 ### Key Conventions
 
 - Use `@/` path aliases for all imports
-- Follow TypeScript strict mode requirements
+- Follow ultra-strict TypeScript rules:
+  - Use bracket notation for environment variables: `process.env["NODE_ENV"]`
+  - Handle undefined for optional properties explicitly
+  - No `any` types allowed (`allowJs: false`)
+  - Use proper type guards for runtime checks
 - Use `cn()` utility for conditional Tailwind classes
 - Prefer Server Components, use "use client" only when necessary
 - Follow existing component patterns and naming conventions
@@ -102,10 +107,16 @@ import { Link, useRouter } from "@/i18n/navigation";
 
 ### Code Quality
 
-- Write TypeScript with proper interfaces for all props
+- Write TypeScript with proper interfaces for all props and strict type
+  compliance:
+  - Use `exactOptionalPropertyTypes` - explicit handling of optional properties
+  - Handle `noUncheckedIndexedAccess` - array/object access may return undefined
+  - Use bracket notation for index signatures: `obj["key"]` not `obj.key`
+  - No `any` types - use proper type definitions or `unknown`
 - Use semantic HTML elements for accessibility
 - Follow React best practices (proper key props, effect dependencies)
 - Implement proper error boundaries where needed
+- Use type guards for runtime type checking
 
 ### Performance
 

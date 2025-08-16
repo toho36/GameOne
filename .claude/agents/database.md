@@ -12,11 +12,14 @@ security.
 ### Database Technologies
 
 - **PostgreSQL** - Advanced features, JSON support, full-text search, extensions
-- **Prisma ORM** - Schema design, migrations, query optimization, type safety
+- **Prisma ORM** - Schema design, migrations, query optimization, ultra-strict
+  type safety
 - **Database Design** - Normalization, relationships, indexing strategies
 - **Performance Optimization** - Query tuning, connection pooling, caching
 - **Data Migration** - Schema evolution, data transformation, rollback
   strategies
+- **Ultra-Strict TypeScript** - `exactOptionalPropertyTypes`,
+  `noPropertyAccessFromIndexSignature`, `noUncheckedIndexedAccess`
 
 ### Database Specializations
 
@@ -201,15 +204,16 @@ export class UserRepository {
 ### Connection Management
 
 ```typescript
-// Prisma connection configuration
+// Prisma connection configuration with strict typing
 export const prisma = new PrismaClient({
   datasources: {
     db: {
-      url: process.env.DATABASE_URL,
+      // Environment variables must use bracket notation
+      url: process.env["DATABASE_URL"],
     },
   },
   log:
-    process.env.NODE_ENV === "development"
+    process.env["NODE_ENV"] === "development"
       ? ["query", "error", "warn"]
       : ["error"],
 });
@@ -218,7 +222,7 @@ export const prisma = new PrismaClient({
 export const prismaEdge = new PrismaClient({
   datasources: {
     db: {
-      url: process.env.DATABASE_URL + "?connection_limit=1",
+      url: process.env["DATABASE_URL"] + "?connection_limit=1",
     },
   },
 });

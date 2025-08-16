@@ -1,6 +1,6 @@
 
 import { describe, it, expect, beforeEach } from 'vitest'
-import { GET } from '../route'
+import { GET } from '@/app/api/auth/me/route'
 
 // Mock is already set up in setup.ts
 describe('Auth Me API', () => {

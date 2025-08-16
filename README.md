@@ -1,69 +1,91 @@
-# BunPlate
+# 🎮 GameOne - Event Management System
 
-A comprehensive modern web application boilerplate built with Bun runtime and
-optimized for Vercel deployment. This boilerplate includes everything you need
-to build scalable, production-ready web applications with the latest
-technologies and best practices.
+A modern, production-ready event management platform built with Next.js, Kinde
+Auth, and PostgreSQL. This comprehensive system handles event registration,
+payments, user management, and internationalization with enterprise-grade
+security and performance.
 
 ## 🚀 Features
 
-### Core Technologies
+### 🎯 Core Functionality
 
-- **[Bun](https://bun.sh/)** - Fast JavaScript runtime for development and build
-  processes
-- **[Next.js 14+](https://nextjs.org/)** - React framework with App Router and
-  Server Components
-- **[TypeScript](https://www.typescriptlang.org/)** - Type-safe JavaScript with
-  strict configuration
-- **[Tailwind CSS](https://tailwindcss.com/)** - Utility-first CSS framework
-  with custom design system
-- **[Prisma](https://prisma.io/)** - Next-generation ORM for PostgreSQL
-- **[NextAuth.js](https://next-auth.js.org/)** - Complete authentication
-  solution
+- **Event Management** - Create, manage, and publish events
+- **User Registration** - Seamless event registration with approval workflows
+- **Payment Processing** - QR codes, bank transfers, and payment tracking
+- **Waiting Lists** - Manage event capacity and automatic promotions
+- **User Management** - Role-based access control and permissions
+- **Internationalization** - Czech and English language support
 
-### Development Experience
+### 🔐 Authentication & Security
 
-- **ESLint & Prettier** - Code linting and formatting with modern rules
-- **Vitest** - Fast unit testing with React Testing Library
-- **Playwright** - Reliable end-to-end testing
-- **TypeScript Strict Mode** - Maximum type safety
-- **Path Mapping** - Clean imports with `@/` prefix
-- **Hot Module Replacement** - Fast development with Turbopack
+- **Kinde Auth** - Modern authentication with SSO and user management
+- **Role-Based Access Control** - Granular permissions system
+- **Secure Payments** - PCI DSS compliant payment processing
+- **Rate Limiting** - API protection and abuse prevention
+- **Data Encryption** - Field-level encryption for sensitive data
 
-### Production Ready
+### 📧 Communication
 
-- **Vercel Optimization** - Configured for Vercel's edge network
-- **Docker Support** - Multi-stage builds for development and production
-- **CI/CD Pipeline** - GitHub Actions for testing and deployment
-- **SEO Optimization** - Metadata API, sitemap, and structured data
-- **Performance** - Image optimization, ISR, and caching strategies
-- **Security** - CSP headers, CSRF protection, and authentication
-- **Accessibility** - ARIA compliance and keyboard navigation
+- **Resend Email** - Reliable email delivery with templates
+- **Notification System** - Automated event reminders and updates
+- **Email Templates** - Professional, customizable email designs
+- **Rate Limiting** - Controlled email sending to prevent spam
 
-### UI/UX
+### 🗄️ Data Management
 
+- **PostgreSQL Database** - Robust, scalable data storage
+- **Prisma ORM** - Type-safe database operations
+- **Data Migrations** - Safe schema evolution
+- **Audit Logging** - Complete activity tracking
+- **Backup & Recovery** - Automated data protection
+
+## 🛠️ Tech Stack
+
+### Frontend
+
+- **Next.js 15+** - React framework with App Router
+- **React 18** - Latest React features and hooks
+- **TypeScript** - Strict type safety and development experience
+- **Tailwind CSS** - Utility-first CSS framework
 - **Shadcn/ui** - Beautiful, accessible component library
-- **Dark Mode** - System-aware theme switching
-- **Responsive Design** - Mobile-first approach
-- **Loading States** - Skeleton screens and suspense boundaries
-- **Error Boundaries** - Graceful error handling
-- **Toast Notifications** - User feedback system
+
+### Backend & Database
+
+- **PostgreSQL** - Production-ready relational database
+- **Prisma** - Next-generation ORM with type safety
+- **Next.js API Routes** - Serverless API endpoints
+- **Bun Runtime** - Fast JavaScript runtime for development
+
+### Authentication & Services
+
+- **Kinde Auth** - Complete authentication solution
+- **Resend** - Modern email API service
+- **JWT Tokens** - Secure session management
+- **OAuth 2.0** - Industry-standard authentication
+
+### Development & Quality
+
+- **ESLint** - Code quality and consistency
+- **Prettier** - Code formatting
+- **TypeScript Strict Mode** - Maximum type safety
+- **GitHub Actions** - Automated CI/CD pipeline
 
 ## 📦 Getting Started
 
 ### Prerequisites
 
-- **Bun** 1.0+ or Node.js 18+
-- **PostgreSQL** database
-- **Git** for version control
+- **Bun** (>= 1.0.0) - [Download](https://bun.sh)
+- **Node.js** (>= 18.0.0) - for compatibility
+- **PostgreSQL** database - local or hosted
+- **Git** - for version control
 
-### Installation
+### Quick Start
 
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/your-username/bunplate.git
-   cd bunplate
+   git clone <your-repo-url> gameone
+   cd gameone
    ```
 
 2. **Install dependencies**
@@ -76,204 +98,235 @@ technologies and best practices.
 
    ```bash
    cp .env.example .env.local
-   ```
-
-   Update the following variables in `.env.local`:
-
-   ```env
-   DATABASE_URL="postgresql://username:password@localhost:5432/bunplate"
-   NEXTAUTH_SECRET="your-secret-key-here"
-   NEXTAUTH_URL="http://localhost:3000"
+   # Edit .env.local with your configuration
    ```
 
 4. **Set up the database**
 
    ```bash
+   bun run db:generate
    bun run db:push
    bun run db:seed
    ```
 
-5. **Start the development server**
+5. **Start development server**
    ```bash
    bun run dev
    ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Visit [http://localhost:3000](http://localhost:3000) to see your application.
 
-## 🐳 Docker Development
+## 🔐 Required Services Setup
 
-Run the entire stack with Docker Compose:
+### 1. Database (PostgreSQL)
+
+**Recommended**: [Neon](https://neon.tech) - Serverless PostgreSQL
+
+- Create a new PostgreSQL database
+- Get your connection URL
+- Add to `.env.local`:
+  ```env
+  DATABASE_URL="postgresql://user:password@host:port/dbname"
+  DIRECT_URL="postgresql://user:password@host:port/dbname"
+  ```
+
+### 2. Authentication (Kinde)
+
+**Service**: [Kinde Auth](https://kinde.com)
+
+- Sign up and create a new application
+- Configure redirect URLs for development and production
+- Add credentials to `.env.local`:
+  ```env
+  KINDE_CLIENT_ID=your_kinde_client_id
+  KINDE_CLIENT_SECRET=your_kinde_client_secret
+  KINDE_ISSUER_URL=https://your-domain.kinde.com
+  KINDE_SITE_URL=http://localhost:3000
+  ```
+
+### 3. Email Service (Resend)
+
+**Service**: [Resend](https://resend.com)
+
+- Create an account and API key
+- Verify your domain (recommended)
+- Add to `.env.local`:
+  ```env
+  RESEND_API_KEY=re_your_resend_api_key
+  DEFAULT_FROM_EMAIL=noreply@yourdomain.com
+  ```
+
+## 🗄️ Database Schema
+
+The system includes comprehensive data models for:
+
+- **Users** - Authentication, profiles, and roles
+- **Events** - Event details, categories, and settings
+- **Registrations** - User event registrations with status tracking
+- **Payments** - Payment processing and tracking
+- **Waiting Lists** - Capacity management and promotions
+- **Audit Logs** - Complete activity tracking
+- **Notifications** - User communication preferences
+
+## 🚀 Available Commands
+
+### Development
 
 ```bash
-# Development
-docker-compose up -d
-
-# Production
-docker-compose -f docker-compose.prod.yml up -d
+bun run dev          # Start development server
+bun run build        # Build for production
+bun run start        # Start production server
 ```
 
-This includes:
-
-- Next.js application
-- PostgreSQL database
-- Redis for caching
-- Adminer for database management
-
-## 🧪 Testing
+### Code Quality
 
 ```bash
-# Run unit tests
-bun run test
-
-# Run tests with coverage
-bun run test:coverage
-
-# Run tests in watch mode
-bun run test:watch
-
-# Run E2E tests
-bun run e2e
-
-# Run E2E tests with UI
-bun run e2e:ui
+bun run lint         # Run ESLint
+bun run lint:fix     # Auto-fix ESLint errors
+bun run format       # Format with Prettier
+bun run type-check   # TypeScript type checking
+bun run type-safety  # Comprehensive type safety check
 ```
 
-## 🏗️ Project Structure
+### Testing
 
-```
-src/
-├── app/                   # Next.js App Router
-│   ├── api/              # API routes
-│   ├── auth/             # Authentication pages
-│   ├── globals.css       # Global styles
-│   ├── layout.tsx        # Root layout
-│   └── page.tsx          # Home page
-├── components/           # React components
-│   ├── ui/               # Reusable UI components
-│   └── auth/             # Authentication components
-├── lib/                  # Utility libraries
-│   ├── auth.ts           # NextAuth configuration
-│   ├── db.ts             # Database client
-│   ├── env.ts            # Environment variables
-│   └── utils.ts          # Utility functions
-├── hooks/                # Custom React hooks
-├── types/                # TypeScript type definitions
-└── test/                 # Test utilities and setup
+```bash
+bun run test         # Run tests
+bun run test:coverage # Run tests with coverage
 ```
 
-## 🔧 Configuration
+### Database
 
-### Environment Variables
+```bash
+bun run db:generate  # Generate Prisma client
+bun run db:push      # Push schema changes
+bun run db:migrate   # Run migrations
+bun run db:seed      # Seed database
+bun run db:studio    # Open Prisma Studio
+```
 
-| Variable               | Description                  | Required |
-| ---------------------- | ---------------------------- | -------- |
-| `DATABASE_URL`         | PostgreSQL connection string | Yes      |
-| `NEXTAUTH_SECRET`      | NextAuth.js secret key       | Yes      |
-| `NEXTAUTH_URL`         | Application URL              | Yes      |
-| `GITHUB_CLIENT_ID`     | GitHub OAuth client ID       | No       |
-| `GITHUB_CLIENT_SECRET` | GitHub OAuth client secret   | No       |
-| `GOOGLE_CLIENT_ID`     | Google OAuth client ID       | No       |
-| `GOOGLE_CLIENT_SECRET` | Google OAuth client secret   | No       |
+### Security
 
-### Scripts
+```bash
+bun run security:check    # Security audit
+bun run security:audit    # Dependency vulnerability check
+bun run security:audit-fix # Auto-fix vulnerabilities
+```
 
-| Command              | Description               |
-| -------------------- | ------------------------- |
-| `bun run dev`        | Start development server  |
-| `bun run build`      | Build for production      |
-| `bun run start`      | Start production server   |
-| `bun run lint`       | Run ESLint                |
-| `bun run lint:fix`   | Fix ESLint errors         |
-| `bun run format`     | Format code with Prettier |
-| `bun run type-check` | Run TypeScript check      |
-| `bun run test`       | Run unit tests            |
-| `bun run e2e`        | Run E2E tests             |
-| `bun run db:push`    | Push database schema      |
-| `bun run db:seed`    | Seed database             |
-| `bun run db:studio`  | Open Prisma Studio        |
+## 🌐 Internationalization
+
+The application supports multiple languages:
+
+- **English** - Default language
+- **Czech** - Full localization support
+- **Extensible** - Easy to add more languages
+
+Translation files are located in the `messages/` directory.
+
+## 🔒 Security Features
+
+- **Authentication** - Secure OAuth 2.0 with Kinde
+- **Authorization** - Role-based access control
+- **Data Protection** - Field-level encryption
+- **Input Validation** - Zod schemas for all inputs
+- **Rate Limiting** - API abuse prevention
+- **Security Headers** - CSP, XSS protection
+- **Audit Logging** - Complete activity tracking
+
+## 📱 Responsive Design
+
+- **Mobile-First** - Optimized for mobile devices
+- **Progressive Web App** - Installable and offline-capable
+- **Accessibility** - WCAG 2.1 AA compliant
+- **Performance** - Optimized loading and rendering
 
 ## 🚀 Deployment
 
 ### Vercel (Recommended)
 
-1. **Connect your repository to Vercel**
-2. **Set environment variables** in the Vercel dashboard
-3. **Deploy automatically** on push to main branch
+The application is optimized for Vercel deployment:
 
-The project includes:
+1. Connect your GitHub repository
+2. Set environment variables in Vercel dashboard
+3. Deploy automatically on push to main branch
 
-- `vercel.json` configuration
-- GitHub Actions for CI/CD
-- Automatic preview deployments
+### Other Platforms
 
-### Docker
+Can be deployed to any platform supporting Node.js:
 
-```bash
-# Build production image
-docker build -t bunplate .
+- Railway
+- DigitalOcean App Platform
+- AWS
+- Google Cloud Run
 
-# Run container
-docker run -p 3000:3000 bunplate
-```
+## 🔄 CI/CD Pipeline
 
-## 🔒 Security
+### GitHub Actions
 
-The boilerplate includes several security features:
+Automated quality checks on every push:
 
-- **Authentication** - Secure OAuth and email authentication
-- **CSRF Protection** - Built into NextAuth.js
-- **Security Headers** - CSP, X-Frame-Options, etc.
-- **Input Validation** - Zod schemas for API routes
-- **Rate Limiting** - API route protection
-- **Environment Validation** - Type-safe environment variables
+- TypeScript type checking
+- ESLint code quality
+- Security vulnerability scanning
+- Automatic deployment to Vercel
 
-## 🎨 Customization
+### CodeRabbit Integration
 
-### Theme
+AI-powered code reviews for pull requests.
 
-Customize the design system in `tailwind.config.ts` and
-`src/styles/globals.css`.
+## 🛡️ Production Checklist
 
-### Components
+- [ ] Set up production database
+- [ ] Configure production environment variables
+- [ ] Set up monitoring and error tracking
+- [ ] Configure backup and recovery
+- [ ] Set up SSL certificates
+- [ ] Configure CDN and caching
+- [ ] Set up logging and analytics
 
-Add new components to `src/components/ui/` following the established patterns.
+## 🆘 Troubleshooting
 
-### Database
+### Common Issues
 
-Modify `prisma/schema.prisma` and run:
+- **Database Connection**: Verify DATABASE_URL format and credentials
+- **Authentication**: Check Kinde configuration and redirect URLs
+- **Email**: Verify Resend API key and domain verification
+- **Build Errors**: Run `bun run type-check` for TypeScript issues
 
-```bash
-bun run db:push
-```
+### Getting Help
 
-## 📈 Performance
+1. Check this README and [SETUP.md](./SETUP.md)
+2. Review error logs and console output
+3. Check GitHub Issues for known problems
+4. Create a new issue with detailed error information
 
-The boilerplate is optimized for performance:
+## 📚 Documentation
 
-- **Server Components** - Reduce client-side JavaScript
-- **Image Optimization** - Next.js Image component
-- **Code Splitting** - Automatic route-based splitting
-- **Caching** - ISR and edge caching
-- **Bundle Analysis** - Built-in bundle analyzer
+- **[SETUP.md](./SETUP.md)** - Comprehensive setup guide
+- **[API Documentation](./docs/api.md)** - API endpoints and usage
+- **[Database Schema](./prisma/schema.prisma)** - Data models and relationships
+- **[Component Library](./src/components/)** - UI components and usage
 
-## 🛠️ Contributing
+## 🤝 Contributing
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+3. Make your changes following the coding standards
+4. Add tests if applicable
+5. Submit a pull request
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
-for details.
+This project is licensed under the MIT License - see the [LICENSE](./LICENSE)
+file for details.
 
 ## 🙏 Acknowledgments
 
 - [Next.js](https://nextjs.org/) team for the amazing framework
 - [Vercel](https://vercel.com/) for the deployment platform
-- [Bun](https://bun.sh/) team for the fast runtime
+- [Kinde](https://kinde.com/) for authentication services
+- [Resend](https://resend.com/) for email delivery
+- [Prisma](https://prisma.io/) for the excellent ORM
 - [Shadcn](https://ui.shadcn.com/) for the beautiful components
 - Open source community for the amazing tools
 
@@ -281,4 +334,4 @@ for details.
 
 ![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/toho36/GameOne?utm_source=oss&utm_medium=github&utm_campaign=toho36%2FGameOne&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
 
-Built with ❤️ using modern web technologies. Happy coding! 🚀
+Built with ❤️ using modern web technologies. Happy coding!

@@ -11,7 +11,7 @@ jobs:
     name: 🧪 Quality Check
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    
+
     steps:
       - name: 📦 Checkout code
         uses: actions/checkout@v4
@@ -29,6 +29,9 @@ jobs:
 
       - name: 🧹 Lint code
         run: bun run lint
+
+      - name: 🏗️ Validate project structure
+        run: bun run validate-structure
 
       - name: ✅ Quality passed
         run: |

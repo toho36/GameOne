@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { routing } from '../routing'
+import { routing } from '@/i18n/routing'
 
 describe('i18n routing configuration', () => {
   it('has correct supported locales', () => {

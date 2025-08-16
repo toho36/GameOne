@@ -36,7 +36,12 @@
     "db:deploy": "bun run db:generate && bun run db:migrate:deploy && bun run db:seed",
     "db:verify": "prisma migrate status && prisma validate",
     "vercel:build": "prisma generate && next build",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "validate-structure": "bun run scripts/validate-structure.ts",
+    "pre-push": "bun run scripts/pre-push-checks.ts",
+    "pre-push-fix": "bun run scripts/pre-push-checks.ts --fix",
+    "check-all": "bun run pre-push",
+    "setup-hooks": "bash scripts/setup-hooks.sh"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",

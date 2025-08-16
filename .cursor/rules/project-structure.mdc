@@ -1,0 +1,436 @@
+---
+description: Project Structure and File Organization Rules
+alwaysApply: true
+---
+
+# Project Structure and File Organization
+
+## Overview
+
+This document defines the mandatory file structure, naming conventions, and organization patterns for the GameOne event management system. All files must be placed in the correct directories following established patterns.
+
+## Directory Structure (MANDATORY)
+
+```
+GameOne/
+├── .claude/                    # Claude Code agent configurations
+│   └── agents/                # Specialized agent definitions
+├── .cursor/                   # Cursor IDE rules and configurations
+│   └── rules/                 # Development rules (this directory)
+├── .github/                   # GitHub workflows and templates
+│   └── workflows/             # CI/CD pipeline definitions
+├── .next/                     # Next.js build output (auto-generated)
+├── .vercel/                   # Vercel deployment configuration
+├── messages/                  # Internationalization message files
+│   ├── en.json               # English translations
+│   └── cs.json               # Czech translations
+├── node_modules/             # Dependencies (auto-generated)
+├── prisma/                   # Database schema and migrations
+│   ├── migrations/           # Database migration files
+│   ├── schema.prisma         # Main database schema
+│   └── seed.ts              # Database seeding script
+├── public/                   # Static assets
+│   ├── images/              # Image assets
+│   ├── icons/               # Icon files
+│   └── favicon.ico          # Site favicon
+├── src/                     # SOURCE CODE (main application)
+│   ├── app/                 # Next.js App Router (pages and layouts)
+│   │   ├── [locale]/        # Internationalized routes
+│   │   │   ├── layout.tsx   # Root layout component
+│   │   │   ├── page.tsx     # Home page
+│   │   │   ├── dashboard/   # Dashboard feature pages
+│   │   │   ├── events/      # Event management pages
+│   │   │   ├── profile/     # User profile pages
+│   │   │   └── settings/    # Application settings pages
+│   │   ├── api/             # API routes
+│   │   │   ├── auth/        # Authentication endpoints
+│   │   │   ├── events/      # Event management APIs
+│   │   │   ├── users/       # User management APIs
+│   │   │   ├── payments/    # Payment processing APIs
+│   │   │   └── health/      # Health check endpoints
+│   │   ├── globals.css      # Global CSS styles
+│   │   └── not-found.tsx    # 404 error page
+│   ├── components/          # React components
+│   │   ├── ui/              # Base UI components (Shadcn/ui)
+│   │   │   ├── button.tsx   # Button component
+│   │   │   ├── input.tsx    # Input component
+│   │   │   ├── dialog.tsx   # Dialog/modal component
+│   │   │   └── ...          # Other UI primitives
+│   │   ├── forms/           # Form components
+│   │   │   ├── event-form.tsx
+│   │   │   ├── user-form.tsx
+│   │   │   └── registration-form.tsx
+│   │   ├── layout/          # Layout components
+│   │   │   ├── header.tsx
+│   │   │   ├── footer.tsx
+│   │   │   ├── sidebar.tsx
+│   │   │   └── navigation.tsx
+│   │   ├── features/        # Feature-specific components
+│   │   │   ├── events/      # Event-related components
+│   │   │   ├── users/       # User-related components
+│   │   │   ├── payments/    # Payment-related components
+│   │   │   └── dashboard/   # Dashboard-specific components
+│   │   └── providers/       # Context providers and wrappers
+│   │       ├── auth-provider.tsx
+│   │       ├── theme-provider.tsx
+│   │       └── query-provider.tsx
+│   ├── hooks/               # Custom React hooks
+│   │   ├── use-auth.ts      # Authentication hooks
+│   │   ├── use-events.ts    # Event management hooks
+│   │   ├── use-payments.ts  # Payment processing hooks
+│   │   └── use-local-storage.ts
+│   ├── i18n/                # Internationalization configuration
+│   │   ├── navigation.ts    # Localized navigation
+│   │   ├── routing.ts       # Locale routing setup
+│   │   └── request.ts       # Request configuration
+│   ├── lib/                 # Utility libraries and configurations
+│   │   ├── auth.ts          # Authentication utilities
+│   │   ├── prisma.ts        # Database connection
+│   │   ├── utils.ts         # General utilities (cn function, etc.)
+│   │   ├── validations.ts   # Zod schemas and validation
+│   │   ├── constants.ts     # Application constants
+│   │   ├── email.ts         # Email service integration
+│   │   ├── logger.ts        # Logging utilities
+│   │   ├── sentry.ts        # Error tracking utilities
+│   │   └── api-client.ts    # HTTP client configuration
+│   ├── stores/              # State management (Zustand stores)
+│   │   ├── auth-store.ts    # Authentication state
+│   │   ├── event-store.ts   # Event management state
+│   │   └── ui-store.ts      # UI-related state
+│   ├── styles/              # Styling files
+│   │   └── globals.css      # Global CSS and Tailwind imports
+│   └── types/               # TypeScript type definitions
+│       ├── api/             # API-related types
+│       │   ├── requests.ts  # Request payload types
+│       │   ├── responses.ts # Response payload types
+│       │   └── errors.ts    # Error types
+│       ├── database/        # Database-related types
+│       │   ├── models.ts    # Prisma model extensions
+│       │   └── enums.ts     # Database enums
+│       ├── features/        # Feature-specific types
+│       │   ├── events.ts    # Event-related types
+│       │   ├── users.ts     # User-related types
+│       │   ├── payments.ts  # Payment-related types
+│       │   └── auth.ts      # Authentication types
+│       ├── ui/              # UI component types
+│       │   ├── components.ts # Component prop types
+│       │   └── forms.ts     # Form-related types
+│       └── global/          # Global type definitions
+│           ├── index.ts     # Main type exports
+│           └── environment.ts # Environment variable types
+├── CLAUDE.md                # Claude Code project instructions
+├── SETUP.md                 # Project setup guide
+├── README.md                # Project documentation
+├── package.json             # Project dependencies and scripts
+├── bun.lockb               # Bun lockfile
+├── tsconfig.json           # TypeScript configuration
+├── tailwind.config.ts      # Tailwind CSS configuration
+├── eslint.config.mjs       # ESLint configuration
+├── prettier.config.js      # Prettier configuration
+├── next.config.js          # Next.js configuration
+├── middleware.ts           # Next.js middleware
+├── sentry.client.config.ts # Sentry client configuration
+├── sentry.server.config.ts # Sentry server configuration
+├── sentry.edge.config.ts   # Sentry edge configuration
+└── .env.example            # Environment variables template
+```
+
+## File Naming Conventions (STRICT)
+
+### TypeScript/React Files
+- **Components**: `kebab-case.tsx` (e.g., `event-card.tsx`)
+- **Pages**: `page.tsx` (App Router convention)
+- **Layouts**: `layout.tsx` (App Router convention)
+- **API Routes**: `route.ts` (App Router convention)
+- **Hooks**: `use-{name}.ts` (e.g., `use-auth.ts`)
+- **Types**: `kebab-case.ts` (e.g., `api-types.ts`)
+- **Utilities**: `kebab-case.ts` (e.g., `form-utils.ts`)
+- **Stores**: `{name}-store.ts` (e.g., `auth-store.ts`)
+
+### Configuration Files
+- **Root level**: Use exact names (e.g., `tsconfig.json`, `next.config.js`)
+- **Environment**: `.env.example`, `.env.local`, `.env.production`
+
+### Database Files
+- **Schema**: `schema.prisma` (Prisma convention)
+- **Migrations**: Auto-generated timestamp format
+- **Seeds**: `seed.ts`
+
+## Component Organization Rules
+
+### UI Components (`src/components/ui/`)
+```typescript
+// ✅ CORRECT: Base UI component with proper exports
+// src/components/ui/button.tsx
+import { cn } from "@/lib/utils";
+
+interface ButtonProps {
+  variant?: "default" | "outline" | "ghost";
+  size?: "sm" | "md" | "lg";
+  children: React.ReactNode;
+}
+
+export function Button({ variant = "default", size = "md", ...props }: ButtonProps) {
+  return <button className={cn("base-styles", variants[variant])} {...props} />;
+}
+
+// Named export (required)
+export { Button };
+```
+
+### Feature Components (`src/components/features/`)
+```typescript
+// ✅ CORRECT: Feature component organization
+// src/components/features/events/event-card.tsx
+import { Button } from "@/components/ui/button";
+import type { Event } from "@/types/features/events";
+
+interface EventCardProps {
+  event: Event;
+  onEdit?: (id: string) => void;
+}
+
+export function EventCard({ event, onEdit }: EventCardProps) {
+  // Component implementation
+}
+```
+
+### Layout Components (`src/components/layout/`)
+```typescript
+// ✅ CORRECT: Layout component
+// src/components/layout/header.tsx
+import { Navigation } from "./navigation";
+
+export function Header() {
+  return (
+    <header className="border-b">
+      <Navigation />
+    </header>
+  );
+}
+```
+
+## API Route Organization
+
+### API Route Structure
+```typescript
+// ✅ CORRECT: API route organization
+// src/app/api/events/route.ts
+import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
+
+export async function GET(request: NextRequest) {
+  // Environment variables must use bracket notation
+  const apiKey = process.env["API_KEY"];
+  
+  try {
+    const user = await auth();
+    // Implementation
+    return NextResponse.json({ data: events });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+}
+
+export async function POST(request: NextRequest) {
+  // POST implementation
+}
+```
+
+### API Route Naming
+- **Collections**: `/api/events/route.ts`
+- **Individual items**: `/api/events/[id]/route.ts`
+- **Actions**: `/api/events/[id]/register/route.ts`
+- **Nested resources**: `/api/events/[id]/participants/route.ts`
+
+## Page Organization (App Router)
+
+### Page Structure
+```typescript
+// ✅ CORRECT: Page component
+// src/app/[locale]/events/page.tsx
+import { EventList } from "@/components/features/events/event-list";
+import { getEvents } from "@/lib/api/events";
+
+export default async function EventsPage() {
+  const events = await getEvents();
+  
+  return (
+    <div>
+      <h1>Events</h1>
+      <EventList events={events} />
+    </div>
+  );
+}
+```
+
+### Layout Structure
+```typescript
+// ✅ CORRECT: Layout component
+// src/app/[locale]/events/layout.tsx
+import { EventNavigation } from "@/components/features/events/event-navigation";
+
+export default function EventsLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex">
+      <EventNavigation />
+      <main className="flex-1">{children}</main>
+    </div>
+  );
+}
+```
+
+## Type Organization
+
+### Type File Structure
+```typescript
+// ✅ CORRECT: Type organization
+// src/types/features/events.ts
+
+// Enums first
+export enum EventStatus {
+  DRAFT = "DRAFT",
+  PUBLISHED = "PUBLISHED",
+  CANCELLED = "CANCELLED",
+}
+
+// Base interfaces
+export interface BaseEvent {
+  id: string;
+  title: string;
+  status: EventStatus;
+}
+
+// Extended interfaces
+export interface Event extends BaseEvent {
+  description: string;
+  startDate: Date;
+}
+
+// Request/Response types
+export interface CreateEventRequest {
+  title: string;
+  description: string;
+}
+
+export interface EventResponse {
+  data: Event;
+  success: boolean;
+}
+```
+
+## Import/Export Patterns
+
+### Import Order (MANDATORY)
+```typescript
+// ✅ CORRECT: Import order
+// 1. React imports
+import React from "react";
+import { useState, useEffect } from "react";
+
+// 2. Next.js imports
+import { NextRequest, NextResponse } from "next/server";
+import Link from "next/link";
+
+// 3. Third-party libraries
+import { clsx } from "clsx";
+import { z } from "zod";
+
+// 4. Internal imports (using @/ aliases)
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/use-auth";
+import { cn } from "@/lib/utils";
+import type { Event } from "@/types/features/events";
+```
+
+### Export Patterns
+```typescript
+// ✅ CORRECT: Named exports (preferred)
+export function ComponentName() {}
+export const utilityFunction = () => {};
+export type TypeName = {};
+
+// ✅ CORRECT: Default export for pages/layouts only
+export default function Page() {}
+```
+
+## Error Handling Patterns
+
+### Component Error Handling
+```typescript
+// ✅ CORRECT: Component with error handling
+import { ErrorBoundary } from "@/components/error-boundary";
+
+export function EventCard({ event }: EventCardProps) {
+  if (!event) {
+    return <div>Event not found</div>;
+  }
+
+  return (
+    <ErrorBoundary fallback={<div>Error loading event</div>}>
+      {/* Component content */}
+    </ErrorBoundary>
+  );
+}
+```
+
+### API Error Handling
+```typescript
+// ✅ CORRECT: API error handling
+export async function GET(request: NextRequest) {
+  try {
+    // API logic
+    return NextResponse.json({ data: result });
+  } catch (error) {
+    // Environment variables with bracket notation
+    const isDev = process.env["NODE_ENV"] === "development";
+    const message = error instanceof Error ? error.message : "Unknown error";
+    
+    if (isDev) {
+      console.error("API Error:", error);
+    }
+    
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+}
+```
+
+## Validation Rules
+
+### MUST Follow Rules
+1. **File Placement**: All files MUST be in their designated directories
+2. **Naming Convention**: File names MUST follow kebab-case pattern
+3. **Import Aliases**: MUST use `@/` path aliases for internal imports
+4. **Type Safety**: MUST use TypeScript with strict mode
+5. **Environment Variables**: MUST use bracket notation (`process.env["VAR"]`)
+6. **Error Handling**: MUST handle errors with proper TypeScript types
+
+### MUST NOT Rules
+1. **Relative Imports**: NEVER use `../../../` - always use `@/` aliases
+2. **Any Types**: NEVER use `any` type - use proper typing or `unknown`
+3. **Wrong Directory**: NEVER place files in incorrect directories
+4. **Default Exports**: NEVER use default exports except for pages/layouts
+5. **Direct Process.env**: NEVER use `process.env.VAR` - use bracket notation
+
+## Enforcement
+
+These rules are enforced by:
+1. **TypeScript Compiler** - Type safety and structure validation
+2. **ESLint** - Code quality and pattern enforcement
+3. **File Structure Agent** - Automated structure validation
+4. **Code Review Process** - Manual verification during reviews
+
+## Non-Compliance Actions
+
+If code doesn't follow these patterns:
+1. **Build will fail** - TypeScript/ESLint errors
+2. **CI/CD will block** - Automated checks
+3. **Code review rejection** - Manual review process
+4. **Refactoring required** - Structure corrections needed
+
+This structure ensures maintainability, scalability, and team consistency across the entire codebase.
