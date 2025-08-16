@@ -152,4 +152,4 @@ Check the specific job that's failing and fix the reported issues locally.
 ### "Auto-merge not working"
 
 Ensure you're the repository owner or have added the `auto-merge` label to your
-PR.
+PR
