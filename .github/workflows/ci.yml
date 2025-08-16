@@ -1,0 +1,37 @@
+name: 🧪 Quality Check Pipeline
+
+on:
+  push:
+    branches: [master, develop]
+  pull_request:
+    branches: [master]
+
+jobs:
+  quality-check:
+    name: 🧪 Quality Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+      - name: 📦 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: 📥 Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: �� Type check
+        run: bun run type-check
+
+      - name: 🧹 Lint code
+        run: bun run lint
+
+      - name: ✅ Quality passed
+        run: |
+          echo "�� All quality checks passed!"
+          echo "�� Vercel will handle the build and deployment automatically."
+          echo "📊 Build status will be available in Vercel dashboard."
