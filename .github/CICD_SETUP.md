@@ -2,9 +2,12 @@
 
 ## Overview
 
-This repository now has an automated CI/CD pipeline that runs the same
-comprehensive checks as your local pre-push script. PRs cannot be merged until
-all checks pass.
+This repository now has a **STRICT** automated CI/CD pipeline that runs the same
+comprehensive checks as your local pre-push script. 
+
+🔒 **ZERO TOLERANCE**: PRs cannot be manually merged until ALL checks pass.
+🚫 **NO BYPASSING**: Even admins must follow the rules.
+✅ **AUTOMATION ONLY**: Merge only happens when everything is green.
 
 ## What Happens on Every PR
 
@@ -55,12 +58,15 @@ To activate branch protection (run once):
 4. Select branch (default: master)
 5. Click "Run workflow"
 
-This will configure:
+This will configure STRICT ENFORCEMENT:
 
 - ✅ Required status checks (all CI jobs must pass)
 - 📋 Require 1 approving review
+- 🔒 **Enforce for admins** (even admins cannot bypass)
+- 🔒 **Require approval after latest push** (fresh approval needed)
 - 🚫 Block force pushes
 - 💬 Require conversation resolution
+- ⚠️ **NO MANUAL MERGE BUTTON** until all checks pass
 
 ## Local Development
 

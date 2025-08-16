@@ -31,32 +31,38 @@ jobs:
                   strict: true,
                   contexts: [
                     "🚀 Pre-Push Validation",
-                    "🏗️ Build Verification",
+                    "🏗️ Build Verification", 
                     "✅ CI Pipeline Success"
                   ]
                 },
-                enforce_admins: false,
+                enforce_admins: true, // Even admins must follow the rules
                 required_pull_request_reviews: {
                   required_approving_review_count: 1,
                   dismiss_stale_reviews: true,
                   require_code_owner_reviews: false,
-                  require_last_push_approval: false
+                  require_last_push_approval: true // Require approval after latest push
                 },
                 restrictions: null,
                 allow_force_pushes: false,
                 allow_deletions: false,
                 block_creations: false,
-                required_conversation_resolution: true
+                required_conversation_resolution: true,
+                lock_branch: false,
+                allow_fork_syncing: false
               });
               
               console.log(`✅ Branch protection rules updated for ${branch}`);
+              console.log('🔒 STRICT MODE ENABLED - No manual merges allowed!');
               console.log('🔒 Required status checks:');
               console.log('  - 🚀 Pre-Push Validation');
               console.log('  - 🏗️ Build Verification'); 
               console.log('  - ✅ CI Pipeline Success');
               console.log('📋 Required: 1 approving review');
+              console.log('🔒 Enforce for admins: YES (even admins must pass checks)');
+              console.log('🔒 Require approval after latest push: YES');
               console.log('🚫 Force pushes: disabled');
               console.log('💬 Require conversation resolution: enabled');
+              console.log('⚠️  NO BYPASSING ALLOWED - All checks must pass!');
               
             } catch (error) {
               console.error('❌ Failed to setup branch protection:', error.message);
