@@ -55,7 +55,7 @@ jobs:
           CI: true
           DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/test_gameone"
           DIRECT_URL: "postgresql://postgres:postgres@localhost:5432/test_gameone"
-          
+
       - name: 📊 Upload test results
         if: always()
         uses: actions/upload-artifact@v4
