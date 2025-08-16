@@ -197,6 +197,8 @@ async function createItem(formData: FormData) {
 - `bun run build` - Verify production build
 - `bun run type-check` - Check TypeScript compliance
 - `bun run lint` - Verify code quality
+- `bun run pre-push` - Run all quality checks before pushing
+- `bun run pre-push --fix` - Auto-fix issues and re-check
 
 ## Environment & Configuration
 
@@ -237,6 +239,52 @@ export function middleware(request: NextRequest) {
 - **Testing** - Coordinate with Testing Agent for API testing
 - **Code review** - Request Code Review Agent for security review
 - **Database design** - Consider specialized Database Agent for complex schemas
+
+## Essential Documentation
+
+### Framework & API Documentation
+
+- **Next.js 15**:
+  [API Routes](https://nextjs.org/docs/app/building-your-application/routing/route-handlers)
+  |
+  [Server Actions](https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations)
+- **Next.js**:
+  [Server Components](https://nextjs.org/docs/app/building-your-application/rendering/server-components)
+  |
+  [Middleware](https://nextjs.org/docs/app/building-your-application/routing/middleware)
+- **TypeScript**: [Handbook](https://www.typescriptlang.org/docs/) |
+  [Utility Types](https://www.typescriptlang.org/docs/handbook/utility-types.html)
+
+### Database & Authentication
+
+- **Prisma**: [Documentation](https://www.prisma.io/docs) |
+  [Client API](https://www.prisma.io/docs/reference/api-reference/prisma-client-reference)
+- **Kinde Auth**:
+  [Next.js Guide](https://kinde.com/docs/developer-tools/nextjs-sdk/) |
+  [Server-side Auth](https://kinde.com/docs/developer-tools/nextjs-sdk/#protect-api-routes)
+
+### HTTP & Security
+
+- **HTTP Status Codes**:
+  [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status)
+- **Security Headers**:
+  [OWASP Guide](https://owasp.org/www-project-secure-headers/) |
+  [Security.txt](https://securitytxt.org/)
+- **CORS**: [MDN Guide](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS)
+
+### Email & File Handling
+
+- **Resend**: [API Documentation](https://resend.com/docs) |
+  [Next.js Integration](https://resend.com/docs/send-with-nextjs)
+- **File Uploads**:
+  [Next.js Guide](https://nextjs.org/docs/app/building-your-application/routing/route-handlers#request-body)
+
+### Performance & Monitoring
+
+- **Web Vitals**: [Google Guide](https://web.dev/vitals/) |
+  [Next.js Analytics](https://nextjs.org/analytics)
+- **Vercel**: [Functions](https://vercel.com/docs/functions) |
+  [Edge Config](https://vercel.com/docs/storage/edge-config)
 
 ## Success Metrics
 

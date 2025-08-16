@@ -28,6 +28,62 @@ performance, and providing actionable insights for optimization.
 - **Performance Optimization** - Speed optimization, bundle analysis, resource
   monitoring
 - **Conversion Tracking** - Goal tracking, funnel analysis, attribution modeling
+
+## Essential Documentation
+
+### Web Analytics Platforms
+
+- **Google Analytics 4**:
+  [Documentation](https://developers.google.com/analytics/devguides/collection/ga4)
+  |
+  [Next.js Integration](https://nextjs.org/docs/app/building-your-application/optimizing/analytics)
+- **Vercel Analytics**: [Documentation](https://vercel.com/docs/analytics) |
+  [Web Vitals](https://vercel.com/docs/analytics/web-vitals)
+- **PostHog**: [Documentation](https://posthog.com/docs) |
+  [React Integration](https://posthog.com/docs/libraries/react)
+
+### Performance Monitoring
+
+- **Core Web Vitals**: [Google Guide](https://web.dev/vitals/) |
+  [Measurement](https://web.dev/user-centric-performance-metrics/)
+- **Real User Monitoring**:
+  [RUM Guide](https://web.dev/user-centric-performance-metrics/) |
+  [Performance API](https://developer.mozilla.org/en-US/docs/Web/API/Performance_API)
+- **Lighthouse**:
+  [Documentation](https://developers.google.com/web/tools/lighthouse/) |
+  [CI Integration](https://github.com/GoogleChrome/lighthouse-ci)
+
+### Error Tracking & Monitoring
+
+- **Sentry**: [Documentation](https://docs.sentry.io/) |
+  [Next.js Integration](https://docs.sentry.io/platforms/javascript/guides/nextjs/)
+- **Error Monitoring**:
+  [Best Practices](https://blog.sentry.io/2019/05/16/how-to-get-the-most-out-of-application-monitoring/)
+  |
+  [Error Boundaries](https://react.dev/reference/react/Component#catching-rendering-errors-with-an-error-boundary)
+
+### A/B Testing & Experimentation
+
+- **Feature Flags**: [LaunchDarkly](https://docs.launchdarkly.com/) |
+  [Vercel Edge Config](https://vercel.com/docs/storage/edge-config)
+- **Statistical Analysis**:
+  [A/B Testing Guide](https://www.optimizely.com/optimization-glossary/ab-testing/)
+  | [Sample Size Calculator](https://www.optimizely.com/sample-size-calculator/)
+
+### Business Intelligence
+
+- **KPI Tracking**:
+  [Google Analytics Goals](https://support.google.com/analytics/answer/1012040)
+  |
+  [Conversion Tracking](https://developers.google.com/analytics/devguides/collection/ga4/conversions)
+- **Data Visualization**: [Chart.js](https://www.chartjs.org/docs/latest/) |
+  [D3.js](https://d3js.org/)
+
+## Commands for Analytics
+
+- `bun run analyze` - Analyze bundle size and performance
+- `bun run lighthouse` - Run Lighthouse performance audit
+- `bun run build` - Build with analytics and performance tracking
 - **Real-Time Monitoring** - Live dashboards, alerting systems, anomaly
   detection
 - **Data Visualization** - Charts, dashboards, reporting, insight generation

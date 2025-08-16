@@ -225,18 +225,74 @@ const apiUrl = process.env["API_URL"];
 Run these commands to validate structure:
 
 ```bash
-# Check TypeScript compliance
-bun run type-check
+# Run comprehensive pre-push checks (includes all validations)
+bun run pre-push
 
-# Verify ESLint rules
-bun run lint
-
-# Validate file structure (custom script)
-bun run validate-structure
-
-# Check import paths
-bun run check-imports
+# Individual validation commands
+bun run type-check        # Check TypeScript compliance
+bun run lint             # Verify ESLint rules
+bun run validate-structure # Check file structure and organization
+bun run pre-push --fix   # Auto-fix issues where possible
 ```
+
+## Essential Documentation
+
+### Project Structure Guidelines
+
+- **Next.js 15**:
+  [App Router File Conventions](https://nextjs.org/docs/app/building-your-application/routing#file-conventions)
+  |
+  [Project Organization](https://nextjs.org/docs/app/building-your-application/routing/colocation)
+- **React**:
+  [Component Organization](https://react.dev/learn/thinking-in-react#step-1-break-the-ui-into-a-component-hierarchy)
+  |
+  [File Structure](https://react.dev/learn/start-a-new-react-project#production-grade-react-frameworks)
+
+### Naming Conventions & Best Practices
+
+- **File Naming**:
+  [Kebab Case Guide](https://developer.mozilla.org/en-US/docs/Glossary/Kebab_case)
+  |
+  [Next.js Conventions](https://nextjs.org/docs/app/building-your-application/routing/pages-and-layouts)
+- **TypeScript**:
+  [Naming Conventions](https://github.com/microsoft/TypeScript/wiki/Coding-guidelines#names)
+  |
+  [Project Structure](https://www.typescriptlang.org/docs/handbook/declaration-files/library-structures.html)
+
+### Import/Export Patterns
+
+- **ES Modules**:
+  [MDN Import Guide](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import)
+  |
+  [Export Guide](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/export)
+- **TypeScript**:
+  [Module Resolution](https://www.typescriptlang.org/docs/handbook/module-resolution.html)
+  |
+  [Path Mapping](https://www.typescriptlang.org/docs/handbook/module-resolution.html#path-mapping)
+
+### Component Architecture
+
+- **Design Systems**:
+  [Atomic Design](https://bradfrost.com/blog/post/atomic-web-design/) |
+  [Component API Design](https://react.dev/learn/passing-props-to-a-component)
+- **Shadcn/ui**: [File Structure](https://ui.shadcn.com/docs/installation/next)
+  | [Component Organization](https://ui.shadcn.com/docs/components-json)
+
+### Code Quality & Standards
+
+- **ESLint**: [Rules Reference](https://eslint.org/docs/latest/rules/) |
+  [TypeScript ESLint](https://typescript-eslint.io/rules/)
+- **Prettier**:
+  [Configuration Guide](https://prettier.io/docs/en/configuration.html) |
+  [Code Style](https://prettier.io/docs/en/rationale.html)
+
+### Architectural Patterns
+
+- **Clean Architecture**:
+  [Robert Martin's Guide](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
+- **Feature-Based Structure**:
+  [Feature Folders](https://www.robinwieruch.de/react-folder-structure/) |
+  [Domain-Driven Design](https://martinfowler.com/bliki/DomainDrivenDesign.html)
 
 ## Structure Refactoring Guidelines
 

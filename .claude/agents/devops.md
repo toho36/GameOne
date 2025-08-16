@@ -39,6 +39,73 @@ scalable infrastructure.
 - **Dependency Management** - Package updates, security patches, vulnerability
   monitoring
 
+## Essential Documentation
+
+### CI/CD & Deployment
+
+- **GitHub Actions**: [Documentation](https://docs.github.com/en/actions) |
+  [Workflow Syntax](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions)
+- **Vercel**: [Documentation](https://vercel.com/docs) |
+  [Deployments](https://vercel.com/docs/deployments/overview)
+- **Vercel**:
+  [Environment Variables](https://vercel.com/docs/projects/environment-variables)
+  | [Build Process](https://vercel.com/docs/deployments/builds)
+
+### Infrastructure & Hosting
+
+- **Vercel Platform**:
+  [Edge Network](https://vercel.com/docs/edge-network/overview) |
+  [Functions](https://vercel.com/docs/functions)
+- **Serverless**:
+  [Best Practices](https://vercel.com/docs/functions/serverless-functions) |
+  [Edge Functions](https://vercel.com/docs/functions/edge-functions)
+- **Database Hosting**:
+  [Vercel Postgres](https://vercel.com/docs/storage/vercel-postgres) |
+  [Neon](https://neon.tech/docs) | [Supabase](https://supabase.com/docs)
+
+### Monitoring & Performance
+
+- **Vercel Analytics**: [Documentation](https://vercel.com/docs/analytics) |
+  [Core Web Vitals](https://vercel.com/docs/analytics/core-web-vitals)
+- **Performance**: [Web Vitals](https://web.dev/vitals/) |
+  [Lighthouse](https://developers.google.com/web/tools/lighthouse)
+- **Error Tracking**: [Sentry](https://docs.sentry.io/) |
+  [Error Monitoring Best Practices](https://blog.sentry.io/2019/05/16/how-to-get-the-most-out-of-application-monitoring/)
+
+### Security & Compliance
+
+- **Security Headers**: [Mozilla Observatory](https://observatory.mozilla.org/)
+  | [Security Headers Guide](https://securityheaders.com/)
+- **SSL/TLS**: [Let's Encrypt](https://letsencrypt.org/docs/) |
+  [SSL Best Practices](https://wiki.mozilla.org/Security/Server_Side_TLS)
+- **Vulnerability Scanning**: [Snyk](https://docs.snyk.io/) |
+  [OWASP Dependency Check](https://owasp.org/www-project-dependency-check/)
+
+### Git & Version Control
+
+- **Git Workflows**:
+  [GitHub Flow](https://docs.github.com/en/get-started/quickstart/github-flow) |
+  [Git Best Practices](https://git-scm.com/book/en/v2)
+- **Branch Protection**:
+  [GitHub Branch Protection](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches)
+- **Semantic Versioning**: [SemVer](https://semver.org/) |
+  [Conventional Commits](https://www.conventionalcommits.org/)
+
+### Package Management
+
+- **Bun**: [Documentation](https://bun.sh/docs) |
+  [Package Manager](https://bun.sh/docs/cli/install)
+- **Dependency Updates**: [Renovate](https://docs.renovatebot.com/) |
+  [Dependabot](https://docs.github.com/en/code-security/dependabot)
+
+## Commands for DevOps
+
+- `bun run build` - Build for production
+- `bun run pre-deploy` - Pre-deployment checks
+- `bun run pre-push` - Quality gates before pushing
+- `bun run security:check` - Security validation
+- `bun run clean` - Clean build artifacts
+
 ## Key Responsibilities
 
 ### CI/CD Pipeline Management
