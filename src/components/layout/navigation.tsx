@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { UserProfile } from "@/components/auth";
-import { LanguageSwitcher } from "@/components/language-switcher";
+import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { useState } from "react";
 import { type Locale } from "@/i18n/routing";
 

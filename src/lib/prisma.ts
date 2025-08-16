@@ -59,13 +59,15 @@ export interface PaginatedResult<T> {
 
 export async function paginate<T>(
   model: any,
+  options: PaginationOptions = {},
   where?: any,
   include?: any,
   orderBy?: any
 ): Promise<PaginatedResult<T>> {
-  const page = Math.max(1, 1);
-  const limit = Math.min(100, Math.max(1, 20));
-  const offset = 0;
+  const { page: inputPage = 1, limit: inputLimit = 20 } = options;
+  const page = Math.max(1, inputPage);
+  const limit = Math.min(100, Math.max(1, inputLimit));
+  const offset = (page - 1) * limit;
 
   const [data, total] = await Promise.all([
     model.findMany({

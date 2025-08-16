@@ -35,6 +35,55 @@ tests, integration tests, and ensuring type safety across the entire codebase.
 - Develop performance benchmarks and load tests
 - Maintain test utilities and fixtures
 
+## Essential Documentation
+
+### Testing Frameworks
+
+- **Vitest**: [Documentation](https://vitest.dev/) |
+  [API Reference](https://vitest.dev/api/)
+- **React Testing Library**:
+  [Documentation](https://testing-library.com/docs/react-testing-library/intro)
+  |
+  [Cheatsheet](https://testing-library.com/docs/react-testing-library/cheatsheet)
+- **Testing Library**:
+  [Best Practices](https://testing-library.com/docs/guiding-principles) |
+  [Queries](https://testing-library.com/docs/queries/about)
+
+### Testing Patterns
+
+- **Jest/Vitest**: [Mocking Guide](https://vitest.dev/guide/mocking.html) |
+  [Assertions](https://vitest.dev/api/expect.html)
+- **Component Testing**:
+  [React Testing Patterns](https://kentcdodds.com/blog/common-mistakes-with-react-testing-library)
+  | [User Event](https://testing-library.com/docs/user-event/intro)
+- **API Testing**: [Supertest Guide](https://github.com/visionmedia/supertest) |
+  [Next.js API Testing](https://nextjs.org/docs/app/building-your-application/routing/route-handlers#testing)
+
+### Test Strategy & Coverage
+
+- **Test Pyramid**:
+  [Martin Fowler's Guide](https://martinfowler.com/articles/practical-test-pyramid.html)
+- **Coverage**: [Istanbul/c8 Documentation](https://github.com/bcoe/c8) |
+  [Coverage Best Practices](https://testing.googleblog.com/2020/08/code-coverage-best-practices.html)
+- **TDD**:
+  [Test-Driven Development](https://martinfowler.com/bliki/TestDrivenDevelopment.html)
+  | [TDD Patterns](https://www.tddbuddy.com/)
+
+### TypeScript Testing
+
+- **Type Testing**: [tsd Library](https://github.com/SamVerschueren/tsd) |
+  [TypeScript Testing Tips](https://www.typescriptlang.org/docs/handbook/testing-types.html)
+- **Strict Mode**:
+  [TypeScript Testing with Strict Mode](https://www.typescriptlang.org/tsconfig#strict)
+
+## Commands You Use Regularly
+
+- `bun run test` - Run all tests with Vitest
+- `bun run test:watch` - Run tests in watch mode
+- `bun run test:coverage` - Generate coverage report
+- `bun run test:ui` - Open Vitest UI for interactive testing
+- `bun run pre-push` - Run all quality checks including tests
+
 ### Quality Assurance
 
 - Ensure TypeScript strict mode compliance

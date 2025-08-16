@@ -16,6 +16,8 @@ routes, and data flow.
 - **Server Actions** - Form handling, mutations, server-side logic
 - **Authentication** - Session management, JWT, OAuth integration
 - **Database Integration** - ORMs, query optimization, migrations
+- **Ultra-Strict TypeScript** - `exactOptionalPropertyTypes`,
+  `noPropertyAccessFromIndexSignature`, `noUncheckedIndexedAccess`
 
 ### Fullstack Specializations
 
@@ -81,9 +83,22 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
   try {
-    // Your logic here
+    // Environment variables must use bracket notation
+    const apiKey = process.env["API_KEY"];
+    if (!apiKey) {
+      return NextResponse.json(
+        { error: "API key not configured" },
+        { status: 500 }
+      );
+    }
+
+    // Your logic here with proper type checking
+    const result = await fetchData();
     return NextResponse.json({ data: result });
   } catch (error) {
+    // Handle unknown error types properly
+    const message = error instanceof Error ? error.message : "Unknown error";
+    console.error("API Error:", message);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }
@@ -119,11 +134,22 @@ export default function Page() {
 async function createItem(formData: FormData) {
   "use server";
 
-  const name = formData.get("name") as string;
-  // Database operation
-  const result = await db.create({ name });
-  revalidatePath("/items");
-  return result;
+  // Proper form data type checking
+  const name = formData.get("name");
+  if (typeof name !== "string" || !name.trim()) {
+    throw new Error("Name is required");
+  }
+
+  try {
+    // Database operation with proper error handling
+    const result = await db.create({ name: name.trim() });
+    revalidatePath("/items");
+    return { success: true, data: result };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Database error";
+    console.error("Create item failed:", message);
+    return { success: false, error: message };
+  }
 }
 ```
 
@@ -132,8 +158,12 @@ async function createItem(formData: FormData) {
 ### API Design
 
 - Follow RESTful conventions and HTTP status codes
-- Implement comprehensive error handling
-- Use proper TypeScript interfaces for request/response
+- Implement comprehensive error handling with proper TypeScript:
+  - Use `unknown` for catch blocks, then type check
+  - Environment variables must use bracket notation: `process.env["VAR"]`
+  - Handle potential undefined from array/object access
+  - Use type guards for runtime validation
+- Use proper TypeScript interfaces for request/response with strict typing
 - Include input validation and sanitization
 - Document API endpoints and expected payloads
 
@@ -167,6 +197,8 @@ async function createItem(formData: FormData) {
 - `bun run build` - Verify production build
 - `bun run type-check` - Check TypeScript compliance
 - `bun run lint` - Verify code quality
+- `bun run pre-push` - Run all quality checks before pushing
+- `bun run pre-push --fix` - Auto-fix issues and re-check
 
 ## Environment & Configuration
 
@@ -207,6 +239,52 @@ export function middleware(request: NextRequest) {
 - **Testing** - Coordinate with Testing Agent for API testing
 - **Code review** - Request Code Review Agent for security review
 - **Database design** - Consider specialized Database Agent for complex schemas
+
+## Essential Documentation
+
+### Framework & API Documentation
+
+- **Next.js 15**:
+  [API Routes](https://nextjs.org/docs/app/building-your-application/routing/route-handlers)
+  |
+  [Server Actions](https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations)
+- **Next.js**:
+  [Server Components](https://nextjs.org/docs/app/building-your-application/rendering/server-components)
+  |
+  [Middleware](https://nextjs.org/docs/app/building-your-application/routing/middleware)
+- **TypeScript**: [Handbook](https://www.typescriptlang.org/docs/) |
+  [Utility Types](https://www.typescriptlang.org/docs/handbook/utility-types.html)
+
+### Database & Authentication
+
+- **Prisma**: [Documentation](https://www.prisma.io/docs) |
+  [Client API](https://www.prisma.io/docs/reference/api-reference/prisma-client-reference)
+- **Kinde Auth**:
+  [Next.js Guide](https://kinde.com/docs/developer-tools/nextjs-sdk/) |
+  [Server-side Auth](https://kinde.com/docs/developer-tools/nextjs-sdk/#protect-api-routes)
+
+### HTTP & Security
+
+- **HTTP Status Codes**:
+  [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status)
+- **Security Headers**:
+  [OWASP Guide](https://owasp.org/www-project-secure-headers/) |
+  [Security.txt](https://securitytxt.org/)
+- **CORS**: [MDN Guide](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS)
+
+### Email & File Handling
+
+- **Resend**: [API Documentation](https://resend.com/docs) |
+  [Next.js Integration](https://resend.com/docs/send-with-nextjs)
+- **File Uploads**:
+  [Next.js Guide](https://nextjs.org/docs/app/building-your-application/routing/route-handlers#request-body)
+
+### Performance & Monitoring
+
+- **Web Vitals**: [Google Guide](https://web.dev/vitals/) |
+  [Next.js Analytics](https://nextjs.org/analytics)
+- **Vercel**: [Functions](https://vercel.com/docs/functions) |
+  [Edge Config](https://vercel.com/docs/storage/edge-config)
 
 ## Success Metrics
 

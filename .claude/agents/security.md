@@ -46,6 +46,75 @@ compliance with security best practices and standards.
 - Configure secure HTTP headers and policies
 - Implement rate limiting and DDoS protection
 
+## Essential Documentation
+
+### Security Standards & Guidelines
+
+- **OWASP**: [Top 10](https://owasp.org/www-project-top-ten/) |
+  [Cheat Sheet Series](https://cheatsheetseries.owasp.org/)
+- **NIST**: [Cybersecurity Framework](https://www.nist.gov/cyberframework) |
+  [Security Guidelines](https://csrc.nist.gov/publications)
+- **Web Security**:
+  [MDN Security](https://developer.mozilla.org/en-US/docs/Web/Security) |
+  [Security Headers](https://securityheaders.com/)
+
+### Authentication & Authorization
+
+- **Kinde Auth**:
+  [Security Guide](https://kinde.com/docs/build/authentication/security-and-compliance/)
+  |
+  [JWT Security](https://auth0.com/blog/a-look-at-the-latest-draft-for-jwt-bcp/)
+- **OAuth 2.0**: [RFC 6749](https://datatracker.ietf.org/doc/html/rfc6749) |
+  [OAuth Security](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-security-topics)
+- **Session Management**:
+  [OWASP Session Management](https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html)
+
+### Web Application Security
+
+- **Input Validation**:
+  [OWASP Input Validation](https://cheatsheetseries.owasp.org/cheatsheets/Input_Validation_Cheat_Sheet.html)
+- **XSS Prevention**:
+  [OWASP XSS Prevention](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html)
+- **CSRF Protection**:
+  [OWASP CSRF Prevention](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html)
+- **SQL Injection**:
+  [OWASP SQL Injection Prevention](https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html)
+
+### Data Protection & Privacy
+
+- **GDPR**: [Official Guide](https://gdpr.eu/) |
+  [Data Protection Impact Assessment](https://gdpr.eu/data-protection-impact-assessment-template/)
+- **Encryption**:
+  [OWASP Cryptographic Storage](https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html)
+- **Data Classification**:
+  [NIST Data Classification](https://csrc.nist.gov/glossary/term/data_classification)
+
+### API Security
+
+- **API Security**:
+  [OWASP API Security](https://owasp.org/www-project-api-security/) |
+  [API Security Checklist](https://github.com/shieldfy/API-Security-Checklist)
+- **Rate Limiting**:
+  [OWASP Rate Limiting](https://cheatsheetseries.owasp.org/cheatsheets/Denial_of_Service_Cheat_Sheet.html#rate-limiting)
+- **CORS**:
+  [OWASP CORS](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Origin_Resource_Sharing_Cheat_Sheet.html)
+
+### Security Tools & Scanning
+
+- **Static Analysis**: [SonarQube](https://www.sonarqube.org/) |
+  [CodeQL](https://codeql.github.com/)
+- **Dependency Scanning**:
+  [npm audit](https://docs.npmjs.com/cli/v8/commands/npm-audit) |
+  [Snyk](https://snyk.io/)
+- **Security Testing**: [OWASP ZAP](https://owasp.org/www-project-zap/) |
+  [Burp Suite](https://portswigger.net/burp)
+
+## Commands for Security
+
+- `bun run security:audit` - Check for vulnerabilities
+- `bun run security:check` - Run security validations
+- `bun run pre-push` - Include security checks in quality validation
+
 ### Compliance & Monitoring
 
 - Ensure compliance with security standards (OWASP, GDPR)

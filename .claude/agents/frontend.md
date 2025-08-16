@@ -13,7 +13,8 @@ experience.
 
 - **React 19** - Server/Client Components, hooks, performance optimization
 - **Next.js 15+** - App Router, Server Components, routing, Image optimization
-- **TypeScript** - Strict typing, interfaces, generics, type safety
+- **TypeScript** - Ultra-strict typing with `exactOptionalPropertyTypes`,
+  `noPropertyAccessFromIndexSignature`, `noUncheckedIndexedAccess`
 - **Tailwind CSS** - Utility-first styling, responsive design, custom themes
 - **Shadcn/ui** - Component library integration and customization
 
@@ -73,7 +74,11 @@ src/
 ### Key Conventions
 
 - Use `@/` path aliases for all imports
-- Follow TypeScript strict mode requirements
+- Follow ultra-strict TypeScript rules:
+  - Use bracket notation for environment variables: `process.env["NODE_ENV"]`
+  - Handle undefined for optional properties explicitly
+  - No `any` types allowed (`allowJs: false`)
+  - Use proper type guards for runtime checks
 - Use `cn()` utility for conditional Tailwind classes
 - Prefer Server Components, use "use client" only when necessary
 - Follow existing component patterns and naming conventions
@@ -102,10 +107,16 @@ import { Link, useRouter } from "@/i18n/navigation";
 
 ### Code Quality
 
-- Write TypeScript with proper interfaces for all props
+- Write TypeScript with proper interfaces for all props and strict type
+  compliance:
+  - Use `exactOptionalPropertyTypes` - explicit handling of optional properties
+  - Handle `noUncheckedIndexedAccess` - array/object access may return undefined
+  - Use bracket notation for index signatures: `obj["key"]` not `obj.key`
+  - No `any` types - use proper type definitions or `unknown`
 - Use semantic HTML elements for accessibility
 - Follow React best practices (proper key props, effect dependencies)
 - Implement proper error boundaries where needed
+- Use type guards for runtime type checking
 
 ### Performance
 
@@ -127,6 +138,8 @@ import { Link, useRouter } from "@/i18n/navigation";
 - `bun run type-check` - Verify TypeScript compliance
 - `bun run lint` - Check code quality
 - `bun run format` - Format code consistently
+- `bun run pre-push` - Run all quality checks before pushing
+- `bun run pre-push --fix` - Auto-fix issues and re-check
 
 ## When to Collaborate
 
@@ -134,6 +147,40 @@ import { Link, useRouter } from "@/i18n/navigation";
 - **Testing** - Coordinate with Testing Agent for component testing
 - **Code review** - Request Code Review Agent for quality checks
 - **Complex state** - Consider if backend state management is needed
+
+## Essential Documentation
+
+### Framework Documentation
+
+- **Next.js 15**: [App Router Guide](https://nextjs.org/docs/app) |
+  [Server Components](https://nextjs.org/docs/app/building-your-application/rendering/server-components)
+- **React 19**: [React Docs](https://react.dev) |
+  [Hooks Reference](https://react.dev/reference/react)
+- **TypeScript**: [Handbook](https://www.typescriptlang.org/docs/) |
+  [Strict Mode](https://www.typescriptlang.org/tsconfig#strict)
+- **Tailwind CSS**: [Documentation](https://tailwindcss.com/docs) |
+  [Responsive Design](https://tailwindcss.com/docs/responsive-design)
+
+### Component Libraries
+
+- **Shadcn/ui**: [Components](https://ui.shadcn.com/docs/components) |
+  [Installation](https://ui.shadcn.com/docs/installation/next)
+- **Radix UI**:
+  [Primitives](https://www.radix-ui.com/primitives/docs/overview/introduction)
+- **Lucide Icons**: [Icon Library](https://lucide.dev/icons/)
+
+### Internationalization
+
+- **next-intl**: [Documentation](https://next-intl-docs.vercel.app/) |
+  [App Router Setup](https://next-intl-docs.vercel.app/docs/getting-started/app-router)
+
+### Tools & Best Practices
+
+- **ESLint**:
+  [Next.js Config](https://nextjs.org/docs/app/building-your-application/configuring/eslint)
+- **Prettier**: [Configuration](https://prettier.io/docs/en/configuration.html)
+- **Accessibility**: [WebAIM Guidelines](https://webaim.org/articles/) |
+  [ARIA Practices](https://www.w3.org/WAI/ARIA/apg/)
 
 ## Success Metrics
 

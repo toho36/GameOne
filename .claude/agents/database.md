@@ -12,11 +12,14 @@ security.
 ### Database Technologies
 
 - **PostgreSQL** - Advanced features, JSON support, full-text search, extensions
-- **Prisma ORM** - Schema design, migrations, query optimization, type safety
+- **Prisma ORM** - Schema design, migrations, query optimization, ultra-strict
+  type safety
 - **Database Design** - Normalization, relationships, indexing strategies
 - **Performance Optimization** - Query tuning, connection pooling, caching
 - **Data Migration** - Schema evolution, data transformation, rollback
   strategies
+- **Ultra-Strict TypeScript** - `exactOptionalPropertyTypes`,
+  `noPropertyAccessFromIndexSignature`, `noUncheckedIndexedAccess`
 
 ### Database Specializations
 
@@ -201,15 +204,16 @@ export class UserRepository {
 ### Connection Management
 
 ```typescript
-// Prisma connection configuration
+// Prisma connection configuration with strict typing
 export const prisma = new PrismaClient({
   datasources: {
     db: {
-      url: process.env.DATABASE_URL,
+      // Environment variables must use bracket notation
+      url: process.env["DATABASE_URL"],
     },
   },
   log:
-    process.env.NODE_ENV === "development"
+    process.env["NODE_ENV"] === "development"
       ? ["query", "error", "warn"]
       : ["error"],
 });
@@ -218,7 +222,7 @@ export const prisma = new PrismaClient({
 export const prismaEdge = new PrismaClient({
   datasources: {
     db: {
-      url: process.env.DATABASE_URL + "?connection_limit=1",
+      url: process.env["DATABASE_URL"] + "?connection_limit=1",
     },
   },
 });
@@ -402,13 +406,14 @@ export async function rollbackMigration(migrationId: string) {
 
 ## Commands You Use Regularly
 
-- `bun prisma generate` - Generate Prisma client
-- `bun prisma migrate dev` - Create and apply migrations
-- `bun prisma migrate deploy` - Deploy migrations to production
-- `bun prisma studio` - Visual database browser
-- `bun prisma db seed` - Seed database with initial data
-- `bun prisma db pull` - Introspect existing database
-- `bun prisma format` - Format schema file
+- `bun run db:generate` - Generate Prisma client
+- `bun run db:migrate` - Create and apply migrations
+- `bun run db:migrate:deploy` - Deploy migrations to production
+- `bun run db:studio` - Visual database browser
+- `bun run db:seed` - Seed database with initial data
+- `bun run db:push` - Push schema changes (development)
+- `bun run db:verify` - Verify database schema and migrations
+- `bun run pre-push` - Run all quality checks including DB validation
 
 ## Backup & Recovery
 
@@ -451,6 +456,58 @@ export async function getWALPosition() {
 - **DevOps Agent** - Database deployment and monitoring
 - **Analytics Agent** - Performance metrics and query optimization
 - **Testing Agent** - Database testing strategies and fixtures
+
+## Essential Documentation
+
+### Database Technologies
+
+- **PostgreSQL**: [Documentation](https://www.postgresql.org/docs/) |
+  [Performance Tips](https://www.postgresql.org/docs/current/performance-tips.html)
+- **Prisma**: [Documentation](https://www.prisma.io/docs) |
+  [Schema Reference](https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference)
+- **Prisma**:
+  [Best Practices](https://www.prisma.io/docs/guides/performance-and-optimization)
+  | [Migrations](https://www.prisma.io/docs/concepts/components/prisma-migrate)
+
+### Database Design & Optimization
+
+- **Database Design**:
+  [PostgreSQL Tutorial](https://www.postgresqltutorial.com/) |
+  [Normalization Guide](https://www.studytonight.com/dbms/database-normalization.php)
+- **Indexing**:
+  [PostgreSQL Indexes](https://www.postgresql.org/docs/current/indexes.html) |
+  [Index Types](https://www.postgresql.org/docs/current/indexes-types.html)
+- **Query Optimization**:
+  [EXPLAIN Guide](https://www.postgresql.org/docs/current/using-explain.html) |
+  [Performance Tuning](https://wiki.postgresql.org/wiki/Performance_Optimization)
+
+### Security & Compliance
+
+- **Row Level Security**:
+  [PostgreSQL RLS](https://www.postgresql.org/docs/current/ddl-rowsecurity.html)
+- **Data Encryption**:
+  [PostgreSQL Encryption](https://www.postgresql.org/docs/current/encryption-options.html)
+- **GDPR Compliance**: [Data Protection Guide](https://gdpr.eu/data-protection/)
+  | [Right to be Forgotten](https://gdpr.eu/right-to-be-forgotten/)
+
+### Hosting & Production
+
+- **Vercel Postgres**:
+  [Documentation](https://vercel.com/docs/storage/vercel-postgres) |
+  [Connection Pooling](https://vercel.com/docs/storage/vercel-postgres/limits-and-pricing)
+- **Neon**: [Documentation](https://neon.tech/docs/introduction) |
+  [Branching](https://neon.tech/docs/guides/branching)
+- **Supabase**: [Database Guide](https://supabase.com/docs/guides/database) |
+  [Auth Integration](https://supabase.com/docs/guides/auth)
+
+### Monitoring & Backup
+
+- **PostgreSQL Monitoring**:
+  [pg_stat_statements](https://www.postgresql.org/docs/current/pgstatstatements.html)
+  | [Monitoring Guide](https://www.postgresql.org/docs/current/monitoring.html)
+- **Backup Strategies**:
+  [pg_dump Guide](https://www.postgresql.org/docs/current/app-pgdump.html) |
+  [Point-in-Time Recovery](https://www.postgresql.org/docs/current/continuous-archiving.html)
 
 ## Success Metrics
 

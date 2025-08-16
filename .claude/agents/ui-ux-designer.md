@@ -28,6 +28,74 @@ provide excellent user experiences.
 - **User Interface Design** - Layout design, information architecture,
   navigation
 - **Design Systems** - Atomic design, component documentation, design tokens
+
+## Essential Documentation
+
+### Design System Resources
+
+- **Shadcn/ui**: [Components](https://ui.shadcn.com/docs/components) |
+  [Design System](https://ui.shadcn.com/docs/components-json)
+- **Radix UI**:
+  [Design System](https://www.radix-ui.com/themes/docs/overview/getting-started)
+  | [Primitives](https://www.radix-ui.com/primitives)
+- **Tailwind CSS**:
+  [Design System](https://tailwindcss.com/docs/customizing-colors) |
+  [Component Examples](https://tailwindui.com/components)
+
+### UI/UX Principles
+
+- **Material Design**: [Guidelines](https://m3.material.io/) |
+  [Components](https://m3.material.io/components)
+- **Apple Human Interface**:
+  [Guidelines](https://developer.apple.com/design/human-interface-guidelines/) |
+  [iOS Design](https://developer.apple.com/design/human-interface-guidelines/ios)
+- **Nielsen's Heuristics**:
+  [10 Usability Heuristics](https://www.nngroup.com/articles/ten-usability-heuristics/)
+  | [UX Laws](https://lawsofux.com/)
+
+### Accessibility Standards
+
+- **WCAG 2.1**: [Guidelines](https://www.w3.org/WAI/WCAG21/quickref/) |
+  [AA Checklist](https://webaim.org/standards/wcag/checklist)
+- **Web Accessibility**: [WebAIM](https://webaim.org/) |
+  [A11y Project](https://www.a11yproject.com/)
+- **Testing Tools**: [axe DevTools](https://www.deque.com/axe/devtools/) |
+  [WAVE](https://wave.webaim.org/)
+
+### Typography & Color
+
+- **Typography**: [Practical Typography](https://practicaltypography.com/) |
+  [Google Fonts](https://fonts.google.com/)
+- **Color Theory**: [Adobe Color](https://color.adobe.com/) |
+  [Coolors](https://coolors.co/) |
+  [Contrast Checker](https://webaim.org/resources/contrastchecker/)
+- **Design Tokens**: [Design Tokens Guide](https://designtokens.org/) |
+  [Style Dictionary](https://amzn.github.io/style-dictionary/)
+
+### Responsive Design
+
+- **Mobile First**:
+  [Luke Wroblewski's Guide](https://www.lukew.com/ff/entry.asp?933) |
+  [Responsive Images](https://developer.mozilla.org/en-US/docs/Learn/HTML/Multimedia_and_embedding/Responsive_images)
+- **Breakpoints**:
+  [Tailwind Breakpoints](https://tailwindcss.com/docs/responsive-design) |
+  [CSS Grid](https://css-tricks.com/snippets/css/complete-guide-grid/)
+
+### User Experience Research
+
+- **User Testing**:
+  [Steve Krug's Approach](https://sensible.com/dont-make-me-think/) |
+  [Usability.gov](https://www.usability.gov/)
+- **User Personas**:
+  [Persona Guide](https://www.interaction-design.org/literature/topics/personas)
+  |
+  [Journey Mapping](https://www.nngroup.com/articles/customer-journey-mapping/)
+
+## Commands for Design
+
+- `bun run dev` - Preview design changes in development
+- `bun run storybook` - View component library (if configured)
+- `bun run build` - Check design implementation in production build
 - **User Research** - User personas, journey mapping, usability testing
 - **Prototyping** - Interactive mockups, design validation, user testing
 

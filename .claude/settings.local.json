@@ -28,7 +28,8 @@
       "Bash(git commit:*)",
       "Bash(cat:*)",
       "Bash(curl:*)",
-      "Bash(touch:*)"
+      "Bash(touch:*)",
+      "Bash(chmod:*)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"

@@ -7,11 +7,11 @@ on:
     branches: [master]
 
 jobs:
-  quality-check:
-    name: 🧪 Quality Check
+  pre-push-checks:
+    name: 🚀 Pre-Push Validation
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-    
+    timeout-minutes: 15
+
     steps:
       - name: 📦 Checkout code
         uses: actions/checkout@v4
@@ -24,14 +24,89 @@ jobs:
       - name: 📥 Install dependencies
         run: bun install --frozen-lockfile
 
-      - name: �� Type check
-        run: bun run type-check
+      - name: 🚀 Run comprehensive pre-push checks
+        run: bun run pre-push --skip-git
+        env:
+          CI: true
 
-      - name: 🧹 Lint code
-        run: bun run lint
+      - name: 📊 Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: |
+            coverage/
+            test-results/
+          retention-days: 30
 
-      - name: ✅ Quality passed
+  build-check:
+    name: 🏗️ Build Verification
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: pre-push-checks
+
+    steps:
+      - name: 📦 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: 📥 Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: 🏗️ Build application
+        run: bun run build
+        env:
+          CI: true
+
+      - name: 📊 Build size analysis
         run: |
-          echo "�� All quality checks passed!"
-          echo "�� Vercel will handle the build and deployment automatically."
-          echo "📊 Build status will be available in Vercel dashboard."
+          echo "📊 Build completed successfully!"
+          if [ -d ".next" ]; then
+            echo "📦 Build artifacts created"
+            du -sh .next/ || echo "No .next directory found"
+          fi
+
+  # Optional: Security audit (runs in parallel)
+  security-audit:
+    name: 🔒 Security Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    continue-on-error: true # Don't fail the pipeline on security warnings
+
+    steps:
+      - name: 📦 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: 🔍 Security audit
+        run: bun audit || echo "⚠️ Security audit completed with warnings"
+
+  # Summary job that other workflows can depend on
+  ci-success:
+    name: ✅ CI Pipeline Success
+    runs-on: ubuntu-latest
+    needs: [pre-push-checks, build-check]
+    if: always()
+
+    steps:
+      - name: 🎉 All checks passed
+        if: needs.pre-push-checks.result == 'success' && needs.build-check.result == 'success'
+        run: |
+          echo "🎉 All quality checks and build verification passed!"
+          echo "✅ This PR is ready for review and merge."
+          echo "🚀 Deployment will be handled automatically by Vercel."
+
+      - name: ❌ Some checks failed
+        if: needs.pre-push-checks.result != 'success' || needs.build-check.result != 'success'
+        run: |
+          echo "❌ Some checks failed. Please review the failed jobs above."
+          echo "🔧 Run 'bun run pre-push --fix' locally to auto-fix common issues."
+          exit 1
