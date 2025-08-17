@@ -31,7 +31,9 @@
       "Bash(touch:*)",
       "Bash(chmod:*)",
       "Bash(prisma validate:*)",
-      "Bash(rg:*)"
+      "Bash(rg:*)",
+      "Bash(npm run type-check:*)",
+      "Bash(npx prisma generate:*)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"

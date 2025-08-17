@@ -101,6 +101,78 @@
       "registration": "Registrace {start} - {end}"
     }
   },
+  "AdminEventDashboard": {
+    "title": "Administrátorská nástěnka událostí",
+    "subtitle": "Spravujte všechny události na platformě s administrátorskými oprávněními",
+    "loading": "Načítání administrátorské nástěnky...",
+    "accessDenied": "Přístup odepřen. Vyžadují se administrátorská oprávnění.",
+    "accessDeniedDesc": "Tato nástěnka vyžaduje administrátorská oprávnění.",
+    "returnToDashboard": "Vrátit se na nástěnku",
+    "exportData": "Exportovat data",
+    "filters": "Filtry",
+    "advancedFilters": "Pokročilé filtry",
+    "clearAll": "Vymazat vše",
+    "selectAll": "Vybrat vše",
+    "bulkActions": {
+      "approve": "Schválit",
+      "reject": "Zamítnout",
+      "cancel": "Zrušit",
+      "delete": "Smazat",
+      "eventsSelected": "{count} událost{plural} vybráno"
+    },
+    "stats": {
+      "totalEvents": "Celkem událostí",
+      "pendingApproval": "Čekající na schválení",
+      "published": "Publikované",
+      "totalRegistrations": "Celkem registrací",
+      "activeEvents": "Aktivní události",
+      "cancelled": "Zrušené"
+    },
+    "table": {
+      "event": "Událost",
+      "creator": "Tvůrce",
+      "status": "Stav",
+      "type": "Typ",
+      "date": "Datum",
+      "registrations": "Registrace",
+      "actions": "Akce",
+      "noEvents": "Žádné události nenalezeny",
+      "noEventsFiltered": "Zkuste upravit filtry pro zobrazení více událostí.",
+      "noEventsCreated": "Zatím nebyly vytvořeny žádné události."
+    },
+    "filters": {
+      "search": "Hledat události",
+      "searchPlaceholder": "Hledat podle názvu, popisu nebo tvůrce...",
+      "creator": "Tvůrce",
+      "creatorPlaceholder": "ID tvůrce nebo email",
+      "status": "Stav",
+      "allStatuses": "Všechny stavy",
+      "type": "Typ",
+      "allTypes": "Všechny typy",
+      "city": "Město",
+      "cityPlaceholder": "Zadejte město",
+      "fromDate": "Od data",
+      "toDate": "Do data",
+      "payment": "Platba",
+      "allEvents": "Všechny události",
+      "paidOnly": "Pouze placené události",
+      "freeOnly": "Pouze bezplatné události",
+      "locationType": "Typ lokace",
+      "onlineOnly": "Pouze online",
+      "inPersonOnly": "Pouze osobně",
+      "approval": "Schválení",
+      "requiresApproval": "Vyžaduje schválení",
+      "noApprovalNeeded": "Není potřeba schválení",
+      "sortBy": "Řadit podle",
+      "sortOrder": "Pořadí řazení",
+      "createdDate": "Datum vytvoření",
+      "eventDate": "Datum události",
+      "title": "Název",
+      "registrations": "Registrace",
+      "descending": "Sestupně",
+      "ascending": "Vzestupně"
+    }
+  },
   "Navigation": {
     "home": "Domů",
     "dashboard": "Nástěnka"
@@ -128,5 +200,109 @@
   "Language": {
     "switchTo": "Přepnout na {language}",
     "currentLanguage": "Aktuální jazyk: {language}"
+  },
+  "EventEdit": {
+    "title": "Upravit událost",
+    "cancel": "Zrušit",
+    "unsavedChanges": "Máte neuložené změny. Uložte prosím své změny před odchodem.",
+    "previous": "Předchozí",
+    "next": "Další",
+    "saveDraft": "Uložit koncept",
+    "updating": "Aktualizace...",
+    "updateEvent": "Aktualizovat událost",
+    "validationError": {
+      "title": "Chyba validace",
+      "description": "Opravte prosím chyby před pokračováním.",
+      "stepError": "Dokončete prosím krok {step} před pokračováním."
+    },
+    "updateSuccess": {
+      "title": "Úspěch",
+      "description": "Událost byla úspěšně aktualizována!"
+    },
+    "updateWarning": {
+      "title": "Varování aktualizace",
+      "description": "Událost byla aktualizována s varováními."
+    },
+    "updateError": {
+      "title": "Chyba",
+      "description": "Nepodařilo se aktualizovat událost"
+    },
+    "stepError": {
+      "title": "Chyba načítání kroku",
+      "description": "Nepodařilo se načíst krok {step}. Zkuste to prosím znovu nebo kontaktujte podporu."
+    },
+    "unsavedChangesDialog": {
+      "title": "Neuložené změny",
+      "description": "Máte neuložené změny. Opravdu chcete odejít?",
+      "cancel": "Zůstat",
+      "leave": "Odejít"
+    },
+    "capacityWarning": {
+      "title": "Varování změny kapacity",
+      "description": "Snížení kapacity může ovlivnit existující registrace.",
+      "cancel": "Zrušit",
+      "continue": "Pokračovat"
+    }
+  },
+  "RegistrationImpactValidator": {
+    "title": "Analýza dopadu na registrace",
+    "totalRegistrations": "Celkem registrací",
+    "confirmedRegistrations": "Potvrzené",
+    "pendingRegistrations": "Čekající",
+    "waitingList": "Čekací listina",
+    "capacityChange": "Změna kapacity",
+    "capacityReductionWarning": "Snížení kapacity z {current} na {new} ovlivní {confirmed} potvrzených registrací.",
+    "warnings": "Varování",
+    "criticalIssues": "Kritické problémy",
+    "proceedWithChanges": "Pokračovat se změnami",
+    "rollbackChanges": "Vrátit změny zpět",
+    "validationPassed": "Validace prošla",
+    "validationFailed": "Validace selhala",
+    "safeToProceed": "Bezpečné pokračovat",
+    "requiresAttention": "Vyžaduje pozornost",
+    "confirmationDialog": {
+      "title": "Potvrdit kritické změny",
+      "description": "Následující změny mohou významně ovlivnit existující registrace:",
+      "warning": "Tyto změny vyžadují zvláštní pozornost a mohou ovlivnit zkušenost účastníků.",
+      "cancel": "Zrušit změny",
+      "proceed": "Pokračovat i tak"
+    },
+    "rollbackDialog": {
+      "title": "Potvrdit vrácení zpět",
+      "description": "Opravdu chcete vrátit všechny změny zpět? Tuto akci nelze vrátit.",
+      "cancel": "Zrušit",
+      "confirm": "Potvrdit vrácení zpět"
+    }
+  },
+  "EventAnalytics": {
+    "title": "Analytika události",
+    "subtitle": "Komplexní přehledy a metriky výkonu pro vaši událost",
+    "loading": "Načítání analytiky...",
+    "error": "Nepodařilo se načíst analytiku",
+    "retry": "Zkusit znovu",
+    "refresh": "Obnovit",
+    "export": "Exportovat data",
+    "noData": "Nejsou k dispozici žádná analytická data",
+    "totalRegistrations": "Celkový počet registrací",
+    "totalRevenue": "Celkové příjmy",
+    "capacityUtilization": "Využití kapacity",
+    "pendingApprovals": "Čekající schválení",
+    "confirmed": "Potvrzeno",
+    "pending": "Čekající",
+    "cancelled": "Zrušeno",
+    "waitingList": "Čekací listina",
+    "paid": "Zaplaceno",
+    "completion": "Míra dokončení",
+    "registrations": "Registrace",
+    "payments": "Platby",
+    "registrationTimeline": "Časová osa registrací",
+    "registrationStatus": "Status registrací",
+    "paymentCompletion": "Dokončení plateb",
+    "registrationSources": "Zdroje registrací",
+    "summaryStatistics": "Souhrnné statistiky",
+    "confirmationRate": "Míra potvrzení",
+    "averageRevenue": "Průměrný příjem na registraci",
+    "cancellationRate": "Míra zrušení",
+    "noSourceData": "Nejsou k dispozici žádná zdrojová data"
   }
 }

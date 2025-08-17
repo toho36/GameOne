@@ -69,6 +69,7 @@ export function EventCreateForm({
   const { toast } = useToast();
 
   const form = useForm<EventFormData>({
+    // Type assertion needed due to strictOptionalProperties incompatibility
     resolver: zodResolver(eventFormSchema) as any,
     defaultValues: {
       title: "",

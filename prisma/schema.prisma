@@ -93,6 +93,8 @@ model User {
   uploadedDocuments            EventDocument[]
   createdVideoClips            VideoClip[]           @relation("VideoClipCreator")
   videoReactions               VideoReaction[]
+  moderationNotes              ModerationNote[]      @relation("ModerationNoteAuthor")
+  moderationActions            ModerationAction[]    @relation("ModerationActionPerformedBy")
 
   // Indexes for performance
   @@index([email])
@@ -166,6 +168,9 @@ enum EventStatus {
   CANCELLED
   COMPLETED
   POSTPONED
+  PENDING_APPROVAL
+  REJECTED
+  SUSPENDED
 }
 
 enum EventType {
@@ -267,6 +272,8 @@ model Event {
   feedback            EventFeedback[]
   documents           EventDocument[]
   videoClips          VideoClip[]
+  moderationNotes     ModerationNote[]
+  moderationHistory   ModerationAction[]
 
   // Performance indexes for complex queries
   @@index([status, startDate])
@@ -809,6 +816,58 @@ model AuditLog {
   @@index([resource, action, timestamp]) // For resource-specific audits
   @@index([sessionId, timestamp]) // For session-based audit trails
   @@map("audit_logs")
+}
+
+// ================================
+// EVENT MODERATION SYSTEM
+// ================================
+
+enum ModerationActionType {
+  APPROVE
+  REJECT
+  REQUEST_CHANGES
+  SUSPEND
+  RESTORE
+}
+
+model ModerationNote {
+  id        String @id @default(cuid())
+  eventId   String
+  content   String
+  authorId  String
+  isInternal Boolean @default(true) // Internal notes vs messages to creator
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  event  Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  author User  @relation("ModerationNoteAuthor", fields: [authorId], references: [id])
+
+  @@index([eventId, createdAt])
+  @@index([authorId, isInternal])
+  @@map("moderation_notes")
+}
+
+model ModerationAction {
+  id            String               @id @default(cuid())
+  eventId       String
+  action        ModerationActionType
+  reason        String?
+  performedById String
+  oldStatus     EventStatus?
+  newStatus     EventStatus?
+
+  createdAt DateTime @default(now())
+
+  // Relations
+  event       Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  performedBy User  @relation("ModerationActionPerformedBy", fields: [performedById], references: [id])
+
+  @@index([eventId, createdAt])
+  @@index([performedById, action])
+  @@index([action, createdAt])
+  @@map("moderation_actions")
 }
 
 // ================================
