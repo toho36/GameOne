@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { EventFormData, EventTranslationData } from "@/lib/schemas/event-schemas";
 
 interface LanguageTabsProps {
-  form: UseFormReturn<any>;
+  form: UseFormReturn<EventFormData>;
   currentLocale: string;
   formData: EventFormData;
 }
@@ -45,9 +45,15 @@ export function LanguageTabs({ form, currentLocale, formData }: LanguageTabsProp
     value: string | undefined
   ) => {
     const currentTranslations = formData.translations || {};
-    const languageTranslation = currentTranslations[language] || {};
+    const languageTranslation = currentTranslations[language] || {
+      title: "", // Ensure title is always present
+      description: undefined,
+      shortDescription: undefined,
+      venue: undefined,
+      address: undefined,
+    };
 
-    const updatedTranslation = {
+    const updatedTranslation: EventTranslationData = {
       ...languageTranslation,
       [field]: value,
     };

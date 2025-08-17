@@ -30,7 +30,10 @@
       "Bash(curl:*)",
       "Bash(touch:*)",
       "Bash(chmod:*)",
-      "Bash(prisma validate:*)"
+      "Bash(prisma validate:*)",
+      "Bash(rg:*)",
+      "Bash(npm run type-check:*)",
+      "Bash(npx prisma generate:*)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"

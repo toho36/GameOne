@@ -7,7 +7,7 @@ import { EventFormData } from "@/lib/schemas/event-schemas";
 import { PaymentSettings } from "@/components/features/events/payment-settings";
 
 interface PaymentStepProps {
-  form: UseFormReturn<any>;
+  form: UseFormReturn<EventFormData>;
   bankAccounts?: Array<{
     id: string;
     name: string;

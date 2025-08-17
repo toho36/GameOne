@@ -19,7 +19,7 @@ import { Badge } from "@/components/ui/badge";
 import { EventFormData } from "@/lib/schemas/event-schemas";
 
 interface RegistrationSettingsProps {
-  form: UseFormReturn<any>;
+  form: UseFormReturn<EventFormData>;
   locale: string;
   formData: EventFormData;
 }

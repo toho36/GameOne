@@ -1,9 +1,13 @@
 "use client";
 
 import { LoginLink, RegisterLink, LogoutLink } from "@kinde-oss/kinde-auth-nextjs/components";
-import { cn } from "@/lib/utils";
 import { useAuth } from "./session-provider";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import {
+  getButtonClasses,
+  getLoadingButtonClasses,
+  getButtonContainerClasses,
+} from "@/lib/utils/button-variants";
 
 interface AuthButtonsProps {
   className?: string;
@@ -24,31 +28,13 @@ export function AuthButtons({
 }: AuthButtonsProps) {
   const { isAuthenticated, isLoading } = useAuth();
 
-  const buttonClasses = cn(
-    "inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
-    {
-      // Variants
-      "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90": variant === "default",
-      "border border-input hover:bg-accent hover:text-accent-foreground": variant === "outline",
-      "hover:bg-accent hover:text-accent-foreground": variant === "ghost",
-
-      // Sizes
-      "h-8 px-3 text-xs": size === "sm",
-      "h-10 px-4 py-2": size === "md",
-      "h-12 px-6 py-3 text-base": size === "lg",
-    },
-    className
-  );
-
-  const containerClasses = cn("flex gap-3", {
-    "flex-row": layout === "horizontal",
-    "flex-col": layout === "vertical",
-  });
+  const buttonClasses = getButtonClasses({ variant, size, className });
+  const containerClasses = getButtonContainerClasses(layout);
 
   if (isLoading) {
     return (
       <div className={containerClasses}>
-        <div className={cn(buttonClasses, "cursor-not-allowed opacity-60")}>
+        <div className={getLoadingButtonClasses({ variant, size, className })}>
           <LoadingSpinner size="sm" className="mr-2" />
           Loading...
         </div>
@@ -128,23 +114,11 @@ export function LoginButton({
 }) {
   const { isAuthenticated, isLoading } = useAuth();
 
-  const buttonClasses = cn(
-    "inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
-    {
-      "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90": variant === "default",
-      "border border-input hover:bg-accent hover:text-accent-foreground": variant === "outline",
-      "hover:bg-accent hover:text-accent-foreground": variant === "ghost",
-
-      "h-8 px-3 text-xs": size === "sm",
-      "h-10 px-4 py-2": size === "md",
-      "h-12 px-6 py-3 text-base": size === "lg",
-    },
-    className
-  );
+  const buttonClasses = getButtonClasses({ variant, size, className });
 
   if (isLoading) {
     return (
-      <div className={cn(buttonClasses, "cursor-not-allowed opacity-60")}>
+      <div className={getLoadingButtonClasses({ variant, size, className })}>
         <LoadingSpinner size="sm" className="mr-2" />
         Loading...
       </div>
@@ -186,23 +160,11 @@ export function RegisterButton({
 }) {
   const { isAuthenticated, isLoading } = useAuth();
 
-  const buttonClasses = cn(
-    "inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
-    {
-      "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90": variant === "default",
-      "border border-input hover:bg-accent hover:text-accent-foreground": variant === "outline",
-      "hover:bg-accent hover:text-accent-foreground": variant === "ghost",
-
-      "h-8 px-3 text-xs": size === "sm",
-      "h-10 px-4 py-2": size === "md",
-      "h-12 px-6 py-3 text-base": size === "lg",
-    },
-    className
-  );
+  const buttonClasses = getButtonClasses({ variant, size, className });
 
   if (isLoading) {
     return (
-      <div className={cn(buttonClasses, "cursor-not-allowed opacity-60")}>
+      <div className={getLoadingButtonClasses({ variant, size, className })}>
         <LoadingSpinner size="sm" className="mr-2" />
         Loading...
       </div>
@@ -244,23 +206,11 @@ export function LogoutButton({
 }) {
   const { isAuthenticated, isLoading } = useAuth();
 
-  const buttonClasses = cn(
-    "inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
-    {
-      "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90": variant === "default",
-      "border border-input hover:bg-accent hover:text-accent-foreground": variant === "outline",
-      "hover:bg-accent hover:text-accent-foreground": variant === "ghost",
-
-      "h-8 px-3 text-xs": size === "sm",
-      "h-10 px-4 py-2": size === "md",
-      "h-12 px-6 py-3 text-base": size === "lg",
-    },
-    className
-  );
+  const buttonClasses = getButtonClasses({ variant, size, className });
 
   if (isLoading) {
     return (
-      <div className={cn(buttonClasses, "cursor-not-allowed opacity-60")}>
+      <div className={getLoadingButtonClasses({ variant, size, className })}>
         <LoadingSpinner size="sm" className="mr-2" />
         Loading...
       </div>

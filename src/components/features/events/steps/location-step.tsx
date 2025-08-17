@@ -17,7 +17,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { EventFormData } from "@/lib/schemas/event-schemas";
 
 interface LocationStepProps {
-  form: UseFormReturn<any>;
+  form: UseFormReturn<EventFormData>;
   locale: string;
   formData: EventFormData;
 }

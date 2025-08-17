@@ -136,12 +136,37 @@ export default async function DashboardPage() {
                   </Link>
 
                   <Link
-                    href="/registrations"
+                    href="/events/create"
                     className="flex items-center gap-3 rounded-lg border border-gray-200 p-4 transition-colors hover:border-green-300 hover:bg-green-50"
                   >
                     <div className="flex size-10 items-center justify-center rounded-lg bg-green-100">
                       <svg
                         className="size-5 text-green-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                        />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">Create Event</p>
+                      <p className="text-sm text-gray-600">Start a new event</p>
+                    </div>
+                  </Link>
+
+                  <Link
+                    href="/registrations"
+                    className="flex items-center gap-3 rounded-lg border border-gray-200 p-4 transition-colors hover:border-purple-300 hover:bg-purple-50"
+                  >
+                    <div className="flex size-10 items-center justify-center rounded-lg bg-purple-100">
+                      <svg
+                        className="size-5 text-purple-600"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -162,11 +187,11 @@ export default async function DashboardPage() {
 
                   <Link
                     href="/analytics"
-                    className="flex items-center gap-3 rounded-lg border border-gray-200 p-4 transition-colors hover:border-purple-300 hover:bg-purple-50"
+                    className="flex items-center gap-3 rounded-lg border border-gray-200 p-4 transition-colors hover:border-orange-300 hover:bg-orange-50"
                   >
-                    <div className="flex size-10 items-center justify-center rounded-lg bg-purple-100">
+                    <div className="flex size-10 items-center justify-center rounded-lg bg-orange-100">
                       <svg
-                        className="size-5 text-purple-600"
+                        className="size-5 text-orange-600"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
