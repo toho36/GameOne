@@ -30,7 +30,8 @@
       "Bash(curl:*)",
       "Bash(touch:*)",
       "Bash(chmod:*)",
-      "Bash(prisma validate:*)"
+      "Bash(prisma validate:*)",
+      "WebSearch"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"

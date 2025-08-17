@@ -1,13 +1,23 @@
 ---
-description: Type Definitions and Interfaces
-alwaysApply: false
+description: Type Definitions and Interfaces - STRICT ENFORCEMENT
+alwaysApply: true
 ---
 
-# Type Definitions and Interfaces
+# Type Definitions and Interfaces - MANDATORY SEPARATION
+
+## 🚨 CRITICAL TYPE RULES - NO EXCEPTIONS
+
+### ABSOLUTE REQUIREMENTS
+1. **ALL types MUST be in separate `.types.ts` files** - NO inline definitions
+2. **Interface for component props** - Type for everything else
+3. **NO `any` types** - Use `unknown` or proper typing
+4. **Consistent naming conventions** - `ComponentNameProps` for interfaces
+5. **Domain-based organization** - Group related types together
+6. **Type imports with `type` keyword** - Always separate type imports
 
 ## Overview
 
-This document defines comprehensive TypeScript type definitions, interfaces, and type management patterns for the GameOne event management system. All types should be strongly typed, well-documented, and follow consistent patterns for maintainability and developer experience.
+This document defines STRICT TypeScript type definitions, interfaces, and type management patterns for the GameOne event management system. All types MUST be strongly typed, properly separated, and follow consistent patterns for maintainability and developer experience.
 
 ## Directory Structure
 
@@ -18,34 +28,77 @@ src/types/
 │   ├── responses.ts       # Response payload types
 │   ├── errors.ts          # Error types
 │   └── pagination.ts      # Pagination types
-├── database/              # Database-related types
-│   ├── prisma.ts          # Extended Prisma types
-│   ├── models.ts          # Model types with relations
-│   └── enums.ts           # Database enums
-├── features/              # Feature-specific types
+├── components/            # Component-specific types (SEPARATED)
+│   ├── ui/               # UI component types
+│   │   ├── button.types.ts
+│   │   ├── form.types.ts
+│   │   └── index.ts
+│   ├── features/         # Feature component types
+│   │   ├── event.types.ts
+│   │   ├── user.types.ts
+│   │   └── index.ts
+│   └── index.ts
+├── features/              # Domain-specific types
 │   ├── events.ts          # Event management types
 │   ├── users.ts           # User management types
 │   ├── registration.ts    # Registration types
 │   ├── payments.ts        # Payment types
-│   ├── videos.ts          # Video content types
-│   └── notifications.ts   # Notification types
-├── ui/                    # UI component types
-│   ├── components.ts      # Common component props
-│   ├── forms.ts           # Form-related types
-│   ├── tables.ts          # Table and data display types
-│   └── navigation.ts      # Navigation types
-├── utils/                 # Utility types
-│   ├── common.ts          # Common utility types
-│   ├── helpers.ts         # Type helper utilities
-│   └── guards.ts          # Type guard functions
-├── auth/                  # Authentication types
-│   ├── user.ts            # User authentication types
-│   ├── permissions.ts     # Permission types
-│   └── roles.ts           # Role types
-└── global/                # Global type definitions
-    ├── environment.ts     # Environment variables
-    ├── config.ts          # Configuration types
-    └── index.ts           # Global type exports
+│   └── index.ts
+├── common/                # Shared common types
+│   ├── base.ts           # Base component props
+│   ├── utility.ts        # Utility types
+│   └── index.ts
+└── index.ts              # Re-export all types
+```
+
+## 🎯 Interface vs Type Usage (STRICT GUIDELINES)
+
+### Use `interface` for:
+- **Component props and state definitions**
+- **Object shapes that might be extended**
+- **API contracts and data models**
+- **When inheritance/extension is needed**
+
+### Use `type` for:
+- **Union types**: `type Status = 'pending' | 'completed' | 'failed'`
+- **Primitive aliases**: `type ID = string`
+- **Complex operations**: intersections, conditionals, mapped types
+- **Function signatures**: `type Handler = (event: Event) => void`
+
+### Examples of Correct Usage:
+
+```typescript
+// ✅ Use interface for component props
+export interface ButtonProps extends ComponentProps<'button'> {
+  variant: ButtonVariant
+  size: ButtonSize
+  loading?: boolean
+  onClick?: (event: MouseEvent) => void
+}
+
+// ✅ Use type for unions and primitives
+export type ButtonVariant = 'default' | 'outline' | 'ghost'
+export type ButtonSize = 'sm' | 'md' | 'lg'
+export type EventStatus = 'draft' | 'published' | 'cancelled'
+
+// ✅ Use interface for object shapes/models
+export interface User {
+  id: string
+  email: string
+  profile: UserProfile
+  createdAt: Date
+}
+
+export interface UserProfile {
+  firstName: string
+  lastName: string
+  avatar?: string
+}
+
+// ✅ Use type for function signatures
+export type EventHandler<T = void> = (data: T) => void
+export type AsyncHandler<T, R = void> = (data: T) => Promise<R>
+export type Validator<T> = (value: T) => boolean
 ```
 
 ## Type Naming Conventions

@@ -1,115 +1,254 @@
-# Cursor Rules for Frontend Development
+# Cursor Rules for GameOne Project
 
-## File Organization & Structure
+## 🎯 Core Principles
 
-### Component Files
+### Code Size & Refactoring Rules
+- **MAXIMUM 300 lines per file/component** - STRICT LIMIT
+- When approaching 200 lines, consider refactoring into smaller components
+- Break large components into logical sub-components immediately
+- Extract custom hooks when logic exceeds 50 lines
+- Use composition over large monolithic components
+- **Refactoring is mandatory, not optional**
 
-- Place all components in `src/components/`
+### File Organization & Structure
+
+#### Component Files
+- Place all components in appropriate subdirectories under `src/components/`
 - Use PascalCase for component file names: `ComponentName.tsx`
-- Group related components in subdirectories when needed
+- **Feature-based organization for complex components:**
+  ```
+  src/components/features/user-dashboard/
+  ├── components/           # Local sub-components
+  ├── hooks/               # Feature-specific hooks
+  ├── types/               # Feature-specific types
+  └── index.ts             # Main component export
+  ```
 - Keep Shadcn/ui components in `src/components/ui/`
 - Use descriptive names that indicate the component's purpose
 
-### Import Organization
-
+#### Import Organization
 - Use `@/` path aliases for all imports
 - Group imports in this order:
   1. React and Next.js imports
   2. Third-party libraries
-  3. Internal components and utilities
-  4. Types and interfaces
-- Use absolute imports with `@/` prefix
+  3. Internal utilities and services
+  4. **Types (separate section)**
+  5. Internal components and hooks
+- Always separate type imports with `type` keyword
 
 ## TypeScript Standards
 
-### Type Definitions
+### Interface vs Type Usage (STRICT GUIDELINES)
+- **Use `interface` for:**
+  - Component props and state definitions
+  - Object shapes that might be extended
+  - API contracts and data models
+  - When inheritance/extension is needed
+  - Public APIs and library interfaces
 
-- Define interfaces for all component props
-- Use descriptive interface names: `ComponentNameProps`
-- Avoid `any` type - always define proper types
+- **Use `type` for:**
+  - Union types: `type Status = 'pending' | 'completed' | 'failed'`
+  - Primitive aliases: `type ID = string`
+  - Complex type operations (intersections, conditionals, mapped types)
+  - Function signatures: `type Handler = (event: Event) => void`
+  - Utility types and transformations
+
+### Type Organization & Separation
+- **All types MUST be in separate files** with `.types.ts` extension
+- Place types in `src/types/` directory organized by domain:
+  ```
+  src/types/
+  ├── api/                 # API-related types
+  ├── auth/                # Authentication types
+  ├── common/              # Shared common types
+  ├── components/          # Component-specific types
+  └── index.ts             # Re-export all types
+  ```
+- Component-specific types go in feature folders:
+  ```
+  src/components/features/user-dashboard/
+  ├── types/
+  │   ├── user-dashboard.types.ts
+  │   └── index.ts
+  ```
+
+### Type Definitions
+- Define interfaces for all component props: `ComponentNameProps`
+- Avoid `any` type - always define proper types or use `unknown`
 - Use union types for variant props
 - Export types when they're used across multiple files
+- Use descriptive type names that indicate purpose
 
-### Component Structure
+### Component Structure Template (MAX 300 LINES)
 
 ```typescript
-interface ComponentNameProps {
-  // Required props first
-  title: string;
-  // Optional props with defaults
-  variant?: 'default' | 'outline';
-  className?: string;
-}
+// 1. Import statements (organized as specified above)
+import React from 'react'
+import { clsx } from 'clsx'
 
-export default function ComponentName({
+import { cn } from '@/lib/utils'
+
+import type { ComponentNameProps } from './component-name.types'
+
+import { useCustomHook } from '@/hooks/use-custom-hook'
+
+// 2. Component implementation (STRICT 300 line limit)
+export function ComponentName({ 
   title,
   variant = 'default',
-  className
+  className,
+  ...props 
 }: ComponentNameProps) {
-  // Component logic
+  // 3. Hooks (max 5-7 hooks per component)
+  // 4. Derived state and computed values  
+  // 5. Event handlers (extract to custom hooks if >3)
+  // 6. Effects (extract to custom hooks if >2)
+  // 7. Early returns/guards
+  // 8. Render helpers (extract if >20 lines)
+  
+  // 9. Main render (BREAK INTO SUB-COMPONENTS IF TOO LONG)
+  return (
+    <div className={cn("base-styles", className)} {...props}>
+      {/* Component JSX - extract sub-components if >50 lines */}
+    </div>
+  )
 }
+
+// 10. Export default
+export default ComponentName
 ```
+
+## 📁 Optimal Folder Structure (ENFORCED)
+
+### Recommended Project Structure
+```
+src/
+├── app/                          # Next.js app directory
+├── components/
+│   ├── ui/                       # Reusable UI components (<100 lines each)
+│   │   ├── button/
+│   │   │   ├── button.tsx        # Main component
+│   │   │   ├── button.types.ts   # Type definitions
+│   │   │   ├── button.test.tsx   # Tests
+│   │   │   └── index.ts          # Export file
+│   │   └── index.ts              # UI components barrel export
+│   ├── layout/                   # Layout-specific components
+│   ├── auth/                     # Authentication components  
+│   └── features/                 # Feature-specific complex components
+│       └── user-dashboard/
+│           ├── components/       # Local sub-components
+│           ├── hooks/            # Feature-specific hooks
+│           ├── types/            # Feature-specific types
+│           ├── user-dashboard.tsx
+│           └── index.ts
+├── types/                        # Global type definitions (SEPARATED)
+│   ├── api/                      # API-related types
+│   ├── auth/                     # Authentication types
+│   ├── common/                   # Shared common types
+│   ├── components/               # Global component types
+│   └── index.ts                  # Re-export all types
+├── hooks/                        # Global reusable hooks
+├── utils/                        # Utility functions
+├── services/                     # API services and external integrations
+├── lib/                          # Third-party library configurations
+└── styles/                       # Global styles
+```
+
+### Refactoring Triggers (MANDATORY)
+- **File exceeds 200 lines**: Plan refactoring immediately
+- **File exceeds 300 lines**: MUST refactor before continuing
+- **Component has >7 props**: Consider composition or reducer pattern
+- **More than 5 hooks**: Extract custom hooks
+- **Nested components >3 levels**: Extract sub-components
+- **Event handlers >50 lines**: Extract to custom hooks
+- **Render logic >100 lines**: Extract render components
 
 ## Styling Conventions
 
 ### Tailwind CSS Usage
-
 - Use `cn()` utility for conditional classes
 - Prefer utility classes over custom CSS
-- Group related classes logically
+- Group related classes logically: base → variants → responsive → custom
 - Use responsive prefixes consistently
 - Follow mobile-first approach
 
 ### Class Organization
-
 ```typescript
 const className = cn(
   // Base styles
   "flex items-center justify-center",
-  // Variant styles
+  // Variant styles  
   variant === 'outline' && "border border-gray-300",
   // Responsive styles
   "text-sm md:text-base",
-  // Custom classes
+  // Custom classes (last)
   className
 );
 ```
 
-## Component Patterns
+## Component Generation & Architecture Rules
+
+### Mandatory Refactoring Guidelines
+- **Components MUST NOT exceed 300 lines**
+- **Functions MUST NOT exceed 50 lines**
+- **JSX blocks MUST NOT exceed 100 lines**
+- **Extract sub-components for any repeated patterns**
+- **Use custom hooks for complex logic (>3 useEffect or >5 useState)**
+
+### Component Architecture Patterns
+- **Composition over inheritance** - always
+- **Single Responsibility Principle** - one concern per component
+- **Props drilling max 3 levels** - use context beyond that
+- **Extract render functions** when JSX exceeds 50 lines
+- **Use compound components** for complex UI patterns
 
 ### Server vs Client Components
-
 - Default to Server Components
 - Use "use client" only when necessary (interactivity, hooks, browser APIs)
 - Keep client components as small as possible
 - Pass data down from server components
 
-### Reusable Component Structure
-
+### Component Size Management
 ```typescript
-// 1. Import statements
-import { cn } from "@/lib/utils";
-import { ComponentProps } from "react";
-
-// 2. Type definitions
-interface ComponentProps extends ComponentProps<"div"> {
-  // Component-specific props
+// ❌ BAD: Large monolithic component (>300 lines)
+export function LargeComponent() {
+  // 400+ lines of code
 }
 
-// 3. Component implementation
-export default function Component({ className, ...props }: ComponentProps) {
+// ✅ GOOD: Broken into smaller components
+export function MainComponent() {
   return (
-    <div className={cn("base-styles", className)} {...props}>
-      {/* Component content */}
+    <div>
+      <ComponentHeader />
+      <ComponentBody />
+      <ComponentFooter />
     </div>
-  );
+  )
 }
+
+// Each sub-component <100 lines
+function ComponentHeader() { /* ... */ }
+function ComponentBody() { /* ... */ }
+function ComponentFooter() { /* ... */ }
 ```
 
-## Internationalization
+## Code Quality & Performance Standards
 
-### Translation Usage
+### Performance Requirements
+- **Lazy load** components >200 lines
+- **Memoize expensive computations** (React.memo, useMemo, useCallback)
+- **Virtualize long lists** (>100 items)
+- **Code splitting** for feature modules
+- **Bundle analysis** before major releases
 
+### Error Handling (MANDATORY)
+- **Every async operation** must have error handling
+- **Error boundaries** for all feature components
+- **Loading states** for all async operations
+- **Fallback UI** for failed states
+- **User-friendly error messages**
+
+### Internationalization
 - Import `useTranslations` from "next-intl"
 - Use descriptive translation keys
 - Group related translations in the same namespace
@@ -120,7 +259,6 @@ import { useTranslations } from "next-intl";
 
 export default function Component() {
   const t = useTranslations("ComponentName");
-
   return (
     <div>
       <h1>{t("title")}</h1>
@@ -130,192 +268,152 @@ export default function Component() {
 }
 ```
 
-### Navigation with Locales
+## Development Workflow (STRICT ENFORCEMENT)
 
-```typescript
-import { Link } from "@/i18n/navigation";
+### Before Creating ANY Component
+1. **Check if component will exceed 200 lines** - plan refactoring
+2. **Determine type vs interface** usage based on rules above
+3. **Create types file FIRST** (component-name.types.ts)
+4. **Plan folder structure** (feature-based vs ui)
+5. **Consider accessibility** from the start
+6. **Plan for mobile responsiveness**
 
-// Use Link component for locale-aware navigation
-<Link href="/about" className="link-styles">
-  {t("about")}
-</Link>
-```
+### Component Creation Checklist
+- [ ] Types defined in separate .types.ts file
+- [ ] Component under 300 lines (MANDATORY)
+- [ ] Proper interface/type usage followed
+- [ ] Tests included
+- [ ] Accessibility considered
+- [ ] Mobile responsiveness implemented
+- [ ] Error handling included
+- [ ] Performance optimizations applied
 
-## Performance & Best Practices
-
-### Image Optimization
-
-- Use Next.js `Image` component for all images
-- Provide proper `alt` text for accessibility
-- Use appropriate `sizes` prop for responsive images
-
-### State Management
-
-- Use React hooks for local state
-- Prefer server state over client state when possible
-- Use `useCallback` and `useMemo` for expensive operations
-- Keep state as close to where it's used as possible
-
-### Accessibility
-
-- Use semantic HTML elements
-- Include proper ARIA labels and roles
-- Ensure keyboard navigation support
-- Maintain color contrast requirements
-- Test with screen readers
-
-## Code Quality Standards
-
-### Error Handling
-
-- Implement proper error boundaries for client components
-- Use try-catch blocks for async operations
-- Provide meaningful error messages
-- Handle loading and error states gracefully
-
-### Code Comments
-
-- Comment complex logic and business rules
-- Explain "why" not "what" in comments
-- Use JSDoc for component documentation
-- Keep comments up-to-date with code changes
+### Code Quality Standards
+- **Semantic HTML elements** - always
+- **ARIA labels and roles** - required
+- **Keyboard navigation** - must support
+- **Color contrast** - WCAG 2.1 AA compliance
+- **Screen reader** compatibility
+- **Loading states** for async operations
+- **Error boundaries** for complex components
 
 ### Naming Conventions
+- Variables/functions: `camelCase`
+- Components/types: `PascalCase`
+- Constants: `UPPER_SNAKE_CASE`
+- Files: `kebab-case.tsx` or `PascalCase.tsx` for components
+- Type files: `component-name.types.ts`
 
-- Use descriptive variable and function names
-- Follow camelCase for variables and functions
-- Use PascalCase for components and types
-- Use UPPER_SNAKE_CASE for constants
+## 🚀 Mandatory File Templates
 
-## File Templates
-
-### New Component Template
-
+### Component Template (STRICT STRUCTURE)
 ```typescript
-import { cn } from "@/lib/utils";
-import { ComponentProps } from "react";
+// component-name.tsx
+import React from 'react'
 
-interface ComponentNameProps extends ComponentProps<"div"> {
-  // Define component-specific props here
-}
+import { cn } from '@/lib/utils'
 
-export default function ComponentName({
+import type { ComponentNameProps } from './component-name.types'
+
+export function ComponentName({
   className,
   ...props
 }: ComponentNameProps) {
+  // Component logic (MAX 250 lines total)
+  
   return (
-    <div className={cn("base-styles", className)} {...props}>
-      {/* Component content */}
+    <div className={cn('base-styles', className)} {...props}>
+      {/* Component content - extract sub-components if >50 lines */}
     </div>
-  );
+  )
 }
+
+export default ComponentName
 ```
 
-### Page Component Template
-
+### Types Template (SEPARATE FILE REQUIRED)
 ```typescript
-import { useTranslations } from "next-intl";
+// component-name.types.ts
+import type { ComponentProps } from 'react'
 
-export default function PageName() {
-  const t = useTranslations("PageName");
-
-  return (
-    <main className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-4">
-        {t("title")}
-      </h1>
-      {/* Page content */}
-    </main>
-  );
+// Use interface for component props
+export interface ComponentNameProps extends ComponentProps<'div'> {
+  // Required props first
+  title: string
+  // Optional props with defaults  
+  variant?: 'default' | 'outline'
+  size?: 'sm' | 'md' | 'lg'
 }
+
+// Use type for unions, primitives, etc.
+export type ComponentVariant = 'default' | 'outline'
+export type ComponentSize = 'sm' | 'md' | 'lg'
 ```
 
-## Development Workflow
-
-### Before Creating New Code
-
-1. Check existing components for similar patterns
-2. Determine if it should be a server or client component
-3. Plan the component's props interface
-4. Consider internationalization needs
-5. Think about accessibility requirements
-
-### Code Review Checklist
-
-- [ ] TypeScript compiles without errors
-- [ ] All props have proper interfaces
-- [ ] Component is responsive across breakpoints
-- [ ] Accessibility requirements are met
-- [ ] Internationalization is properly implemented
-- [ ] Performance considerations are addressed
-- [ ] Code follows established patterns
-
-## Common Patterns to Follow
-
-### Form Components
-
+### Feature Component Template (COMPLEX COMPONENTS)
 ```typescript
-interface FormFieldProps {
-  label: string;
-  error?: string;
-  required?: boolean;
-}
+// src/components/features/user-dashboard/user-dashboard.tsx
+import React from 'react'
 
-export default function FormField({ label, error, required }: FormFieldProps) {
+import type { UserDashboardProps } from './types/user-dashboard.types'
+import { useUserDashboard } from './hooks/use-user-dashboard'
+
+// Local sub-components
+import { DashboardHeader } from './components/dashboard-header'
+import { DashboardBody } from './components/dashboard-body'
+import { DashboardFooter } from './components/dashboard-footer'
+
+export function UserDashboard(props: UserDashboardProps) {
+  const { data, loading, error } = useUserDashboard()
+  
+  if (loading) return <DashboardSkeleton />
+  if (error) return <DashboardError error={error} />
+  
   return (
-    <div className="space-y-2">
-      <label className="block text-sm font-medium">
-        {label} {required && <span className="text-red-500">*</span>}
-      </label>
-      {/* Form input */}
-      {error && <p className="text-sm text-red-500">{error}</p>}
+    <div className="user-dashboard">
+      <DashboardHeader {...props} />
+      <DashboardBody data={data} />
+      <DashboardFooter />
     </div>
-  );
+  )
 }
+
+export default UserDashboard
 ```
 
-### Loading States
+## 🔥 CRITICAL RULES - NO EXCEPTIONS
 
-```typescript
-export default function LoadingSpinner({ className }: { className?: string }) {
-  return (
-    <div className={cn("animate-spin rounded-full border-2 border-gray-300 border-t-blue-600", className)} />
-  );
-}
-```
+### ABSOLUTE REQUIREMENTS
+1. **300 line limit** - Components exceeding this WILL BE REJECTED
+2. **Types in separate files** - No inline type definitions for components
+3. **Interface for props** - Type for everything else
+4. **Feature-based organization** - Complex components in features folder
+5. **Sub-component extraction** - JSX >50 lines must be broken down
+6. **Custom hook extraction** - Logic >50 lines must be extracted
+7. **Error boundaries** - All features must have error handling
+8. **Loading states** - All async operations must show loading
+9. **Tests required** - No component without tests
+10. **Accessibility compliance** - WCAG 2.1 AA minimum
 
-### Error Boundaries
+### Code Review BLOCKERS
+- [ ] File exceeds 300 lines
+- [ ] Missing type definitions file
+- [ ] Incorrect interface/type usage
+- [ ] No error handling for async operations
+- [ ] Missing loading states
+- [ ] No accessibility attributes
+- [ ] Missing tests
+- [ ] Poor folder organization
+- [ ] Inline styles instead of Tailwind
+- [ ] Missing TypeScript types
 
-```typescript
-"use client";
+## Remember: REFACTOR EARLY, REFACTOR OFTEN
+**Small, focused components are easier to:**
+- Test and debug
+- Reuse and maintain
+- Understand and modify
+- Optimize for performance
+- Make accessible
 
-import { Component, ComponentProps, ReactNode } from "react";
+**When in doubt, break it down further!**
 
-interface ErrorBoundaryProps {
-  children: ReactNode;
-  fallback?: ReactNode;
-}
-
-interface ErrorBoundaryState {
-  hasError: boolean;
-}
-
-export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  constructor(props: ErrorBoundaryProps) {
-    super(props);
-    this.state = { hasError: false };
-  }
-
-  static getDerivedStateFromError(): ErrorBoundaryState {
-    return { hasError: true };
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return this.props.fallback || <div>Something went wrong.</div>;
-    }
-
-    return this.props.children;
-  }
-}
-```
