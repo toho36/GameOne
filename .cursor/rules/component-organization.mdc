@@ -2,105 +2,97 @@
 alwaysApply: true
 ---
 
-# Component Organization and Patterns
+# Component Organization and Patterns - STRICT ENFORCEMENT
+
+## 🚨 CRITICAL RULES - NO EXCEPTIONS
+
+### ABSOLUTE REQUIREMENTS
+1. **MAXIMUM 300 lines per file/component** - STRICT LIMIT - NO EXCEPTIONS
+2. **MANDATORY refactoring at 200 lines** - Plan immediately
+3. **Types MUST be in separate `.types.ts` files** - NO inline definitions
+4. **Interface for component props** - Type for everything else
+5. **Feature-based organization** - Complex components in features folder
+6. **Sub-component extraction** - JSX >50 lines MUST be broken down
+7. **Custom hook extraction** - Logic >50 lines MUST be extracted
 
 ## Overview
 
-This document defines the comprehensive component architecture, organization patterns, and development conventions for the GameOne event management system. All components should follow consistent patterns for maintainability, reusability, and type safety.
+This document defines the comprehensive component architecture with STRICT size limits and organization patterns for the GameOne event management system. All components MUST follow these patterns for maintainability, reusability, and type safety.
 
 ## Directory Structure
 
 ```
-src/components/
-├── ui/                     # Core design system components (Shadcn/ui)
-│   ├── button.tsx
-│   ├── input.tsx
-│   ├── card.tsx
-│   ├── dialog.tsx
-│   ├── dropdown-menu.tsx
-│   ├── form.tsx
-│   ├── table.tsx
-│   ├── toast.tsx
-│   └── index.ts           # Re-export all UI components
-├── layout/                # Layout and navigation components
-│   ├── header.tsx
-│   ├── footer.tsx
-│   ├── sidebar.tsx
-│   ├── navigation.tsx
-│   ├── breadcrumbs.tsx
-│   └── page-wrapper.tsx
-├── forms/                 # Form components and inputs
-│   ├── event-form.tsx
-│   ├── registration-form.tsx
-│   ├── user-form.tsx
-│   ├── payment-form.tsx
-│   ├── search-form.tsx
-│   └── form-fields/       # Specialized form field components
-│       ├── date-picker.tsx
-│       ├── rich-text-editor.tsx
-│       ├── file-upload.tsx
-│       ├── multi-select.tsx
-│       └── address-input.tsx
-├── features/              # Feature-specific component groups
-│   ├── events/
-│   │   ├── event-card.tsx
-│   │   ├── event-list.tsx
-│   │   ├── event-details.tsx
-│   │   ├── event-calendar.tsx
-│   │   ├── event-feedback.tsx
-│   │   └── index.ts
-│   ├── registration/
-│   │   ├── registration-wizard.tsx
-│   │   ├── registration-summary.tsx
-│   │   ├── waiting-list.tsx
-│   │   ├── guest-registration.tsx
-│   │   └── index.ts
-│   ├── payments/
-│   │   ├── payment-methods.tsx
-│   │   ├── qr-code-display.tsx
-│   │   ├── bank-transfer-info.tsx
-│   │   ├── payment-status.tsx
-│   │   └── index.ts
-│   ├── users/
-│   │   ├── user-profile.tsx
-│   │   ├── user-avatar.tsx
-│   │   ├── user-list.tsx
-│   │   ├── role-assignment.tsx
-│   │   └── index.ts
-│   ├── videos/
-│   │   ├── video-player.tsx
-│   │   ├── video-list.tsx
-│   │   ├── video-reactions.tsx
-│   │   ├── video-categories.tsx
-│   │   └── index.ts
-│   └── admin/
-│       ├── dashboard.tsx
-│       ├── analytics-charts.tsx
-│       ├── audit-log.tsx
-│       ├── system-config.tsx
-│       └── index.ts
-├── shared/                # Shared utility components
-│   ├── loading-spinner.tsx
-│   ├── error-boundary.tsx
-│   ├── empty-state.tsx
-│   ├── pagination.tsx
-│   ├── search-bar.tsx
-│   ├── filter-panel.tsx
-│   ├── data-table.tsx
-│   ├── confirmation-dialog.tsx
-│   ├── image-gallery.tsx
-│   └── language-switcher.tsx
-├── providers/             # Context providers and state management
-│   ├── auth-provider.tsx
-│   ├── theme-provider.tsx
-│   ├── toast-provider.tsx
-│   ├── query-provider.tsx
-│   └── notification-provider.tsx
-└── icons/                 # Custom icon components
-    ├── event-icon.tsx
-    ├── user-icon.tsx
-    ├── payment-icon.tsx
-    └── index.ts
+src/
+├── components/
+│   ├── ui/                       # Simple UI components (<100 lines each)
+│   │   ├── button/
+│   │   │   ├── button.tsx        # Main component (MAX 100 lines)
+│   │   │   ├── button.types.ts   # Type definitions (SEPARATED)
+│   │   │   ├── button.test.tsx   # Tests (MANDATORY)
+│   │   │   └── index.ts          # Export file
+│   │   └── index.ts              # UI components barrel export
+│   ├── layout/                   # Layout components (<150 lines each)
+│   ├── auth/                     # Authentication components
+│   └── features/                 # Feature-specific complex components
+│       └── user-dashboard/       # Example feature structure
+│           ├── components/       # Local sub-components (<100 lines)
+│           ├── hooks/            # Feature-specific hooks
+│           ├── types/            # Feature-specific types (SEPARATED)
+│           ├── user-dashboard.tsx # Main component (MAX 300 lines)
+│           └── index.ts
+├── types/                        # Global type definitions (SEPARATED)
+│   ├── api/                      # API-related types
+│   ├── auth/                     # Authentication types
+│   ├── common/                   # Shared common types
+│   ├── components/               # Global component types
+│   └── index.ts                  # Re-export all types
+├── hooks/                        # Global reusable hooks
+├── utils/                        # Utility functions
+├── services/                     # API services and external integrations
+└── lib/                          # Third-party library configurations
+```
+
+## 🔥 SIZE LIMITS & REFACTORING TRIGGERS
+
+### Component Size Enforcement
+- **UI Components**: MAX 100 lines (simple, reusable)
+- **Layout Components**: MAX 150 lines
+- **Feature Components**: MAX 300 lines (ABSOLUTE LIMIT)
+- **Hook Functions**: MAX 50 lines
+- **Utility Functions**: MAX 30 lines
+
+### MANDATORY Refactoring Triggers
+- **200+ lines**: STOP and plan refactoring immediately
+- **300+ lines**: MUST refactor before continuing - NO EXCEPTIONS
+- **JSX >50 lines**: Extract sub-components
+- **Logic >50 lines**: Extract custom hooks
+- **>7 props**: Consider composition or reducer pattern
+- **>5 hooks in component**: Extract custom hooks
+- **>3 event handlers**: Extract to custom hooks
+- **Nested components >3 levels**: Extract sub-components
+
+### Extraction Patterns (IMMEDIATE ACTION)
+```typescript
+// ❌ BAD: Large monolithic component (>300 lines)
+export function LargeComponent() {
+  // 400+ lines of everything mixed together
+}
+
+// ✅ GOOD: Broken into smaller, focused components
+export function MainComponent() {
+  return (
+    <div>
+      <ComponentHeader />
+      <ComponentBody />
+      <ComponentFooter />
+    </div>
+  )
+}
+
+// Each sub-component <100 lines, focused on single responsibility
+function ComponentHeader() { /* <50 lines */ }
+function ComponentBody() { /* <100 lines */ }
+function ComponentFooter() { /* <30 lines */ }
 ```
 
 ## Component Naming Conventions
@@ -145,42 +137,95 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 Button.displayName = "Button";
 ```
 
-## TypeScript Patterns
+## TypeScript Standards (STRICT ENFORCEMENT)
 
-### Props Interface Definition
+### Interface vs Type Usage (MANDATORY)
+
+**Use `interface` for:**
+- Component props and state definitions
+- Object shapes that might be extended
+- API contracts and data models
+- When inheritance/extension is needed
+
+**Use `type` for:**
+- Union types: `type Status = 'pending' | 'completed' | 'failed'`
+- Primitive aliases: `type ID = string`
+- Complex operations (intersections, conditionals, mapped types)
+- Function signatures: `type Handler = (event: Event) => void`
+
+### Type Organization (STRICT SEPARATION)
 
 ```typescript
-// Base props interface
-interface BaseComponentProps {
-  className?: string;
-  children?: React.ReactNode;
-  'data-testid'?: string;
+// component-name.types.ts (SEPARATE FILE REQUIRED)
+import type { ComponentProps } from 'react'
+
+// ✅ Use interface for component props
+export interface ComponentNameProps extends ComponentProps<'div'> {
+  // Required props first
+  title: string
+  data: ComponentData[]
+  // Optional props with defaults  
+  variant?: ComponentVariant
+  size?: ComponentSize
+  onAction?: (id: string) => void
 }
 
-// Specific component props
-interface EventCardProps extends BaseComponentProps {
-  event: Event;
-  onSelect?: (event: Event) => void;
-  onEdit?: (eventId: string) => void;
-  onDelete?: (eventId: string) => void;
-  showActions?: boolean;
-  variant?: 'default' | 'compact' | 'detailed';
-  locale?: string;
+// ✅ Use type for unions and primitives
+export type ComponentVariant = 'default' | 'outline' | 'ghost'
+export type ComponentSize = 'sm' | 'md' | 'lg'
+export type ComponentStatus = 'loading' | 'success' | 'error'
+
+// ✅ Use interface for object shapes
+export interface ComponentData {
+  id: string
+  title: string
+  createdAt: Date
+  status: ComponentStatus
 }
 
-// Generic component props
-interface DataTableProps<TData> extends BaseComponentProps {
-  data: TData[];
-  columns: ColumnDef<TData>[];
-  loading?: boolean;
-  error?: string;
-  pagination?: {
-    page: number;
-    pageSize: number;
-    total: number;
-  };
-  onPageChange?: (page: number) => void;
-  onSortChange?: (sorting: SortingState) => void;
+// ✅ Use type for function signatures
+export type ComponentHandler = (data: ComponentData) => void
+export type ComponentValidator = (value: string) => boolean
+```
+
+### Props Interface Definition (MANDATORY PATTERNS)
+
+```typescript
+// Base props interface (in types/common/base.types.ts)
+export interface BaseComponentProps {
+  className?: string
+  children?: React.ReactNode
+  'data-testid'?: string
+}
+
+// Feature component props (in features/event/types/event.types.ts)
+export interface EventCardProps extends BaseComponentProps {
+  event: Event
+  onSelect?: (event: Event) => void
+  onEdit?: (eventId: string) => void
+  onDelete?: (eventId: string) => void
+  showActions?: boolean
+  variant?: EventCardVariant
+  locale?: string
+}
+
+// Generic component props with strict typing
+export interface DataTableProps<TData> extends BaseComponentProps {
+  data: TData[]
+  columns: ColumnDef<TData>[]
+  loading?: boolean
+  error?: string | null
+  pagination?: TablePagination
+  onPageChange?: (page: number) => void
+  onSortChange?: (sorting: SortingState) => void
+}
+
+// Supporting type definitions (separate from interfaces)
+export type EventCardVariant = 'default' | 'compact' | 'detailed'
+export type TablePagination = {
+  page: number
+  pageSize: number
+  total: number
 }
 ```
 

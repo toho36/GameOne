@@ -103,7 +103,7 @@ export const mockApiResponse = <T,>(data: T, status = 200) => ({
 
 // Mock fetch
 export const mockFetch = (response: any) => {
-  global.fetch = vi.fn().mockResolvedValue(response);
+  global.fetch = vi.fn().mockResolvedValue(response) as any;
 };
 
 // Wait for async operations
