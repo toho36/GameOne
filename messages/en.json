@@ -101,6 +101,78 @@
       "registration": "Registration {start} - {end}"
     }
   },
+  "AdminEventDashboard": {
+    "title": "Admin Event Dashboard",
+    "subtitle": "Manage all events across the platform with administrative controls",
+    "loading": "Loading admin dashboard...",
+    "accessDenied": "Access denied. Admin permissions required.",
+    "accessDeniedDesc": "This dashboard requires administrator privileges.",
+    "returnToDashboard": "Return to Dashboard",
+    "exportData": "Export Data",
+    "filters": "Filters",
+    "advancedFilters": "Advanced Filters",
+    "clearAll": "Clear All",
+    "selectAll": "Select All",
+    "bulkActions": {
+      "approve": "Approve",
+      "reject": "Reject",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "eventsSelected": "{count} event{plural} selected"
+    },
+    "stats": {
+      "totalEvents": "Total Events",
+      "pendingApproval": "Pending Approval",
+      "published": "Published",
+      "totalRegistrations": "Total Registrations",
+      "activeEvents": "Active Events",
+      "cancelled": "Cancelled"
+    },
+    "table": {
+      "event": "Event",
+      "creator": "Creator",
+      "status": "Status",
+      "type": "Type",
+      "date": "Date",
+      "registrations": "Registrations",
+      "actions": "Actions",
+      "noEvents": "No events found",
+      "noEventsFiltered": "Try adjusting your filters to see more events.",
+      "noEventsCreated": "No events have been created yet."
+    },
+    "filters": {
+      "search": "Search Events",
+      "searchPlaceholder": "Search by title, description, or creator...",
+      "creator": "Creator",
+      "creatorPlaceholder": "Creator ID or email",
+      "status": "Status",
+      "allStatuses": "All statuses",
+      "type": "Type",
+      "allTypes": "All types",
+      "city": "City",
+      "cityPlaceholder": "Enter city",
+      "fromDate": "From Date",
+      "toDate": "To Date",
+      "payment": "Payment",
+      "allEvents": "All events",
+      "paidOnly": "Paid events only",
+      "freeOnly": "Free events only",
+      "locationType": "Location Type",
+      "onlineOnly": "Online only",
+      "inPersonOnly": "In-person only",
+      "approval": "Approval",
+      "requiresApproval": "Requires approval",
+      "noApprovalNeeded": "No approval needed",
+      "sortBy": "Sort By",
+      "sortOrder": "Sort Order",
+      "createdDate": "Created Date",
+      "eventDate": "Event Date",
+      "title": "Title",
+      "registrations": "Registrations",
+      "descending": "Descending",
+      "ascending": "Ascending"
+    }
+  },
   "Navigation": {
     "home": "Home",
     "dashboard": "Dashboard"
@@ -128,5 +200,109 @@
   "Language": {
     "switchTo": "Switch to {language}",
     "currentLanguage": "Current language: {language}"
+  },
+  "EventEdit": {
+    "title": "Edit Event",
+    "cancel": "Cancel",
+    "unsavedChanges": "You have unsaved changes. Please save your changes before leaving.",
+    "previous": "Previous",
+    "next": "Next",
+    "saveDraft": "Save Draft",
+    "updating": "Updating...",
+    "updateEvent": "Update Event",
+    "validationError": {
+      "title": "Validation Error",
+      "description": "Please fix the errors before continuing.",
+      "stepError": "Please complete step {step} before proceeding."
+    },
+    "updateSuccess": {
+      "title": "Success",
+      "description": "Event updated successfully!"
+    },
+    "updateWarning": {
+      "title": "Update Warning",
+      "description": "Event updated with warnings."
+    },
+    "updateError": {
+      "title": "Error",
+      "description": "Failed to update event"
+    },
+    "stepError": {
+      "title": "Step Loading Error",
+      "description": "Failed to load {step} step. Please try again or contact support."
+    },
+    "unsavedChangesDialog": {
+      "title": "Unsaved Changes",
+      "description": "You have unsaved changes. Are you sure you want to leave?",
+      "cancel": "Stay",
+      "leave": "Leave"
+    },
+    "capacityWarning": {
+      "title": "Capacity Change Warning",
+      "description": "Reducing capacity may affect existing registrations.",
+      "cancel": "Cancel",
+      "continue": "Continue"
+    }
+  },
+  "RegistrationImpactValidator": {
+    "title": "Registration Impact Analysis",
+    "totalRegistrations": "Total Registrations",
+    "confirmedRegistrations": "Confirmed",
+    "pendingRegistrations": "Pending",
+    "waitingList": "Waiting List",
+    "capacityChange": "Capacity Change",
+    "capacityReductionWarning": "Reducing capacity from {current} to {new} will affect {confirmed} confirmed registrations.",
+    "warnings": "Warnings",
+    "criticalIssues": "Critical Issues",
+    "proceedWithChanges": "Proceed with Changes",
+    "rollbackChanges": "Rollback Changes",
+    "validationPassed": "Validation Passed",
+    "validationFailed": "Validation Failed",
+    "safeToProceed": "Safe to Proceed",
+    "requiresAttention": "Requires Attention",
+    "confirmationDialog": {
+      "title": "Confirm Critical Changes",
+      "description": "The following changes may significantly impact existing registrations:",
+      "warning": "These changes require special attention and may affect attendee experience.",
+      "cancel": "Cancel Changes",
+      "proceed": "Proceed Anyway"
+    },
+    "rollbackDialog": {
+      "title": "Confirm Rollback",
+      "description": "Are you sure you want to rollback all changes? This action cannot be undone.",
+      "cancel": "Cancel",
+      "confirm": "Confirm Rollback"
+    }
+  },
+  "EventAnalytics": {
+    "title": "Event Analytics",
+    "subtitle": "Comprehensive insights and performance metrics for your event",
+    "loading": "Loading analytics...",
+    "error": "Failed to load analytics",
+    "retry": "Try Again",
+    "refresh": "Refresh",
+    "export": "Export Data",
+    "noData": "No analytics data available",
+    "totalRegistrations": "Total Registrations",
+    "totalRevenue": "Total Revenue",
+    "capacityUtilization": "Capacity Utilization",
+    "pendingApprovals": "Pending Approvals",
+    "confirmed": "Confirmed",
+    "pending": "Pending",
+    "cancelled": "Cancelled",
+    "waitingList": "Waiting List",
+    "paid": "Paid",
+    "completion": "Completion Rate",
+    "registrations": "Registrations",
+    "payments": "Payments",
+    "registrationTimeline": "Registration Timeline",
+    "registrationStatus": "Registration Status",
+    "paymentCompletion": "Payment Completion",
+    "registrationSources": "Registration Sources",
+    "summaryStatistics": "Summary Statistics",
+    "confirmationRate": "Confirmation Rate",
+    "averageRevenue": "Average Revenue per Registration",
+    "cancellationRate": "Cancellation Rate",
+    "noSourceData": "No source data available"
   }
 }

@@ -55,6 +55,15 @@ export interface EventAnalyticsResponse {
     registrationTypes: Record<string, number>;
     sources: Record<string, number>;
   };
+  attendanceStats?: {
+    attended: number;
+    noShow: number;
+    confirmed: number;
+  } | null;
+  event?: {
+    capacity: number;
+    title: string;
+  };
 }
 
 export class EventService {
@@ -290,7 +299,15 @@ export class EventService {
   async getEventAnalytics(eventId: string, userId: string): Promise<EventAnalyticsResponse> {
     const event = await prisma.event.findUnique({
       where: { id: eventId },
-      select: { creatorId: true },
+      select: {
+        creatorId: true,
+        capacity: true,
+        requiresPayment: true,
+        price: true,
+        title: true,
+        startDate: true,
+        createdAt: true,
+      },
     });
 
     if (!event) {
@@ -301,6 +318,7 @@ export class EventService {
       throw new Error("Unauthorized");
     }
 
+    // Get registration statistics
     const registrationStats = await prisma.registration.groupBy({
       by: ["status"],
       where: { eventId },
@@ -334,18 +352,158 @@ export class EventService {
       }
     });
 
+    // Get real payment statistics if event requires payment
+    let paymentStats = {
+      totalRevenue: 0,
+      paidCount: 0,
+      pendingCount: 0,
+      completionRate: 0,
+    };
+
+    if (event.requiresPayment && event.price) {
+      // Query actual payment records
+      const payments = await prisma.payment.findMany({
+        where: {
+          eventId,
+          status: "COMPLETED",
+        },
+        select: {
+          amount: true,
+          status: true,
+        },
+      });
+
+      const pendingPayments = await prisma.pendingPayment.count({
+        where: {
+          eventId,
+          status: "PENDING",
+        },
+      });
+
+      const paidCount = payments.length;
+      const totalRevenue = payments.reduce((sum, payment) => sum + Number(payment.amount), 0);
+
+      paymentStats = {
+        totalRevenue,
+        paidCount,
+        pendingCount: pendingPayments,
+        completionRate: regStats.confirmed > 0 ? (paidCount / regStats.confirmed) * 100 : 0,
+      };
+    }
+
+    // Get real timeline data from database
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - 30); // Last 30 days
+
+    // Query daily registration counts
+    const dailyRegistrations = await prisma.$queryRaw<Array<{ date: string; count: number }>>`
+      SELECT 
+        DATE(registered_at) as date,
+        COUNT(*) as count
+      FROM registrations 
+      WHERE event_id = ${eventId} 
+        AND registered_at >= ${startDate}
+        AND registered_at <= NOW()
+      GROUP BY DATE(registered_at)
+      ORDER BY date ASC
+    `;
+
+    // Query daily payment counts if applicable
+    let dailyPayments: Array<{ date: string; count: number }> = [];
+    if (event.requiresPayment) {
+      dailyPayments = await prisma.$queryRaw<Array<{ date: string; count: number }>>`
+        SELECT 
+          DATE(paid_at) as date,
+          COUNT(*) as count
+        FROM payments 
+        WHERE event_id = ${eventId} 
+          AND paid_at >= ${startDate}
+          AND paid_at <= NOW()
+          AND status = 'COMPLETED'
+        GROUP BY DATE(paid_at)
+        ORDER BY date ASC
+      `;
+    }
+
+    // Create comprehensive timeline for last 30 days
+    const timeline: Array<{ date: string; registrations: number; payments: number }> = [];
+    const registrationMap = new Map(
+      dailyRegistrations.map((item) => [item.date, Number(item.count)])
+    );
+    const paymentMap = new Map(dailyPayments.map((item) => [item.date, Number(item.count)]));
+
+    for (let i = 29; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toISOString().split("T")[0];
+
+      if (dateStr) {
+        timeline.push({
+          date: dateStr,
+          registrations: registrationMap.get(dateStr) || 0,
+          payments: paymentMap.get(dateStr) || 0,
+        });
+      }
+    }
+
+    // Get real demographic data from registrations
+    const registrationTypes = await prisma.registration.groupBy({
+      by: ["registrationType"],
+      where: { eventId },
+      _count: { registrationType: true },
+    });
+
+    const registrationSources = await prisma.registration.groupBy({
+      by: ["registrationSource"],
+      where: { eventId },
+      _count: { registrationSource: true },
+    });
+
+    const demographics = {
+      registrationTypes: registrationTypes.reduce(
+        (acc, item) => {
+          acc[item.registrationType] = item._count.registrationType;
+          return acc;
+        },
+        {} as Record<string, number>
+      ),
+      sources: registrationSources.reduce(
+        (acc, item) => {
+          acc[item.registrationSource] = item._count.registrationSource;
+          return acc;
+        },
+        {} as Record<string, number>
+      ),
+    };
+
+    // Get attendance tracking for completed events
+    let attendanceStats = null;
+    if (event.startDate < new Date()) {
+      const attendanceData = await prisma.registration.groupBy({
+        by: ["status"],
+        where: {
+          eventId,
+          status: { in: ["ATTENDED", "NO_SHOW", "CONFIRMED"] },
+        },
+        _count: { status: true },
+      });
+
+      attendanceStats = {
+        attended: attendanceData.find((item) => item.status === "ATTENDED")?._count.status || 0,
+        noShow: attendanceData.find((item) => item.status === "NO_SHOW")?._count.status || 0,
+        confirmed: attendanceData.find((item) => item.status === "CONFIRMED")?._count.status || 0,
+      };
+    }
+
     return {
       registrationStats: regStats,
-      paymentStats: {
-        totalRevenue: 0,
-        paidCount: 0,
-        pendingCount: 0,
-        completionRate: 0,
-      },
-      timeline: [],
-      demographics: {
-        registrationTypes: {},
-        sources: {},
+      paymentStats,
+      timeline,
+      demographics,
+      attendanceStats,
+      event: {
+        capacity: event.capacity,
+        title: event.title,
       },
     };
   }
