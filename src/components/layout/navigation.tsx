@@ -41,6 +41,12 @@ export function Navigation({ currentLocale }: NavigationProps) {
             >
               Events
             </Link>
+            <Link
+              href="/dashboard/users"
+              className="text-gray-600 transition-colors hover:text-gray-900"
+            >
+              Users
+            </Link>
           </div>
 
           {/* Right Side: Language Switcher + User Profile */}
@@ -97,6 +103,13 @@ export function Navigation({ currentLocale }: NavigationProps) {
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Events
+              </Link>
+              <Link
+                href="/dashboard/users"
+                className="rounded-md px-3 py-2 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Users
               </Link>
 
               {/* Language Switcher in Mobile Menu */}

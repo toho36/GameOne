@@ -39,7 +39,8 @@
       "Bash(cp:*)",
       "Bash(npm run validate-structure:*)",
       "Bash(npm run type-check:*)",
-      "Bash(npm run lint)"
+      "Bash(npm run lint)",
+      "Bash(npx tsx:*)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"

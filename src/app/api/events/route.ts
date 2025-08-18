@@ -4,6 +4,26 @@ import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { eventCreationSchema } from "@/lib/validation/event-creation";
 
+// Helper function to create user with default role and active status
+async function createUserWithDefaults(kindeUser: any) {
+  // Get default USER role
+  const defaultRole = await prisma.role.findUnique({
+    where: { name: "USER" },
+  });
+
+  return await prisma.user.create({
+    data: {
+      kindeId: kindeUser.id,
+      email: kindeUser.email || "",
+      name: kindeUser.given_name || kindeUser.family_name || kindeUser.email || "User",
+      firstName: kindeUser.given_name || "",
+      lastName: kindeUser.family_name || "",
+      status: "ACTIVE", // Set to ACTIVE by default
+      primaryRoleId: defaultRole?.id, // Assign default USER role
+    },
+  });
+}
+
 // Create slug from title
 function createSlug(title: string): string {
   return title
@@ -29,16 +49,8 @@ export async function GET(request: NextRequest) {
     });
 
     if (!dbUser) {
-      // Create user if they don't exist in database
-      dbUser = await prisma.user.create({
-        data: {
-          kindeId: user.id,
-          email: user.email || "",
-          name: user.given_name || user.family_name || user.email || "User",
-          firstName: user.given_name || "",
-          lastName: user.family_name || "",
-        },
-      });
+      // Create user if they don't exist in database with defaults
+      dbUser = await createUserWithDefaults(user);
     }
 
     const { searchParams } = new URL(request.url);
@@ -160,16 +172,8 @@ export async function POST(request: NextRequest) {
     });
 
     if (!dbUser) {
-      // Create user if they don't exist in database
-      dbUser = await prisma.user.create({
-        data: {
-          kindeId: user.id,
-          email: user.email || "",
-          name: user.given_name || user.family_name || user.email || "User",
-          firstName: user.given_name || "",
-          lastName: user.family_name || "",
-        },
-      });
+      // Create user if they don't exist in database with defaults
+      dbUser = await createUserWithDefaults(user);
     }
 
     const body = await request.json();
