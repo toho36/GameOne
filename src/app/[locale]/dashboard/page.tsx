@@ -111,7 +111,7 @@ export default async function DashboardPage() {
                 <h3 className="mb-6 text-xl font-semibold text-gray-900">{t("actions")}</h3>
                 <div className="space-y-4">
                   <Link
-                    href="/events"
+                    href="/dashboard/events"
                     className="flex items-center gap-3 rounded-lg border border-gray-200 p-4 transition-colors hover:border-blue-300 hover:bg-blue-50"
                   >
                     <div className="flex size-10 items-center justify-center rounded-lg bg-blue-100">
@@ -132,6 +132,31 @@ export default async function DashboardPage() {
                     <div>
                       <p className="font-medium text-gray-900">Manage Events</p>
                       <p className="text-sm text-gray-600">Create and organize events</p>
+                    </div>
+                  </Link>
+
+                  <Link
+                    href="/dashboard/events/create"
+                    className="flex items-center gap-3 rounded-lg border border-gray-200 p-4 transition-colors hover:border-green-300 hover:bg-green-50"
+                  >
+                    <div className="flex size-10 items-center justify-center rounded-lg bg-green-100">
+                      <svg
+                        className="size-5 text-green-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                        />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">Create New Event</p>
+                      <p className="text-sm text-gray-600">Quick access to event creation</p>
                     </div>
                   </Link>
 

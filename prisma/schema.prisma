@@ -403,6 +403,15 @@ enum RegistrationStatus {
   NO_SHOW // Didn't show up
 }
 
+enum RegistrationPaymentStatus {
+  PENDING_VERIFICATION                    // Doesn't take spot
+  PAYMENT_SENT_AWAITING_VERIFICATION     // Takes spot
+  PAYMENT_VERIFIED                       // Takes spot (confirmed)
+  VERIFIED_CASH                          // Takes spot (cash payment)
+  REJECTED                               // Back to pending or waiting list
+  WAITING_LIST_PROMOTED                  // New status for promoted users
+}
+
 model Registration {
   id      String             @id @default(cuid())
   userId  String? // Can be null for guest registrations
@@ -443,6 +452,23 @@ model Registration {
   requiresPayment Boolean @default(false)
   paymentId       String? @unique
   pendingPaymentId String? // Reference to pending payment
+
+  // New payment status tracking
+  paymentStatus RegistrationPaymentStatus @default(PENDING_VERIFICATION)
+  paymentClaimedAt DateTime?
+  paymentVerifiedAt DateTime?
+  paymentRejectedAt DateTime?
+  paymentRejectionReason String?
+  paymentMethod PaymentMethod? // BANK_TRANSFER, CASH, etc.
+
+  // Friend registration fields
+  friendInfo Json? // Stores friend details
+  registeredBy String? // User who registered the friend
+
+  // Waiting list promotion tracking
+  promotedFromWaitingList Boolean   @default(false)
+  waitingListPosition     Int?
+  promotedAt              DateTime?
 
   // Relations
   user           User?           @relation(fields: [userId], references: [id], onDelete: Cascade)
