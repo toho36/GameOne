@@ -7,7 +7,7 @@ import {
   EventFilters,
   UseEventsOptions,
   UseEventsReturn,
-} from "../event-dashboard.types";
+} from "@/types/components/event-dashboard.types";
 
 export function useEvents(options: UseEventsOptions = {}): UseEventsReturn {
   const { filters: initialFilters = {}, page: initialPage = 1, limit = 10 } = options;

@@ -1,4 +1,5 @@
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,9 +10,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { EventFiltersProps } from "./event-dashboard.types";
+import { EventFiltersProps } from "@/types/components/event-dashboard.types";
 
 export function EventFilters({ filters, onFiltersChange, onClear }: EventFiltersProps) {
+  const t = useTranslations("Events");
+  const tCommon = useTranslations("Common");
+
   const handleFilterChange = (key: string, value: string) => {
     onFiltersChange({
       ...filters,
@@ -32,7 +36,7 @@ export function EventFilters({ filters, onFiltersChange, onClear }: EventFilters
             <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
             <Input
               type="text"
-              placeholder="Search events..."
+              placeholder={t("searchPlaceholder")}
               value={filters.search || ""}
               onChange={(e) => handleFilterChange("search", e.target.value)}
               className="pl-10"
@@ -47,13 +51,13 @@ export function EventFilters({ filters, onFiltersChange, onClear }: EventFilters
             onValueChange={(value) => handleFilterChange("status", value)}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Status" />
+              <SelectValue placeholder={t("filters.status")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Statuses</SelectItem>
-              <SelectItem value="DRAFT">Draft</SelectItem>
-              <SelectItem value="PUBLISHED">Published</SelectItem>
-              <SelectItem value="CANCELLED">Cancelled</SelectItem>
+              <SelectItem value="all">{t("filters.allStatuses")}</SelectItem>
+              <SelectItem value="DRAFT">{t("status.draft")}</SelectItem>
+              <SelectItem value="PUBLISHED">{t("status.published")}</SelectItem>
+              <SelectItem value="CANCELLED">{t("status.cancelled")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -65,16 +69,16 @@ export function EventFilters({ filters, onFiltersChange, onClear }: EventFilters
             onValueChange={(value) => handleFilterChange("type", value)}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Type" />
+              <SelectValue placeholder={t("filters.type")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Types</SelectItem>
-              <SelectItem value="CONFERENCE">Conference</SelectItem>
-              <SelectItem value="WORKSHOP">Workshop</SelectItem>
-              <SelectItem value="WEBINAR">Webinar</SelectItem>
-              <SelectItem value="NETWORKING">Networking</SelectItem>
-              <SelectItem value="SOCIAL">Social</SelectItem>
-              <SelectItem value="OTHER">Other</SelectItem>
+              <SelectItem value="all">{t("filters.allTypes")}</SelectItem>
+              <SelectItem value="CONFERENCE">{t("types.conference")}</SelectItem>
+              <SelectItem value="WORKSHOP">{t("types.workshop")}</SelectItem>
+              <SelectItem value="WEBINAR">{t("types.webinar")}</SelectItem>
+              <SelectItem value="NETWORKING">{t("types.networking")}</SelectItem>
+              <SelectItem value="SOCIAL">{t("types.social")}</SelectItem>
+              <SelectItem value="OTHER">{t("types.other")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -93,15 +97,15 @@ export function EventFilters({ filters, onFiltersChange, onClear }: EventFilters
             }}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Sort by" />
+              <SelectValue placeholder={t("filters.sortBy")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="startDate-asc">Date (Earliest)</SelectItem>
-              <SelectItem value="startDate-desc">Date (Latest)</SelectItem>
-              <SelectItem value="title-asc">Title (A-Z)</SelectItem>
-              <SelectItem value="title-desc">Title (Z-A)</SelectItem>
-              <SelectItem value="createdAt-desc">Created (Newest)</SelectItem>
-              <SelectItem value="createdAt-asc">Created (Oldest)</SelectItem>
+              <SelectItem value="startDate-asc">{t("sort.dateEarliest")}</SelectItem>
+              <SelectItem value="startDate-desc">{t("sort.dateLatest")}</SelectItem>
+              <SelectItem value="title-asc">{t("sort.titleAZ")}</SelectItem>
+              <SelectItem value="title-desc">{t("sort.titleZA")}</SelectItem>
+              <SelectItem value="createdAt-desc">{t("sort.createdNewest")}</SelectItem>
+              <SelectItem value="createdAt-asc">{t("sort.createdOldest")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -115,7 +119,7 @@ export function EventFilters({ filters, onFiltersChange, onClear }: EventFilters
             className="flex shrink-0 items-center gap-2"
           >
             <XMarkIcon className="h-4 w-4" />
-            Clear
+            {tCommon("clear")}
           </Button>
         )}
       </div>

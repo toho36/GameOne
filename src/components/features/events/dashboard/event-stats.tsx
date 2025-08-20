@@ -1,6 +1,6 @@
 import { CalendarIcon, EyeIcon, DocumentTextIcon, UsersIcon } from "@heroicons/react/24/outline";
 
-import { EventStatsProps } from "./event-dashboard.types";
+import { EventStatsProps } from "@/types/components/event-dashboard.types";
 
 export function EventStats({
   totalEvents,

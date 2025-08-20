@@ -13,7 +13,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { EventCardProps } from "./event-dashboard.types";
+import { EventCardProps } from "@/types/components/event-dashboard.types";
 
 export function EventCard({ event, onEdit, onDelete, onToggleStatus }: EventCardProps) {
   const statusColors = {

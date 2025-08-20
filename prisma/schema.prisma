@@ -716,13 +716,15 @@ model PendingPayment {
 model BankAccount {
   id            String  @id @default(cuid())
   name          String // Display name for the account
-  bankName      String
-  accountNumber String
-  bankCode      String
-  iban          String? @unique
+  iban          String  @unique // Primary field - IBAN (required)
+  
+  // Optional fields - auto-extracted from IBAN or manually provided
+  bankName      String?
+  accountNumber String?
+  bankCode      String?
   swift         String?
 
-  // Slovak banking specifics
+  // Bank account settings
   isDefault Boolean @default(false)
   isActive  Boolean @default(true)
 
@@ -739,7 +741,8 @@ model BankAccount {
 
   @@index([isDefault, isActive])
   @@index([isActive, qrCodeEnabled]) // For active payment methods
-  // TODO: Add Slovak IBAN validation at application level - iban ~ '^SK\\d{2}\\s?\\d{4}\\s?\\d{4}\\s?\\d{4}\\s?\\d{4}\\s?\\d{4}$'
+  @@index([iban]) // For IBAN searches
+  // TODO: Add Czech/Slovak IBAN validation at application level - iban ~ '^(CZ|SK)\\d{2}\\s?\\d{4}\\s?\\d{4}\\s?\\d{4}\\s?\\d{4}\\s?\\d{4}$'
   @@map("bank_accounts")
 }
 

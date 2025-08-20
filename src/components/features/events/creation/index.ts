@@ -13,4 +13,4 @@ export { useEventCreationForm } from "./hooks/use-event-creation-form";
 export { useBankAccounts } from "./hooks/use-bank-accounts";
 
 // Export types
-export type * from "./event-creation-form.types";
+export type * from "@/types/components/event-creation-form.types";

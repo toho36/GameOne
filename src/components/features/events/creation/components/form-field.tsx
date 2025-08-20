@@ -5,7 +5,7 @@ import React from "react";
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 
-import type { FormFieldProps } from "@/components/features/events/creation/event-creation-form.types";
+import type { FormFieldProps } from "@/types/components/event-creation-form.types";
 
 export function FormField({
   label,

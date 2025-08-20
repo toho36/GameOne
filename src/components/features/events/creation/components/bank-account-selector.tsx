@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
-import type { BankAccountSelectorProps } from "@/components/features/events/creation/event-creation-form.types";
+import type { BankAccountSelectorProps } from "@/types/components/event-creation-form.types";
 
 export function BankAccountSelector({
   value,

@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect } from "react";
 
+import { logger } from "@/lib/logger";
 import { validateEventCreation, formatValidationErrors } from "@/lib/validation/event-creation";
 import { DEFAULT_EVENT_FORM_DATA } from "@/types/event";
 
@@ -13,7 +14,7 @@ import type {
 import type {
   UseEventCreationFormReturn,
   FormValidationStatus,
-} from "../event-creation-form.types";
+} from "@/types/components/event-creation-form.types";
 
 interface UseEventCreationFormOptions {
   initialData?: Partial<EventCreationFormData>;
@@ -72,7 +73,7 @@ export function useEventCreationForm({
         });
       }
     } catch (error) {
-      console.error("Failed to load event data:", error);
+      logger.error("Failed to load event data for editing", error);
     } finally {
       setIsLoading(false);
     }
@@ -154,13 +155,11 @@ export function useEventCreationForm({
       const endpoint = mode === "create" ? "/api/events" : `/api/events/${eventId}`;
       const method = mode === "create" ? "POST" : "PUT";
 
-      console.log("Sending request to:", endpoint, {
+      logger.debug("Sending event creation request", {
+        endpoint,
         method,
-        body: {
-          ...formData,
-          status: formData.status || "PUBLISHED",
-          requiresPayment: !!formData.bankAccountId,
-        },
+        status: formData.status || "PUBLISHED",
+        requiresPayment: !!formData.bankAccountId,
       });
 
       const response = await fetch(endpoint, {
@@ -175,9 +174,8 @@ export function useEventCreationForm({
         }),
       });
 
-      console.log("Response status:", response.status);
       const result = await response.json();
-      console.log("Response body:", result);
+      logger.debug("Event creation response received", { status: response.status });
 
       if (response.ok) {
         return {
@@ -194,7 +192,7 @@ export function useEventCreationForm({
         };
       }
     } catch (error) {
-      console.error("Form submission error:", error);
+      logger.error("Event form submission failed", error);
       return {
         success: false,
         message: "An unexpected error occurred. Please try again.",
@@ -239,7 +237,7 @@ export function useEventCreationForm({
         };
       }
     } catch (error) {
-      console.error("Draft save error:", error);
+      logger.error("Event draft save failed", error);
       return {
         success: false,
         message: "Failed to save draft. Please try again.",

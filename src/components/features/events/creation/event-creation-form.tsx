@@ -2,11 +2,12 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
-import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { logger } from "@/lib/logger";
 
-import type { EventCreationFormProps } from "./event-creation-form.types";
+import type { EventCreationFormProps } from "@/types/components/event-creation-form.types";
 
 import { useEventCreationForm } from "./hooks/use-event-creation-form";
 import { useBankAccounts } from "./hooks/use-bank-accounts";
@@ -23,6 +24,7 @@ export function EventCreationForm({
 }: EventCreationFormProps) {
   const router = useRouter();
   const { toast } = useToast();
+  const t = useTranslations("Events");
 
   const {
     formData,
@@ -52,8 +54,8 @@ export function EventCreationForm({
 
     if (!validateForm()) {
       toast({
-        title: "Validation Error",
-        description: "Please fix the errors before submitting.",
+        title: t("errors.validationError"),
+        description: t("errors.validationErrorDesc"),
         variant: "destructive",
       });
       return;
@@ -64,11 +66,8 @@ export function EventCreationForm({
 
       if (response.success) {
         toast({
-          title: mode === "create" ? "Event Created" : "Event Updated",
-          description:
-            mode === "create"
-              ? "Your event has been created successfully."
-              : "Your event has been updated successfully.",
+          title: t(mode === "create" ? "success.created" : "success.updated"),
+          description: t(mode === "create" ? "success.createdDesc" : "success.updatedDesc"),
           variant: "default",
         });
 
@@ -80,16 +79,16 @@ export function EventCreationForm({
         }
       } else {
         toast({
-          title: "Error",
-          description: response.message || "An error occurred while saving the event.",
+          title: t("errors.validationError"),
+          description: response.message || t("errors.generalError"),
           variant: "destructive",
         });
       }
     } catch (error) {
-      console.error("Event creation/update error:", error);
+      logger.error("Event creation/update error:", error);
       toast({
-        title: "Error",
-        description: "An unexpected error occurred. Please try again.",
+        title: t("errors.validationError"),
+        description: t("errors.generalError"),
         variant: "destructive",
       });
     }
@@ -102,22 +101,28 @@ export function EventCreationForm({
 
       if (response.success) {
         toast({
-          title: "Draft Saved",
-          description: "Your event draft has been saved.",
+          title: t("success.draftSaved"),
+          description: t("success.draftSaved"),
           variant: "default",
         });
+
+        if (onSuccess) {
+          onSuccess(response);
+        } else {
+          router.push(`/dashboard/events`);
+        }
       } else {
         toast({
-          title: "Error",
-          description: response.message || "Failed to save draft.",
+          title: t("errors.validationError"),
+          description: response.message || t("errors.generalError"),
           variant: "destructive",
         });
       }
     } catch (error) {
-      console.error("Draft save error:", error);
+      logger.error("Save as draft error:", error);
       toast({
-        title: "Error",
-        description: "Failed to save draft. Please try again.",
+        title: t("errors.validationError"),
+        description: t("errors.generalError"),
         variant: "destructive",
       });
     }
@@ -128,94 +133,71 @@ export function EventCreationForm({
     if (onCancel) {
       onCancel();
     } else {
-      router.back();
+      router.push(`/dashboard/events`);
     }
   };
 
-  return (
-    <form
-      onSubmit={handleFormSubmit}
-      className={cn("mx-auto max-w-4xl space-y-6 p-4 sm:space-y-8 sm:p-6", className)}
-      {...props}
-    >
-      {/* Progress Indicator */}
-      <div className="space-y-3 rounded-lg border border-blue-200 bg-blue-50 p-4">
-        <div className="flex justify-between text-sm font-medium text-blue-900">
-          <span>Form Completion</span>
-          <span>{validationStatus.completionPercentage}%</span>
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="text-center">
+          <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-blue-500 border-t-transparent"></div>
+          <p className="text-gray-600">{t("form.loading")}</p>
         </div>
-        <div className="h-2 w-full overflow-hidden rounded-full bg-blue-200">
-          <div
-            className="h-full bg-blue-600 transition-all duration-300 ease-out"
-            style={{ width: `${validationStatus.completionPercentage}%` }}
-          />
-        </div>
-        <p className="text-xs text-blue-700">
-          Complete all required fields to enable form submission
-        </p>
       </div>
+    );
+  }
 
-      {/* Bank accounts loading error */}
-      {bankAccountsError && (
-        <div className="rounded-md border border-yellow-200 bg-yellow-50 p-4">
-          <div className="flex">
-            <div className="flex-shrink-0">
-              <svg
-                className="h-5 w-5 text-yellow-400"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </div>
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-yellow-800">Bank Account Warning</h3>
-              <div className="mt-2 text-sm text-yellow-700">
-                Unable to load bank accounts. Payment settings may be limited. Please refresh the
-                page or contact support if this issue persists.
-              </div>
+  // Show bank accounts error
+  if (bankAccountsError) {
+    return (
+      <div className="rounded-lg border border-red-200 bg-red-50 p-6">
+        <div className="flex items-start space-x-3">
+          <svg
+            className="h-6 w-6 flex-shrink-0 text-red-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"
+            />
+          </svg>
+          <div className="flex-1">
+            <h3 className="text-sm font-medium text-red-800">{t("errors.loadFailed")}</h3>
+            <p className="mt-1 text-sm text-red-700">
+              {bankAccountsError.includes("insufficient_permissions")
+                ? t("errors.permissionError")
+                : t("errors.generalError")}
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={handleFormSubmit} className={`space-y-6 ${className || ""}`} {...props}>
+      {/* Form Header */}
+      {mode === "create" ? (
+        <div className="border-b border-gray-200 pb-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">{t("form.title.create")}</h1>
+              <p className="mt-2 text-sm text-gray-600">{t("form.description.create")}</p>
             </div>
           </div>
         </div>
-      )}
-
-      {/* Form validation summary */}
-      {validationStatus.hasErrors && Object.keys(errors).length > 0 && (
-        <div className="rounded-md border border-red-200 bg-red-50 p-4">
-          <div className="flex">
-            <div className="flex-shrink-0">
-              <svg
-                className="h-5 w-5 text-red-400"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </div>
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-red-800">Please fix the following errors:</h3>
-              <div className="mt-2 text-sm text-red-700">
-                <ul className="list-disc space-y-1 pl-5">
-                  {Object.entries(errors).map(([field, error]) => (
-                    <li key={field}>
-                      <strong className="capitalize">
-                        {field.replace(/([A-Z])/g, " $1").trim()}:
-                      </strong>{" "}
-                      {error}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+      ) : (
+        <div className="border-b border-gray-200 pb-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">{t("form.title.edit")}</h1>
+              <p className="mt-2 text-sm text-gray-600">{t("form.description.edit")}</p>
             </div>
           </div>
         </div>
@@ -226,13 +208,14 @@ export function EventCreationForm({
         {/* Title */}
         <div className="space-y-2">
           <label htmlFor="title" className="block text-sm font-medium text-gray-900">
-            Title
+            {t("form.labels.title")} *
           </label>
           <input
             type="text"
             id="title"
             value={formData.title}
             onChange={(e) => updateFormData({ title: e.target.value })}
+            placeholder={t("form.placeholders.title")}
             className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             disabled={isLoading}
           />
@@ -242,13 +225,14 @@ export function EventCreationForm({
         {/* Description */}
         <div className="space-y-2">
           <label htmlFor="description" className="block text-sm font-medium text-gray-900">
-            Description
+            {t("form.labels.description")} *
           </label>
           <textarea
             id="description"
             rows={4}
             value={formData.description || ""}
             onChange={(e) => updateFormData({ description: e.target.value })}
+            placeholder={t("form.placeholders.description")}
             className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             disabled={isLoading}
           />
@@ -258,14 +242,14 @@ export function EventCreationForm({
         {/* Place/Address */}
         <div className="space-y-2">
           <label htmlFor="venue" className="block text-sm font-medium text-gray-900">
-            Place/Address
+            {t("form.labels.venue")}
           </label>
           <input
             type="text"
             id="venue"
             value={formData.venue || ""}
             onChange={(e) => updateFormData({ venue: e.target.value })}
-            placeholder="e.g., Sportovní hala TJ JM Chodov, Mírového hnutí 2137"
+            placeholder={t("form.placeholders.venue")}
             className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             disabled={isLoading}
           />
@@ -277,7 +261,7 @@ export function EventCreationForm({
           {/* Price */}
           <div className="space-y-2">
             <label htmlFor="price" className="block text-sm font-medium text-gray-900">
-              Price (CZK)
+              {t("form.labels.price")} (CZK)
             </label>
             <input
               type="number"
@@ -285,6 +269,7 @@ export function EventCreationForm({
               min="0"
               value={formData.price || 0}
               onChange={(e) => updateFormData({ price: parseFloat(e.target.value) || 0 })}
+              placeholder={t("form.placeholders.price")}
               className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               disabled={isLoading}
             />
@@ -294,7 +279,7 @@ export function EventCreationForm({
           {/* Capacity */}
           <div className="space-y-2">
             <label htmlFor="capacity" className="block text-sm font-medium text-gray-900">
-              Capacity
+              {t("form.labels.capacity")}
             </label>
             <input
               type="number"
@@ -302,6 +287,7 @@ export function EventCreationForm({
               min="1"
               value={formData.capacity}
               onChange={(e) => updateFormData({ capacity: parseInt(e.target.value) || 1 })}
+              placeholder={t("form.placeholders.capacity")}
               className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               disabled={isLoading}
             />
@@ -314,7 +300,7 @@ export function EventCreationForm({
           {/* Start Date & Time */}
           <div className="space-y-2">
             <label htmlFor="startDate" className="block text-sm font-medium text-gray-900">
-              Start Date & Time
+              {t("form.labels.startDate")} *
             </label>
             <input
               type="datetime-local"
@@ -338,7 +324,7 @@ export function EventCreationForm({
           {/* End Date & Time */}
           <div className="space-y-2">
             <label htmlFor="endDate" className="block text-sm font-medium text-gray-900">
-              End Date & Time
+              {t("form.labels.endDate")}
             </label>
             <input
               type="datetime-local"
@@ -365,7 +351,7 @@ export function EventCreationForm({
         {/* Bank Account for Payments */}
         <div className="space-y-2">
           <label htmlFor="bankAccount" className="block text-sm font-medium text-gray-900">
-            Bank Account for Payments
+            {t("form.labels.bankAccount")}
           </label>
           <select
             id="bankAccount"
@@ -374,7 +360,7 @@ export function EventCreationForm({
             className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             disabled={isLoading || isBankAccountsLoading}
           >
-            <option value="">Select bank account</option>
+            <option value="">{t("form.placeholders.selectBankAccount")}</option>
             {bankAccounts.map((account) => (
               <option key={account.id} value={account.id}>
                 {account.name} - {account.bankName}
@@ -384,14 +370,16 @@ export function EventCreationForm({
           {bankAccounts.length > 0 && formData.bankAccountId && (
             <div className="mt-2 rounded-md bg-gray-50 p-3 text-sm text-gray-600">
               <div className="font-medium">
-                {bankAccounts.find((a) => a.id === formData.bankAccountId)?.name} (Default)
+                {bankAccounts.find((a) => a.id === formData.bankAccountId)?.name} (
+                {t("form.labels.default")})
               </div>
               <div>
-                Account: {bankAccounts.find((a) => a.id === formData.bankAccountId)?.accountNumber}
+                {t("form.labels.account")}:{" "}
+                {bankAccounts.find((a) => a.id === formData.bankAccountId)?.accountNumber}
               </div>
               <div>
-                {bankAccounts.find((a) => a.id === formData.bankAccountId)?.bankName} - Main event
-                account
+                {bankAccounts.find((a) => a.id === formData.bankAccountId)?.bankName} -{" "}
+                {t("form.labels.mainEventAccount")}
               </div>
             </div>
           )}
@@ -401,7 +389,7 @@ export function EventCreationForm({
         {/* Visibility */}
         <div className="space-y-2">
           <label htmlFor="status" className="block text-sm font-medium text-gray-900">
-            Visibility
+            {t("form.labels.visibility")}
           </label>
           <select
             id="status"
@@ -410,8 +398,8 @@ export function EventCreationForm({
             className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             disabled={isLoading}
           >
-            <option value="PUBLISHED">Visible</option>
-            <option value="DRAFT">Hidden</option>
+            <option value="PUBLISHED">{t("form.labels.visible")}</option>
+            <option value="DRAFT">{t("form.labels.hidden")}</option>
           </select>
           {errors.status && <p className="text-sm text-red-600">{errors.status}</p>}
         </div>

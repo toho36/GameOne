@@ -10,7 +10,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
-import type { DateTimePickerProps } from "@/components/features/events/creation/event-creation-form.types";
+import type { DateTimePickerProps } from "@/types/components/event-creation-form.types";
 
 export function DateTimePicker({
   value,
