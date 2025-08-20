@@ -3,7 +3,6 @@ import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 
 import { prisma } from "@/lib/prisma";
 import { UserManagement } from "@/components/features/users/user-management";
-import { logger } from "@/lib/logger";
 
 export default async function UsersPage() {
   const { getUser } = getKindeServerSession();
@@ -66,30 +65,16 @@ async function checkUserManagementPermission(userId: string): Promise<boolean> {
 
   // Check permissions in primary role
   if (primaryRole?.permissions) {
-    try {
-      const permissions = Array.isArray(primaryRole.permissions)
-        ? primaryRole.permissions
-        : JSON.parse(primaryRole.permissions as string);
-
-      if (permissions.includes("users.manage") || permissions.includes("*")) return true;
-    } catch (error) {
-      logger.error("Error parsing primary role permissions:", error);
-    }
+    const permissions = primaryRole.permissions as string[];
+    if (permissions.includes("users.manage") || permissions.includes("*")) return true;
   }
 
   // Check permissions in additional roles
   for (const userRole of userWithRoles.userRoles) {
     if (userRole.role.name === "ADMIN") return true;
 
-    try {
-      const permissions = Array.isArray(userRole.role.permissions)
-        ? userRole.role.permissions
-        : JSON.parse(userRole.role.permissions as string);
-
-      if (permissions.includes("users.manage") || permissions.includes("*")) return true;
-    } catch (error) {
-      logger.error("Error parsing user role permissions:", error);
-    }
+    const permissions = userRole.role.permissions as string[];
+    if (permissions.includes("users.manage") || permissions.includes("*")) return true;
   }
 
   return false;
