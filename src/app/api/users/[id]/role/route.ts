@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 
 import { prisma } from "@/lib/prisma";
-import { logger } from "@/lib/logger";
 
 // Helper function to create user with default role and active status
 async function createUserWithDefaults(kindeUser: any) {
@@ -137,7 +136,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       message: "User role updated successfully",
     });
   } catch (error) {
-    logger.error("User role update error:", error);
+    console.error("User role update error:", error);
     return NextResponse.json({ error: "Failed to update user role" }, { status: 500 });
   }
 }
@@ -150,30 +149,16 @@ async function checkUserManagementPermission(user: any): Promise<boolean> {
 
   // Check permissions in primary role
   if (primaryRole?.permissions) {
-    try {
-      const permissions = Array.isArray(primaryRole.permissions)
-        ? primaryRole.permissions
-        : JSON.parse(primaryRole.permissions as string);
-
-      if (permissions.includes("users.manage") || permissions.includes("*")) return true;
-    } catch (error) {
-      logger.error("Error parsing primary role permissions:", error);
-    }
+    const permissions = primaryRole.permissions as string[];
+    if (permissions.includes("users.manage") || permissions.includes("*")) return true;
   }
 
   // Check permissions in additional roles
   for (const userRole of user.userRoles) {
     if (userRole.role.name === "ADMIN") return true;
 
-    try {
-      const permissions = Array.isArray(userRole.role.permissions)
-        ? userRole.role.permissions
-        : JSON.parse(userRole.role.permissions as string);
-
-      if (permissions.includes("users.manage") || permissions.includes("*")) return true;
-    } catch (error) {
-      logger.error("Error parsing user role permissions:", error);
-    }
+    const permissions = userRole.role.permissions as string[];
+    if (permissions.includes("users.manage") || permissions.includes("*")) return true;
   }
 
   return false;

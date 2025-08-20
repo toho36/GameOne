@@ -5,7 +5,6 @@ import { prisma } from "@/lib/prisma";
 import { bankAccountQuerySchema } from "@/lib/validation/bank-account";
 import { validateBankAccountData } from "@/lib/api/bank-accounts/validation";
 import { ensureSingleDefault } from "@/lib/api/bank-accounts/operations";
-import { logger } from "@/lib/logger";
 
 // GET /api/bank-accounts - Get bank accounts with filtering and pagination
 export async function GET(request: NextRequest) {
@@ -153,7 +152,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    logger.error("Bank accounts fetch error:", error);
+    console.error("Bank accounts fetch error:", error);
     return NextResponse.json({ error: "Failed to fetch bank accounts" }, { status: 500 });
   }
 }
@@ -267,7 +266,7 @@ export async function POST(request: NextRequest) {
       message: "Bank account created successfully",
     });
   } catch (error) {
-    logger.error("Bank account creation error:", error);
+    console.error("Bank account creation error:", error);
     return NextResponse.json({ error: "Failed to create bank account" }, { status: 500 });
   }
 }
