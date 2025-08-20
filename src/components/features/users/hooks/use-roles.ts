@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 
-import { RolesResponse, UseRolesReturn } from "@/components/features/users/user-management.types";
+import { RolesResponse, UseRolesReturn } from "@/types/components/user-management.types";
 
 export function useRoles(): UseRolesReturn {
   const [roles, setRoles] = useState<RolesResponse["roles"]>([]);

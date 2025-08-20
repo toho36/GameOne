@@ -11,4 +11,4 @@ export { EventStats } from "./event-stats";
 export { useEvents } from "./hooks/use-events";
 
 // Export types
-export type * from "./event-dashboard.types";
+export type * from "@/types/components/event-dashboard.types";

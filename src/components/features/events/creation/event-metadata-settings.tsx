@@ -1,10 +1,11 @@
 "use client";
 
 import React from "react";
+import { useTranslations } from "next-intl";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
-import type { EventMetadataSettingsProps } from "./event-creation-form.types";
+import type { EventMetadataSettingsProps } from "@/types/components/event-creation-form.types";
 
 import { FormField } from "./components/form-field";
 import { TagInput } from "./components/tag-input";
@@ -15,6 +16,8 @@ export function EventMetadataSettings({
   onChange,
   isLoading,
 }: EventMetadataSettingsProps) {
+  const t = useTranslations("Events");
+
   const handleFieldChange = (field: keyof typeof formData, value: any) => {
     onChange({ [field]: value });
   };
@@ -22,27 +25,25 @@ export function EventMetadataSettings({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Tags & Metadata</CardTitle>
-        <CardDescription>
-          Add tags and additional information to help people discover your event.
-        </CardDescription>
+        <CardTitle>{t("form.sections.metadata")}</CardTitle>
+        <CardDescription>{t("form.descriptions.metadata")}</CardDescription>
       </CardHeader>
 
       <CardContent className="space-y-6">
         {/* Event Tags */}
         <FormField
-          label="Event Tags"
+          label={t("form.labels.tags")}
           error={errors.tags}
-          description="Add relevant tags to help people find your event (max 10 tags)"
+          description={t("form.descriptions.tags")}
         >
           <TagInput
             value={formData.tags}
             onChange={(tags) => handleFieldChange("tags", tags)}
             error={errors.tags}
-            placeholder="Add a tag..."
+            placeholder={t("form.placeholders.tags")}
             maxTags={10}
             disabled={isLoading}
-            description="Press Enter or comma to add a tag"
+            description={t("form.descriptions.tagInput")}
             suggestions={[
               "workshop",
               "conference",

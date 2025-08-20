@@ -50,7 +50,11 @@
   },
   "Navigation": {
     "home": "Domů",
-    "dashboard": "Nástěnka"
+    "dashboard": "Nástěnka",
+    "events": "Události",
+    "bankAccounts": "Bankovní účty",
+    "users": "Uživatelé",
+    "settings": "Nastavení"
   },
   "Auth": {
     "signIn": "Přihlásit se",
@@ -70,10 +74,407 @@
     "cancel": "Zrušit",
     "save": "Uložit",
     "close": "Zavřít",
-    "goHome": "Jít domů"
+    "goHome": "Jít domů",
+    "previous": "Předchozí",
+    "next": "Další",
+    "page": "Stránka",
+    "of": "z",
+    "noData": "Nebyly nalezeny žádné údaje",
+    "noResults": "Nebyly nalezeny žádné výsledky",
+    "search": "Hledat",
+    "filter": "Filtr",
+    "clear": "Vymazat",
+    "apply": "Použít",
+    "reset": "Resetovat",
+    "select": "Vybrat",
+    "all": "Vše",
+    "none": "Žádné",
+    "yes": "Ano",
+    "no": "Ne",
+    "enabled": "Povoleno",
+    "disabled": "Zakázáno",
+    "active": "Aktivní",
+    "inactive": "Neaktivní",
+    "status": "Stav",
+    "actions": "Akce",
+    "created": "Vytvořeno",
+    "updated": "Aktualizováno",
+    "deleted": "Smazáno",
+    "createdAt": "Vytvořeno dne",
+    "updatedAt": "Aktualizováno dne",
+    "deletedAt": "Smazáno dne"
   },
   "Language": {
     "switchTo": "Přepnout na {language}",
     "currentLanguage": "Aktuální jazyk: {language}"
+  },
+  "BankAccounts": {
+    "title": "Bankovní účty",
+    "description": "Spravujte bankovní účty vaší organizace",
+    "createAccount": "Vytvořit účet",
+    "editAccount": "Upravit účet",
+    "deleteAccount": "Smazat účet",
+    "noAccounts": "Nebyly nalezeny žádné bankovní účty",
+    "createFirst": "Vytvořte svůj první bankovní účet a začněte",
+    "searchPlaceholder": "Hledat bankovní účty...",
+    "filterAll": "Všechny účty",
+    "filterActive": "Pouze aktivní",
+    "filterInactive": "Pouze neaktivní",
+    "clearFilters": "Vymazat filtry",
+    "accountName": "Název účtu",
+    "iban": "IBAN",
+    "bankName": "Název banky",
+    "accountNumber": "Číslo účtu",
+    "bankCode": "Kód banky",
+    "swift": "SWIFT kód",
+
+    "form": {
+      "title": {
+        "create": "Vytvořit bankovní účet",
+        "edit": "Upravit bankovní účet"
+      },
+      "description": {
+        "create": "Přidejte nový bankovní účet pomocí IBAN. Ostatní údaje budou automaticky vyplněny, pokud to bude možné.",
+        "edit": "Aktualizujte informace o bankovním účtu. IBAN je primární identifikátor."
+      },
+      "sections": {
+        "basic": "Základní informace",
+        "details": "Detaily účtu",
+        "settings": "Nastavení účtu"
+      },
+      "labels": {
+        "name": "Název účtu",
+        "nameDesc": "Přátelský název pro identifikaci tohoto účtu",
+        "iban": "IBAN",
+        "ibanDesc": "Mezinárodní číslo bankovního účtu (český/slovenský formát). Ostatní pole budou automaticky vyplněna.",
+        "bankName": "Název banky",
+        "bankNameDesc": "Celý název banky (automaticky vyplněno z IBAN)",
+        "accountNumber": "Číslo účtu",
+        "accountNumberDesc": "Číslo bankovního účtu (automaticky extrahováno z IBAN)",
+        "bankCode": "Kód banky",
+        "bankCodeDesc": "4-místný identifikační kód banky (automaticky vyplněno z IBAN)",
+        "swift": "SWIFT kód",
+        "swiftDesc": "Identifikační kód banky (volitelné)",
+        "isDefault": "Výchozí účet",
+        "isActive": "Aktivní účet",
+        "qrCodeEnabled": "QR kódové platby"
+      },
+      "descriptions": {
+        "name": "Přátelský název pro identifikaci tohoto účtu",
+        "bankName": "Celý název banky (automaticky vyplněno z IBAN)",
+        "accountNumber": "Číslo bankovního účtu (automaticky extrahováno z IBAN)",
+        "iban": "Mezinárodní číslo bankovního účtu (český/slovenský formát). Ostatní pole budou automaticky vyplněna.",
+        "swift": "Identifikační kód banky (volitelné)",
+        "isDefault": "Nastavit tento účet jako výchozí pro nové události",
+        "isActive": "Aktivní účty mohou být použity pro události a transakce",
+        "qrCodeEnabled": "Povolit generování QR kódu pro tento účet"
+      },
+      "filters": {
+        "status": "Stav",
+        "search": "Hledat",
+        "searchPlaceholder": "Hledat podle názvu, názvu banky nebo čísla účtu..."
+      },
+      "placeholders": {
+        "name": "Zadejte název účtu",
+        "iban": "CZ65 0800 0000 1920 0014 5399",
+        "bankName": "Název banky bude automaticky vyplněn",
+        "accountNumber": "Číslo účtu bude extrahováno",
+        "bankCode": "Kód banky bude extrahován",
+        "swift": "Zadejte SWIFT kód (volitelné)"
+      },
+      "validation": {
+        "nameRequired": "Název účtu je povinný",
+        "nameMin": "Název účtu musí mít alespoň 2 znaky",
+        "nameMax": "Název účtu může mít maximálně 100 znaků",
+        "ibanRequired": "IBAN je povinný",
+        "ibanInvalid": "Neplatný formát IBAN",
+        "swiftInvalid": "Neplatný formát SWIFT kódu"
+      }
+    },
+    "delete": {
+      "title": "Smazat bankovní účet",
+      "confirmMessage": "Opravdu chcete smazat bankovní účet \"{name}\"?",
+      "warning": "Tuto akci nelze vrátit zpět. Účet bude trvale odstraněn z vaší organizace a nebude již k dispozici pro události.",
+      "cannotDelete": "Bankovní účet \"{name}\" nelze smazat, protože je nastaven jako výchozí účet.",
+      "setAnotherDefault": "Pro smazání tohoto účtu nejprve nastavte jiný účet jako výchozí a poté to zkuste znovu.",
+      "accountDetails": "Údaje o účtu",
+      "bank": "Banka",
+      "account": "Účet",
+      "defaultWarning": "Nelze smazat výchozí účet. Tento účet je aktuálně nastaven jako výchozí pro nové události. Prosím, vyberte jiný výchozí účet před pokusem o smazání tohoto."
+    },
+    "errors": {
+      "loadFailed": "Nepodařilo se načíst bankovní účty",
+      "createFailed": "Nepodařilo se vytvořit bankovní účet",
+      "updateFailed": "Nepodařilo se aktualizovat bankovní účet",
+      "deleteFailed": "Nepodařilo se smazat bankovní účet",
+      "setDefaultFailed": "Nepodařilo se nastavit výchozí účet",
+      "toggleActiveFailed": "Nepodařilo se aktualizovat stav účtu"
+    },
+    "success": {
+      "created": "Bankovní účet byl úspěšně vytvořen",
+      "updated": "Bankovní účet byl úspěšně aktualizován",
+      "deleted": "Bankovní účet byl úspěšně smazán",
+      "defaultSet": "Výchozí účet byl úspěšně aktualizován",
+      "activated": "Účet byl úspěšně aktivován",
+      "deactivated": "Účet byl úspěšně deaktivován"
+    }
+  },
+  "Events": {
+    "title": "Události",
+    "description": "Spravujte své události a registrace",
+    "createEvent": "Vytvořit událost",
+    "editEvent": "Upravit událost",
+    "deleteEvent": "Smazat událost",
+    "publishEvent": "Publikovat událost",
+    "unpublishEvent": "Zrušit publikaci události",
+    "noEvents": "Nebyly nalezeny žádné události",
+    "createFirst": "Vytvořte svou první událost a začněte",
+    "searchPlaceholder": "Hledat události...",
+    "filterAll": "Všechny události",
+    "filterPublished": "Publikované",
+    "filterDraft": "Koncepty",
+    "clearFilters": "Vymazat filtry",
+    "eventTitle": "Název události",
+    "eventType": "Typ události",
+    "startDate": "Datum začátku",
+    "endDate": "Datum konce",
+    "capacity": "Kapacita",
+    "registrations": "Registrace",
+    "status": "Stav",
+    "actions": "Akce",
+    "edit": "Upravit",
+    "delete": "Smazat",
+    "publish": "Publikovat",
+    "unpublish": "Zrušit publikaci",
+    "draft": "Koncept",
+    "published": "Publikováno",
+    "cancelled": "Zrušeno",
+    "completed": "Dokončeno",
+    "filters": {
+      "status": "Stav",
+      "type": "Typ",
+      "sortBy": "Seřadit podle",
+      "allStatuses": "Všechny stavy",
+      "allTypes": "Všechny typy"
+    },
+    "types": {
+      "conference": "Konference",
+      "workshop": "Workshop",
+      "webinar": "Webinář",
+      "networking": "Networking",
+      "social": "Společenská",
+      "other": "Jiné"
+    },
+    "sort": {
+      "dateEarliest": "Datum (nejdříve)",
+      "dateLatest": "Datum (nejpozději)",
+      "titleAZ": "Název (A-Z)",
+      "titleZA": "Název (Z-A)",
+      "createdNewest": "Vytvořeno (nejnověji)",
+      "createdOldest": "Vytvořeno (nejdříve)"
+    },
+    "form": {
+      "title": {
+        "create": "Vytvořit událost",
+        "edit": "Upravit událost"
+      },
+      "description": {
+        "create": "Vytvořte novou událost pro vaši organizaci",
+        "edit": "Aktualizujte informace o události a nastavení"
+      },
+      "loading": "Načítání formuláře události...",
+      "sections": {
+        "basic": "Základní informace",
+        "schedule": "Plán a časování",
+        "location": "Místo",
+        "capacity": "Kapacita a registrace",
+        "payment": "Nastavení plateb",
+        "metadata": "Dodatečné informace"
+      },
+      "labels": {
+        "title": "Název události",
+        "titleDesc": "Dejte své události jasný, popisný název",
+        "description": "Popis",
+        "descriptionDesc": "Podrobný popis vaší události",
+        "shortDescription": "Krátký popis",
+        "shortDescriptionDesc": "Stručné shrnutí pro seznamy událostí",
+        "type": "Typ události",
+        "typeDesc": "Vyberte typ události, kterou organizujete",
+        "startDate": "Datum a čas začátku",
+        "startDateDesc": "Kdy vaše událost začíná?",
+        "endDate": "Datum a čas konce",
+        "endDateDesc": "Kdy vaše událost končí? (volitelné)",
+        "venue": "Místo konání",
+        "venueDesc": "Kde se vaše událost koná?",
+        "address": "Adresa",
+        "addressDesc": "Úplná adresa místa konání",
+        "city": "Město",
+        "cityDesc": "Město, kde se událost koná",
+        "country": "Země",
+        "countryDesc": "Země, kde se událost koná",
+        "isOnline": "Online událost",
+        "isOnlineDesc": "Zaškrtněte, pokud jde o virtuální událost",
+        "maxParticipants": "Maximální počet účastníků",
+        "maxParticipantsDesc": "Kolik lidí se může zúčastnit?",
+        "price": "Cena",
+        "priceDesc": "Poplatek za registraci na událost (0 pro bezplatné události)",
+        "currency": "Měna",
+        "currencyDesc": "Měna pro cenu události",
+        "tags": "Tagy události"
+      },
+      "descriptions": {
+        "title": "Dejte své události jasný, popisný název",
+        "description": "Podrobný popis vaší události",
+        "shortDescription": "Stručné shrnutí pro seznamy událostí",
+        "type": "Vyberte typ události, kterou organizujete",
+        "startDate": "Kdy vaše událost začíná?",
+        "endDate": "Kdy vaše událost končí? (volitelné)",
+        "venue": "Kde se vaše událost koná?",
+        "address": "Úplná adresa místa konání",
+        "city": "Město, kde se událost koná",
+        "country": "Země, kde se událost koná",
+        "isOnline": "Zaškrtněte, pokud jde o virtuální událost",
+        "maxParticipants": "Kolik lidí se může zúčastnit?",
+        "price": "Poplatek za registraci na událost (0 pro bezplatné události)",
+        "currency": "Měna pro cenu události",
+        "metadata": "Přidejte tagy a dodatečné informace, aby lidé mohli objevit vaši událost",
+        "tags": "Přidejte relevantní tagy, aby lidé mohli najít vaši událost (max 10 tagů)",
+        "tagInput": "Stiskněte Enter nebo čárku pro přidání tagu"
+      },
+      "placeholders": {
+        "title": "Zadejte název události",
+        "description": "Podrobně popište vaši událost",
+        "shortDescription": "Stručné shrnutí vaší události",
+        "venue": "Zadejte název místa",
+        "address": "Zadejte úplnou adresu",
+        "city": "Zadejte název města",
+        "country": "Zadejte název země",
+        "tags": "Přidat tag..."
+      },
+      "types": {
+        "conference": "Konference",
+        "workshop": "Workshop",
+        "meetup": "Setkání",
+        "webinar": "Webinář",
+        "training": "Školení",
+        "networking": "Networking",
+        "social": "Společenská událost",
+        "other": "Ostatní"
+      }
+    },
+    "stats": {
+      "totalEvents": "Celkem událostí",
+      "publishedEvents": "Publikované události",
+      "draftEvents": "Koncepty událostí",
+      "totalRegistrations": "Celkem registrací"
+    },
+    "errors": {
+      "loadFailed": "Nepodařilo se načíst události",
+      "createFailed": "Nepodařilo se vytvořit událost",
+      "updateFailed": "Nepodařilo se aktualizovat událost",
+      "deleteFailed": "Nepodařilo se smazat událost",
+      "publishFailed": "Nepodařilo se publikovat událost",
+      "unpublishFailed": "Nepodařilo se zrušit publikaci události",
+      "validationError": "Chyba ověření",
+      "validationErrorDesc": "Prosím, opravte chyby před odesláním.",
+      "generalError": "Došlo k chybě. Zkuste to prosím znovu.",
+      "permissionError": "Nemáte oprávnění k provedení této akce."
+    },
+    "success": {
+      "created": "Událost vytvořena",
+      "updated": "Událost aktualizována",
+      "deleted": "Událost byla úspěšně smazána",
+      "published": "Událost byla úspěšně publikována",
+      "unpublished": "Publikace události byla úspěšně zrušena",
+      "draftSaved": "Koncept byl úspěšně uložen",
+      "createdDesc": "Vaše událost byla úspěšně vytvořena.",
+      "updatedDesc": "Vaše událost byla úspěšně aktualizována."
+    }
+  },
+
+  "Users": {
+    "title": "Uživatelé",
+    "description": "Spravujte uživatelské účty a oprávnění",
+    "createUser": "Vytvořit uživatele",
+    "editUser": "Upravit uživatele",
+    "deleteUser": "Smazat uživatele",
+    "noUsers": "Nebyli nalezeni žádní uživatelé",
+    "createFirst": "Vytvořte svého prvního uživatele a začněte",
+    "searchPlaceholder": "Hledat uživatele podle jména nebo emailu...",
+    "filterAll": "Všichni uživatelé",
+    "filterActive": "Pouze aktivní",
+    "filterInactive": "Pouze neaktivní",
+    "clearFilters": "Vymazat filtry",
+
+    "filters": {
+      "status": "Stav",
+      "role": "Role",
+      "allStatuses": "Všechny stavy",
+      "allRoles": "Všechny role",
+      "noRole": "Žádná role"
+    },
+    "status": {
+      "active": "Aktivní",
+      "inactive": "Neaktivní",
+      "pendingVerification": "Čeká na ověření",
+      "suspended": "Pozastaveno"
+    },
+    "addUser": "Přidat uživatele",
+    "retryLoading": "Zkusit znovu načíst uživatele",
+    "form": {
+      "title": {
+        "create": "Vytvořit uživatele",
+        "edit": "Upravit uživatele"
+      },
+      "description": {
+        "create": "Přidejte nového uživatele do vaší organizace",
+        "edit": "Aktualizujte informace o uživateli a oprávnění"
+      },
+      "labels": {
+        "name": "Celé jméno",
+        "nameDesc": "Celé jméno uživatele, jak má být zobrazeno",
+        "email": "Emailová adresa",
+        "emailDesc": "Emailová adresa uživatele pro přihlášení a notifikace",
+        "role": "Uživatelská role",
+        "roleDesc": "Vyberte vhodnou roli pro tohoto uživatele",
+        "status": "Stav účtu",
+        "statusDesc": "Zda je uživatelský účet aktivní nebo neaktivní"
+      },
+      "placeholders": {
+        "name": "Zadejte celé jméno",
+        "email": "Zadejte emailovou adresu",
+        "role": "Vyberte uživatelskou roli"
+      },
+      "validation": {
+        "nameRequired": "Celé jméno je povinné",
+        "nameMin": "Jméno musí mít alespoň 2 znaky",
+        "emailRequired": "Emailová adresa je povinná",
+        "emailInvalid": "Zadejte prosím platnou emailovou adresu",
+        "roleRequired": "Uživatelská role je povinná"
+      }
+    },
+    "errors": {
+      "loadFailed": "Nepodařilo se načíst uživatele",
+      "createFailed": "Nepodařilo se vytvořit uživatele",
+      "updateFailed": "Nepodařilo se aktualizovat uživatele",
+      "deleteFailed": "Nepodařilo se smazat uživatele",
+      "roleUpdateFailed": "Nepodařilo se aktualizovat uživatelskou roli",
+      "insufficientPermissions": "Nemáte oprávnění ke správě uživatelů.",
+      "generalError": "Nepodařilo se načíst uživatele. Může se jednat o dočasný problém se serverem."
+    },
+    "success": {
+      "created": "Uživatel byl úspěšně vytvořen",
+      "updated": "Uživatel byl úspěšně aktualizován",
+      "deleted": "Uživatel byl úspěšně smazán",
+      "roleUpdated": "Uživatelská role byla úspěšně aktualizována",
+      "activated": "Uživatel byl úspěšně aktivován",
+      "deactivated": "Uživatel byl úspěšně deaktivován"
+    },
+    "delete": {
+      "title": "Smazat uživatele",
+      "confirmMessage": "Opravdu chcete smazat uživatele \"{name}\"?",
+      "warning": "Tuto akci nelze vrátit zpět. Uživatel bude trvale odstraněn z vaší organizace.",
+      "cannotDelete": "Uživatele \"{name}\" nelze smazat, protože má aktivní role nebo oprávnění."
+    }
   }
 }

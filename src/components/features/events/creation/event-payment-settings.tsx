@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 
-import type { EventPaymentSettingsProps } from "./event-creation-form.types";
+import type { EventPaymentSettingsProps } from "@/types/components/event-creation-form.types";
 
 import { FormField } from "./components/form-field";
 import { BankAccountSelector } from "./components/bank-account-selector";

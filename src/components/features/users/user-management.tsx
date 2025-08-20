@@ -2,19 +2,23 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { MagnifyingGlassIcon, UserPlusIcon } from "@heroicons/react/24/outline";
 
 import { Button } from "@/components/ui/button";
 import { UserList } from "@/components/features/users/user-list";
 import { UserFilters } from "@/components/features/users/user-filters";
 import { useUsers } from "@/components/features/users/hooks/use-users";
+import { logger } from "@/lib/logger";
 import {
   UserManagementProps,
   UserFilters as UserFiltersType,
-} from "@/components/features/users/user-management.types";
+} from "@/types/components/user-management.types";
 
 export function UserManagement({ className }: UserManagementProps) {
   const router = useRouter();
+  const t = useTranslations("Users");
+  const tCommon = useTranslations("Common");
   const [filters, setFilters] = useState<UserFiltersType>({});
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -56,12 +60,12 @@ export function UserManagement({ className }: UserManagementProps) {
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || "Failed to update user role");
+        throw new Error(error.message || t("errors.roleUpdateFailed"));
       }
 
       refetch();
     } catch (error) {
-      console.error("Update user role error:", error);
+      logger.error("Update user role error:", error);
       // You could add toast notification here
     }
   };
@@ -69,10 +73,10 @@ export function UserManagement({ className }: UserManagementProps) {
   const renderErrorState = () => (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-semibold text-gray-900">Users</h2>
+        <h2 className="text-2xl font-semibold text-gray-900">{t("title")}</h2>
         <Button onClick={handleCreateUser} className="flex items-center gap-2">
           <UserPlusIcon className="h-5 w-5" />
-          Add User
+          {t("addUser")}
         </Button>
       </div>
 
@@ -92,15 +96,15 @@ export function UserManagement({ className }: UserManagementProps) {
             />
           </svg>
           <div className="flex-1">
-            <h3 className="text-sm font-medium text-red-800">Failed to Load Users</h3>
+            <h3 className="text-sm font-medium text-red-800">{t("errors.loadFailed")}</h3>
             <p className="mt-1 text-sm text-red-700">
               {error && error.includes("insufficient_permissions")
-                ? "You don't have permission to manage users."
-                : "Unable to fetch users. This might be a temporary issue with the server."}
+                ? t("errors.insufficientPermissions")
+                : t("errors.generalError")}
             </p>
             <div className="mt-4">
               <Button onClick={refetch} variant="outline" size="sm">
-                Retry Loading Users
+                {t("retryLoading")}
               </Button>
             </div>
           </div>
@@ -117,10 +121,10 @@ export function UserManagement({ className }: UserManagementProps) {
     <div className={`space-y-6 ${className || ""}`}>
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-semibold text-gray-900">Users</h2>
+        <h2 className="text-2xl font-semibold text-gray-900">{t("title")}</h2>
         <Button onClick={handleCreateUser} className="flex items-center gap-2">
           <UserPlusIcon className="h-5 w-5" />
-          Add User
+          {t("addUser")}
         </Button>
       </div>
 
@@ -131,7 +135,7 @@ export function UserManagement({ className }: UserManagementProps) {
         </div>
         <input
           type="text"
-          placeholder="Search users by name or email..."
+          placeholder={t("searchPlaceholder")}
           value={searchQuery}
           onChange={(e) => handleSearch(e.target.value)}
           className="w-full rounded-md border border-gray-300 bg-white py-2 pl-10 pr-3 text-sm placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
@@ -165,11 +169,11 @@ export function UserManagement({ className }: UserManagementProps) {
             disabled={pagination.page <= 1}
             onClick={() => setPage(pagination.page - 1)}
           >
-            Previous
+            {tCommon("previous")}
           </Button>
 
           <span className="text-sm text-gray-600">
-            Page {pagination.page} of {pagination.totalPages}
+            {tCommon("page")} {pagination.page} {tCommon("of")} {pagination.totalPages}
           </span>
 
           <Button
@@ -178,7 +182,7 @@ export function UserManagement({ className }: UserManagementProps) {
             disabled={!pagination.hasMore}
             onClick={() => setPage(pagination.page + 1)}
           >
-            Next
+            {tCommon("next")}
           </Button>
         </div>
       )}

@@ -7,7 +7,7 @@ import {
   UserFilters,
   UseUsersOptions,
   UseUsersReturn,
-} from "@/components/features/users/user-management.types";
+} from "@/types/components/user-management.types";
 
 export function useUsers(options: UseUsersOptions = {}): UseUsersReturn {
   const { filters: initialFilters = {}, page: initialPage = 1, limit = 20 } = options;

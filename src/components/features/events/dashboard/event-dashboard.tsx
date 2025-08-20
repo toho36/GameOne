@@ -3,16 +3,19 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { PlusIcon } from "@heroicons/react/24/outline";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
+import { logger } from "@/lib/logger";
 import { EventList } from "./event-list";
 import { EventFilters as EventFiltersComponent } from "./event-filters";
 import { EventStats } from "./event-stats";
 import { useEvents } from "./hooks/use-events";
-import { EventDashboardProps, EventFilters } from "./event-dashboard.types";
+import { EventDashboardProps, EventFilters } from "@/types/components/event-dashboard.types";
 
 export function EventDashboard({ className }: EventDashboardProps) {
   const router = useRouter();
+  const t = useTranslations("Events");
   const [filters, setFilters] = useState<EventFilters>({});
 
   const {
@@ -35,7 +38,7 @@ export function EventDashboard({ className }: EventDashboardProps) {
 
   const handleDeleteEvent = async (eventId: string) => {
     // eslint-disable-next-line no-alert
-    if (!confirm("Are you sure you want to delete this event?")) return;
+    if (!confirm(t("deleteEvent") + "?")) return;
 
     try {
       const response = await fetch(`/api/events/${eventId}`, {
@@ -49,7 +52,7 @@ export function EventDashboard({ className }: EventDashboardProps) {
 
       refetch();
     } catch (error) {
-      console.error("Delete event error:", error);
+      logger.error("Event deletion failed", error);
       // eslint-disable-next-line no-alert
       alert(error instanceof Error ? error.message : "Failed to delete event");
     }
@@ -72,7 +75,7 @@ export function EventDashboard({ className }: EventDashboardProps) {
 
       refetch();
     } catch (error) {
-      console.error(`${action} event error:`, error);
+      logger.error(`Event ${action} operation failed`, error);
       // eslint-disable-next-line no-alert
       alert(error instanceof Error ? error.message : `Failed to ${action} event`);
     }
@@ -188,10 +191,10 @@ export function EventDashboard({ className }: EventDashboardProps) {
     <div className={`space-y-6 ${className || ""}`}>
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-semibold text-gray-900">Your Events</h2>
+        <h2 className="text-2xl font-semibold text-gray-900">{t("title")}</h2>
         <Button onClick={handleCreateEvent} className="flex items-center gap-2">
           <PlusIcon className="h-5 w-5" />
-          Create Event
+          {t("createEvent")}
         </Button>
       </div>
 

@@ -12,6 +12,7 @@ export interface User {
   updatedAt: string;
   lastLoginAt?: string;
   primaryRole?: Role;
+  userRoles?: UserRole[];
 }
 
 export interface Role {
@@ -26,6 +27,17 @@ export interface Role {
   permissions: string[];
   createdAt: string;
   updatedAt: string;
+}
+
+export interface UserRole {
+  id: string;
+  userId: string;
+  roleId: string;
+  assignedAt: string;
+  assignedBy?: string;
+  expiresAt?: string;
+  isActive: boolean;
+  role: Role;
 }
 
 export interface UserFilters {

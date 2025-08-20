@@ -2,8 +2,9 @@
 
 import { useState, useEffect, useCallback } from "react";
 
+import { logger } from "@/lib/logger";
 import type { BankAccountOption } from "@/types/event";
-import type { UseBankAccountsReturn } from "@/components/features/events/creation/event-creation-form.types";
+import type { UseBankAccountsReturn } from "@/types/components/event-creation-form.types";
 
 export function useBankAccounts(): UseBankAccountsReturn {
   const [bankAccounts, setBankAccounts] = useState<BankAccountOption[]>([]);
@@ -16,7 +17,8 @@ export function useBankAccounts(): UseBankAccountsReturn {
     setError(null);
 
     try {
-      const response = await fetch("/api/bank-accounts");
+      // Fetch only active accounts for event creation
+      const response = await fetch("/api/bank-accounts?isActive=true&limit=100");
 
       if (!response.ok) {
         throw new Error(`Failed to fetch bank accounts: ${response.status}`);
@@ -24,8 +26,11 @@ export function useBankAccounts(): UseBankAccountsReturn {
 
       const data = await response.json();
 
+      // Handle both paginated and simple array responses
+      const accounts = Array.isArray(data) ? data : data.bankAccounts || [];
+
       // Transform the data to match our interface
-      const formattedAccounts: BankAccountOption[] = data.map((account: any) => ({
+      const formattedAccounts: BankAccountOption[] = accounts.map((account: any) => ({
         id: account.id,
         name: account.name,
         bankName: account.bankName,
@@ -47,7 +52,7 @@ export function useBankAccounts(): UseBankAccountsReturn {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
       setError(errorMessage);
-      console.error("Error fetching bank accounts:", err);
+      logger.error("Failed to fetch bank accounts for event creation", err);
     } finally {
       setIsLoading(false);
     }

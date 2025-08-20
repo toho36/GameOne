@@ -32,6 +32,7 @@ async function seedRoles() {
         "events.edit",
         "events.delete",
         "bank_accounts.view",
+        "bank_accounts.manage",
       ],
     },
     {

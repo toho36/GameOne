@@ -1,5 +1,5 @@
 import { EventCard } from "./event-card";
-import { EventListProps } from "./event-dashboard.types";
+import { EventListProps } from "@/types/components/event-dashboard.types";
 
 export function EventList({ events, isLoading, onEdit, onDelete, onToggleStatus }: EventListProps) {
   if (isLoading) {

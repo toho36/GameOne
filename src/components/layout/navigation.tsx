@@ -39,13 +39,19 @@ export function Navigation({ currentLocale }: NavigationProps) {
               href="/dashboard/events"
               className="text-gray-600 transition-colors hover:text-gray-900"
             >
-              Events
+              {t("events")}
             </Link>
             <Link
               href="/dashboard/users"
               className="text-gray-600 transition-colors hover:text-gray-900"
             >
-              Users
+              {t("users")}
+            </Link>
+            <Link
+              href="/dashboard/bank-accounts"
+              className="text-gray-600 transition-colors hover:text-gray-900"
+            >
+              {t("bankAccounts")}
             </Link>
           </div>
 
@@ -102,14 +108,21 @@ export function Navigation({ currentLocale }: NavigationProps) {
                 className="rounded-md px-3 py-2 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                Events
+                {t("events")}
               </Link>
               <Link
                 href="/dashboard/users"
                 className="rounded-md px-3 py-2 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                Users
+                {t("users")}
+              </Link>
+              <Link
+                href="/dashboard/bank-accounts"
+                className="rounded-md px-3 py-2 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                {t("bankAccounts")}
               </Link>
 
               {/* Language Switcher in Mobile Menu */}

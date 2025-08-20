@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2, Save, X } from "lucide-react";
 
-import type { EventFormActionsProps } from "./event-creation-form.types";
+import type { EventFormActionsProps } from "@/types/components/event-creation-form.types";
 
 export function EventFormActions({
   onSubmit,

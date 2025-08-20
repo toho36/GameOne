@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-import type { TagInputProps } from "@/components/features/events/creation/event-creation-form.types";
+import type { TagInputProps } from "@/types/components/event-creation-form.types";
 
 export function TagInput({
   value,

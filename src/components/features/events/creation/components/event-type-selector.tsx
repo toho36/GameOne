@@ -6,7 +6,7 @@ import { EventType } from "@prisma/client";
 import { cn } from "@/lib/utils";
 import { EVENT_TYPES } from "@/types/event";
 
-import type { EventTypeSelectorProps } from "@/components/features/events/creation/event-creation-form.types";
+import type { EventTypeSelectorProps } from "@/types/components/event-creation-form.types";
 
 export function EventTypeSelector({
   value,
