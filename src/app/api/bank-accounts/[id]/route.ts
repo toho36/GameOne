@@ -8,6 +8,7 @@ import {
   ensureSingleDefault,
   checkCanDeleteBankAccount,
 } from "@/lib/api/bank-accounts/operations";
+import { logger } from "@/lib/logger";
 
 const BANK_ACCOUNT_PERMISSIONS = ["bank_accounts.manage", "admin.full_access"];
 
@@ -22,7 +23,7 @@ export async function GET(_request: NextRequest, { params }: { params: { id: str
 
     return NextResponse.json({ bankAccount: validation.bankAccount });
   } catch (error) {
-    console.error("Bank account fetch error:", error);
+    logger.error("Bank account fetch error:", error);
     return NextResponse.json({ error: "Failed to fetch bank account" }, { status: 500 });
   }
 }
@@ -69,7 +70,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
     return NextResponse.json({ bankAccount });
   } catch (error) {
-    console.error("Bank account update error:", error);
+    logger.error("Bank account update error:", error);
     return NextResponse.json({ error: "Failed to update bank account" }, { status: 500 });
   }
 }
@@ -94,7 +95,7 @@ export async function DELETE(_request: NextRequest, { params }: { params: { id: 
       message: "Bank account deleted successfully",
     });
   } catch (error) {
-    console.error("Bank account deletion error:", error);
+    logger.error("Bank account deletion error:", error);
     return NextResponse.json({ error: "Failed to delete bank account" }, { status: 500 });
   }
 }
