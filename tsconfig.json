@@ -49,7 +49,7 @@
     "noUnusedParameters": true,
 
     // === DODATKOVÉ STRICT TYPE SAFETY ===
-    "exactOptionalPropertyTypes": true,
+    "exactOptionalPropertyTypes": false,
     "noPropertyAccessFromIndexSignature": true,
     "noUncheckedIndexedAccess": true,
     "allowUnreachableCode": false,

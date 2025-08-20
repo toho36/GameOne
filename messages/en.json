@@ -50,7 +50,11 @@
   },
   "Navigation": {
     "home": "Home",
-    "dashboard": "Dashboard"
+    "dashboard": "Dashboard",
+    "events": "Events",
+    "bankAccounts": "Bank Accounts",
+    "users": "Users",
+    "settings": "Settings"
   },
   "Auth": {
     "signIn": "Sign In",
@@ -70,10 +74,396 @@
     "cancel": "Cancel",
     "save": "Save",
     "close": "Close",
-    "goHome": "Go Home"
+    "goHome": "Go Home",
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page",
+    "of": "of",
+    "noData": "No data found",
+    "noResults": "No results found",
+    "search": "Search",
+    "filter": "Filter",
+    "clear": "Clear",
+    "apply": "Apply",
+    "reset": "Reset",
+    "select": "Select",
+    "all": "All",
+    "none": "None",
+    "yes": "Yes",
+    "no": "No",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "active": "Active",
+    "inactive": "Inactive",
+    "status": "Status",
+    "actions": "Actions",
+    "created": "Created",
+    "updated": "Updated",
+    "deleted": "Deleted",
+    "createdAt": "Created at",
+    "updatedAt": "Updated at",
+    "deletedAt": "Deleted at"
   },
   "Language": {
     "switchTo": "Switch to {language}",
     "currentLanguage": "Current language: {language}"
+  },
+  "BankAccounts": {
+    "title": "Bank Accounts",
+    "description": "Manage your organization's bank accounts",
+    "createAccount": "Create Account",
+    "editAccount": "Edit Account",
+    "deleteAccount": "Delete Account",
+    "noAccounts": "No bank accounts found",
+    "createFirst": "Create your first bank account to get started",
+    "searchPlaceholder": "Search bank accounts...",
+    "filterAll": "All Accounts",
+    "filterActive": "Active Only",
+    "filterInactive": "Inactive Only",
+    "clearFilters": "Clear Filters",
+    "accountName": "Account Name",
+    "iban": "IBAN",
+    "bankName": "Bank Name",
+    "accountNumber": "Account Number",
+    "bankCode": "Bank Code",
+    "swift": "SWIFT Code",
+
+    "form": {
+      "title": {
+        "create": "Create Bank Account",
+        "edit": "Edit Bank Account"
+      },
+      "description": {
+        "create": "Add a new bank account using IBAN. Other details will be auto-filled when possible.",
+        "edit": "Update bank account information. IBAN is the primary identifier."
+      },
+      "sections": {
+        "basic": "Basic Information",
+        "details": "Account Details",
+        "settings": "Account Settings"
+      },
+      "labels": {
+        "name": "Account Name",
+        "nameDesc": "A friendly name to identify this account",
+        "iban": "IBAN",
+        "ibanDesc": "International Bank Account Number (Czech/Slovak format). Other fields will be auto-filled.",
+        "bankName": "Bank Name",
+        "bankNameDesc": "Full name of the bank (auto-filled from IBAN)",
+        "accountNumber": "Account Number",
+        "accountNumberDesc": "Bank account number (auto-extracted from IBAN)",
+        "bankCode": "Bank Code",
+        "bankCodeDesc": "4-digit bank identification code (auto-filled from IBAN)",
+        "swift": "SWIFT Code",
+        "swiftDesc": "Bank Identifier Code (optional)",
+        "isDefault": "Set as Default Account",
+        "isDefaultDesc": "This account will be used as default for new events",
+        "isActive": "Account is Active",
+        "isActiveDesc": "Only active accounts can be used for events",
+        "qrCodeEnabled": "Enable QR Code Generation",
+        "qrCodeDesc": "Allow QR code generation for payments to this account",
+        "autoFilled": "Auto-filled from IBAN, can be overridden"
+      },
+      "placeholders": {
+        "name": "e.g., Primary Business Account",
+        "iban": "e.g., CZ5220100000002801494468",
+        "bankName": "e.g., Česká spořitelna",
+        "accountNumber": "e.g., 2801494468",
+        "bankCode": "e.g., 0800",
+        "swift": "Enter SWIFT code (optional)"
+      },
+      "validation": {
+        "nameRequired": "Account name is required",
+        "nameMin": "Account name must be at least 2 characters",
+        "nameMax": "Account name must be at most 100 characters",
+        "ibanRequired": "IBAN is required",
+        "ibanInvalid": "Invalid IBAN format",
+        "swiftInvalid": "Invalid SWIFT code format"
+      }
+    },
+    "delete": {
+      "title": "Delete Bank Account",
+      "confirmMessage": "Are you sure you want to delete the bank account \"{name}\"?",
+      "warning": "This action cannot be undone. The account will be permanently removed from your organization and will no longer be available for events.",
+      "cannotDelete": "The bank account \"{name}\" cannot be deleted because it is set as the default account.",
+      "setAnotherDefault": "To delete this account, first set another account as the default, then try again.",
+      "accountDetails": "Account Details",
+      "bank": "Bank",
+      "account": "Account",
+      "defaultWarning": "Cannot delete default account. This account is currently set as the default for new events. Please select a different default account before attempting to delete this one."
+    },
+    "errors": {
+      "loadFailed": "Failed to load bank accounts",
+      "createFailed": "Failed to create bank account",
+      "updateFailed": "Failed to update bank account",
+      "deleteFailed": "Failed to delete bank account",
+      "setDefaultFailed": "Failed to set default account",
+      "toggleActiveFailed": "Failed to update account status"
+    },
+    "success": {
+      "created": "Bank account created successfully",
+      "updated": "Bank account updated successfully",
+      "deleted": "Bank account deleted successfully",
+      "defaultSet": "Default account updated successfully",
+      "activated": "Account activated successfully",
+      "deactivated": "Account deactivated successfully"
+    }
+  },
+  "Events": {
+    "title": "Events",
+    "description": "Manage your events and registrations",
+    "createEvent": "Create Event",
+    "editEvent": "Edit Event",
+    "deleteEvent": "Delete Event",
+    "publishEvent": "Publish Event",
+    "unpublishEvent": "Unpublish Event",
+    "noEvents": "No events found",
+    "createFirst": "Create your first event to get started",
+    "searchPlaceholder": "Search events...",
+    "filterAll": "All Events",
+    "filterPublished": "Published",
+    "filterDraft": "Draft",
+    "clearFilters": "Clear Filters",
+    "eventTitle": "Event Title",
+    "eventType": "Event Type",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "capacity": "Capacity",
+    "registrations": "Registrations",
+    "status": "Status",
+    "actions": "Actions",
+    "edit": "Edit",
+    "delete": "Delete",
+    "publish": "Publish",
+    "unpublish": "Unpublish",
+    "draft": "Draft",
+    "published": "Published",
+    "cancelled": "Cancelled",
+    "completed": "Completed",
+    "filters": {
+      "status": "Status",
+      "type": "Type",
+      "sortBy": "Sort by",
+      "allStatuses": "All Statuses",
+      "allTypes": "All Types"
+    },
+    "types": {
+      "conference": "Conference",
+      "workshop": "Workshop",
+      "webinar": "Webinar",
+      "networking": "Networking",
+      "social": "Social",
+      "other": "Other"
+    },
+    "sort": {
+      "dateEarliest": "Date (Earliest)",
+      "dateLatest": "Date (Latest)",
+      "titleAZ": "Title (A-Z)",
+      "titleZA": "Title (Z-A)",
+      "createdNewest": "Created (Newest)",
+      "createdOldest": "Created (Oldest)"
+    },
+    "form": {
+      "title": {
+        "create": "Create Event",
+        "edit": "Edit Event"
+      },
+      "description": {
+        "create": "Create a new event for your organization",
+        "edit": "Update event information and settings"
+      },
+      "loading": "Loading event form...",
+      "sections": {
+        "basic": "Basic Information",
+        "schedule": "Schedule & Timing",
+        "location": "Location",
+        "capacity": "Capacity & Registration",
+        "payment": "Payment Settings",
+        "metadata": "Additional Information"
+      },
+      "labels": {
+        "title": "Event Title",
+        "titleDesc": "Give your event a clear, descriptive title",
+        "description": "Description",
+        "descriptionDesc": "Detailed description of your event",
+        "shortDescription": "Short Description",
+        "shortDescriptionDesc": "Brief summary for event listings",
+        "type": "Event Type",
+        "typeDesc": "Select the type of event you're organizing",
+        "startDate": "Start Date & Time",
+        "startDateDesc": "When does your event start?",
+        "endDate": "End Date & Time",
+        "endDateDesc": "When does your event end? (optional)",
+        "venue": "Venue",
+        "venueDesc": "Where is your event taking place?",
+        "address": "Address",
+        "addressDesc": "Complete address of the venue",
+        "city": "City",
+        "cityDesc": "City where the event takes place",
+        "country": "Country",
+        "countryDesc": "Country where the event takes place",
+        "isOnline": "Online Event",
+        "isOnlineDesc": "Check if this is a virtual event",
+        "maxParticipants": "Maximum Participants",
+        "maxParticipantsDesc": "How many people can attend?",
+        "price": "Price",
+        "priceDesc": "Event registration fee (0 for free events)",
+        "currency": "Currency",
+        "currencyDesc": "Currency for the event price",
+        "tags": "Event Tags"
+      },
+      "descriptions": {
+        "title": "Give your event a clear, descriptive title",
+        "description": "Detailed description of your event",
+        "shortDescription": "Brief summary for event listings",
+        "type": "Select the type of event you're organizing",
+        "startDate": "When does your event start?",
+        "endDate": "When does your event end? (optional)",
+        "venue": "Where is your event taking place?",
+        "address": "Complete address of the venue",
+        "city": "City where the event takes place",
+        "country": "Country where the event takes place",
+        "isOnline": "Check if this is a virtual event",
+        "maxParticipants": "How many people can attend?",
+        "price": "Event registration fee (0 for free events)",
+        "currency": "Currency for the event price",
+        "metadata": "Add tags and additional information to help people discover your event",
+        "tags": "Add relevant tags to help people find your event (max 10 tags)",
+        "tagInput": "Press Enter or comma to add a tag"
+      },
+      "placeholders": {
+        "title": "Enter event title",
+        "description": "Describe your event in detail",
+        "shortDescription": "Brief summary of your event",
+        "venue": "Enter venue name",
+        "address": "Enter complete address",
+        "city": "Enter city name",
+        "country": "Enter country name",
+        "tags": "Add a tag..."
+      },
+      "types": {
+        "conference": "Conference",
+        "workshop": "Workshop",
+        "meetup": "Meetup",
+        "webinar": "Webinar",
+        "training": "Training",
+        "networking": "Networking",
+        "social": "Social Event",
+        "other": "Other"
+      }
+    },
+    "stats": {
+      "totalEvents": "Total Events",
+      "publishedEvents": "Published Events",
+      "draftEvents": "Draft Events",
+      "totalRegistrations": "Total Registrations"
+    },
+    "errors": {
+      "loadFailed": "Failed to load events",
+      "createFailed": "Failed to create event",
+      "updateFailed": "Failed to update event",
+      "deleteFailed": "Failed to delete event",
+      "publishFailed": "Failed to publish event",
+      "unpublishFailed": "Failed to unpublish event",
+      "validationError": "Validation Error",
+      "validationErrorDesc": "Please fix the errors before submitting.",
+      "generalError": "An error occurred. Please try again.",
+      "permissionError": "You don't have permission to perform this action."
+    },
+    "success": {
+      "created": "Event Created",
+      "updated": "Event Updated",
+      "deleted": "Event deleted successfully",
+      "published": "Event published successfully",
+      "unpublished": "Event unpublished successfully",
+      "draftSaved": "Draft saved successfully",
+      "createdDesc": "Your event has been created successfully.",
+      "updatedDesc": "Your event has been updated successfully."
+    }
+  },
+
+  "Users": {
+    "title": "Users",
+    "description": "Manage user accounts and permissions",
+    "createUser": "Create User",
+    "editUser": "Edit User",
+    "deleteUser": "Delete User",
+    "noUsers": "No users found",
+    "createFirst": "Create your first user to get started",
+    "searchPlaceholder": "Search users by name or email...",
+    "filterAll": "All Users",
+    "filterActive": "Active Only",
+    "filterInactive": "Inactive Only",
+    "clearFilters": "Clear Filters",
+
+    "filters": {
+      "status": "Status",
+      "role": "Role",
+      "allStatuses": "All Statuses",
+      "allRoles": "All Roles",
+      "noRole": "No Role"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "pendingVerification": "Pending Verification",
+      "suspended": "Suspended"
+    },
+    "addUser": "Add User",
+    "retryLoading": "Retry Loading Users",
+    "form": {
+      "title": {
+        "create": "Create User",
+        "edit": "Edit User"
+      },
+      "description": {
+        "create": "Add a new user to your organization",
+        "edit": "Update user information and permissions"
+      },
+      "labels": {
+        "name": "Full Name",
+        "nameDesc": "User's full name as it should appear",
+        "email": "Email Address",
+        "emailDesc": "User's email address for login and notifications",
+        "role": "User Role",
+        "roleDesc": "Select the appropriate role for this user",
+        "status": "Account Status",
+        "statusDesc": "Whether the user account is active or inactive"
+      },
+      "placeholders": {
+        "name": "Enter full name",
+        "email": "Enter email address",
+        "role": "Select user role"
+      },
+      "validation": {
+        "nameRequired": "Full name is required",
+        "nameMin": "Name must be at least 2 characters",
+        "emailRequired": "Email address is required",
+        "emailInvalid": "Please enter a valid email address",
+        "roleRequired": "User role is required"
+      }
+    },
+    "errors": {
+      "loadFailed": "Failed to load users",
+      "createFailed": "Failed to create user",
+      "updateFailed": "Failed to update user",
+      "deleteFailed": "Failed to delete user",
+      "roleUpdateFailed": "Failed to update user role",
+      "insufficientPermissions": "You don't have permission to manage users.",
+      "generalError": "Unable to fetch users. This might be a temporary issue with the server."
+    },
+    "success": {
+      "created": "User created successfully",
+      "updated": "User updated successfully",
+      "deleted": "User deleted successfully",
+      "roleUpdated": "User role updated successfully",
+      "activated": "User activated successfully",
+      "deactivated": "User deactivated successfully"
+    },
+    "delete": {
+      "title": "Delete User",
+      "confirmMessage": "Are you sure you want to delete the user \"{name}\"?",
+      "warning": "This action cannot be undone. The user will be permanently removed from your organization.",
+      "cannotDelete": "The user \"{name}\" cannot be deleted because they have active roles or permissions."
+    }
   }
 }

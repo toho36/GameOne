@@ -31,7 +31,20 @@
       "Bash(touch:*)",
       "Bash(chmod:*)",
       "Bash(prisma validate:*)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(npx prisma migrate dev:*)",
+      "Bash(npx prisma migrate reset:*)",
+      "Bash(npx prisma generate:*)",
+      "Bash(npm run build:*)",
+      "Bash(cp:*)",
+      "Bash(npm run validate-structure:*)",
+      "Bash(npm run type-check:*)",
+      "Bash(npm run lint)",
+      "Bash(npx tsx:*)",
+      "Bash(npx prisma migrate:*)",
+      "Bash(npx prisma:*)",
+      "Bash(psql:*)",
+      "Bash(npm run dev:*)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"

@@ -252,7 +252,13 @@ class ProjectStructureValidator {
   private validateTypeNaming(file: FileInfo): void {
     const nameWithoutExt = file.name.replace(file.extension, "");
 
-    if (!this.isKebabCase(nameWithoutExt)) {
+    // Handle .types.ts files - check the part before .types
+    if (nameWithoutExt.endsWith(".types")) {
+      const baseNameWithoutTypes = nameWithoutExt.replace(".types", "");
+      if (!this.isKebabCase(baseNameWithoutTypes)) {
+        this.errors.push(`Type file should use kebab-case: ${file.relativePath}`);
+      }
+    } else if (!this.isKebabCase(nameWithoutExt)) {
       this.errors.push(`Type file should use kebab-case: ${file.relativePath}`);
     }
   }

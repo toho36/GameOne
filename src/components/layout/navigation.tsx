@@ -35,6 +35,24 @@ export function Navigation({ currentLocale }: NavigationProps) {
             <Link href="/dashboard" className="text-gray-600 transition-colors hover:text-gray-900">
               {t("dashboard")}
             </Link>
+            <Link
+              href="/dashboard/events"
+              className="text-gray-600 transition-colors hover:text-gray-900"
+            >
+              {t("events")}
+            </Link>
+            <Link
+              href="/dashboard/users"
+              className="text-gray-600 transition-colors hover:text-gray-900"
+            >
+              {t("users")}
+            </Link>
+            <Link
+              href="/dashboard/bank-accounts"
+              className="text-gray-600 transition-colors hover:text-gray-900"
+            >
+              {t("bankAccounts")}
+            </Link>
           </div>
 
           {/* Right Side: Language Switcher + User Profile */}
@@ -84,6 +102,27 @@ export function Navigation({ currentLocale }: NavigationProps) {
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 {t("dashboard")}
+              </Link>
+              <Link
+                href="/dashboard/events"
+                className="rounded-md px-3 py-2 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                {t("events")}
+              </Link>
+              <Link
+                href="/dashboard/users"
+                className="rounded-md px-3 py-2 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                {t("users")}
+              </Link>
+              <Link
+                href="/dashboard/bank-accounts"
+                className="rounded-md px-3 py-2 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                {t("bankAccounts")}
               </Link>
 
               {/* Language Switcher in Mobile Menu */}
