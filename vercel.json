@@ -18,11 +18,6 @@
     "PRISMA_DEBUG": "false",
     "DATABASE_DEBUG": "false"
   },
-  "build": {
-    "env": {
-      "PRISMA_GENERATE_DATAPROXY": "true"
-    }
-  },
   "headers": [
     {
       "source": "/api/(.*)",
