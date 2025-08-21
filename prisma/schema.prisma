@@ -1,54 +1,30 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider      = "prisma-client-js"
-  // Optimize for serverless environment
   output        = "../node_modules/.prisma/client"
-  // Enable edge runtime compatibility
-  engineType    = "library"
-  // Optimize binary targets for Vercel deployment
   binaryTargets = ["native", "rhel-openssl-1.0.x"]
+  engineType    = "library"
 }
 
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
-  // Additional database configuration for production optimization
-  // relationMode = "prisma" // Uncomment if using serverless databases without foreign key support
-}
-
-// ================================
-// CORE USER MANAGEMENT
-// ================================
-
-enum UserStatus {
-  ACTIVE
-  INACTIVE
-  SUSPENDED
-  PENDING_VERIFICATION
 }
 
 model Role {
-  id          String  @id @default(cuid())
-  name        String  @unique // "USER", "ADMIN", "EVENT_MANAGER", etc.
-  displayName String // "Event Manager", "Administrator"
+  id          String     @id @default(cuid())
+  name        String     @unique
+  displayName String
   description String?
-  color       String? // For UI display (#FF5733)
-  priority    Int     @default(0) // Higher number = higher priority
-  isSystem    Boolean @default(false) // System roles can't be deleted
-  isDefault   Boolean @default(false) // Default role for new users
-
-  // Permissions (JSON for flexibility)
-  permissions Json @default("[]") // ["events.create", "users.manage", etc.]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  users     User[]
-  userRoles UserRole[]
+  color       String?
+  priority    Int        @default(0)
+  isSystem    Boolean    @default(false)
+  isDefault   Boolean    @default(false)
+  permissions Json       @default("[]")
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  userRoles   UserRole[]
+  users       User[]
 
   @@index([name])
   @@index([isDefault])
@@ -56,72 +32,58 @@ model Role {
 }
 
 model User {
-  id            String     @id @default(cuid())
-  kindeId       String?    @unique // For Kinde Auth integration
-  email         String     @unique
-  name          String?
-  firstName     String?
-  lastName      String?
-  primaryRoleId String? // Primary role for quick access
-  status        UserStatus @default(PENDING_VERIFICATION)
-  phoneNumber   String?
-
-  // Internationalization
-  preferredLocale String @default("en")
-
-  // Timestamps
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  lastLoginAt DateTime?
-
-  // Relations
-  primaryRole                  Role?                 @relation(fields: [primaryRoleId], references: [id])
-  userRoles                    UserRole[] // For multiple roles per user
-  assignedUserRoles            UserRole[]            @relation("UserRoleAssigner") // Roles assigned by this user
-  profile                      Profile?
-  eventRegistrations           Registration[]
-  waitingListEntries           WaitingList[]
-  pendingPayments              PendingPayment[]
+  id                           String                @id @default(cuid())
+  kindeId                      String?               @unique
+  email                        String                @unique
+  name                         String?
+  firstName                    String?
+  lastName                     String?
+  primaryRoleId                String?
+  status                       UserStatus            @default(PENDING_VERIFICATION)
+  phoneNumber                  String?
+  preferredLocale              String                @default("en")
+  createdAt                    DateTime              @default(now())
+  updatedAt                    DateTime              @updatedAt
+  lastLoginAt                  DateTime?
+  auditLogs                    AuditLog[]
+  uploadedDocuments            EventDocument[]
+  eventFeedback                EventFeedback[]
   createdEvents                Event[]               @relation("EventCreator")
   managedEvents                Event[]               @relation("EventManager")
-  payments                     Payment[]
-  registrationHistory          RegistrationHistory[] @relation("RegistrationHistoryUser")
-  performedRegistrationActions RegistrationHistory[] @relation("RegistrationHistoryPerformedBy")
-  auditLogs                    AuditLog[]
   notificationLogs             NotificationLog[]
-  eventFeedback                EventFeedback[]
-  uploadedDocuments            EventDocument[]
+  payments                     Payment[]
+  pendingPayments              PendingPayment[]
+  profile                      Profile?
+  performedRegistrationActions RegistrationHistory[] @relation("RegistrationHistoryPerformedBy")
+  registrationHistory          RegistrationHistory[] @relation("RegistrationHistoryUser")
+  eventRegistrations           Registration[]
+  assignedUserRoles            UserRole[]            @relation("UserRoleAssigner")
+  userRoles                    UserRole[]
+  primaryRole                  Role?                 @relation(fields: [primaryRoleId], references: [id])
   createdVideoClips            VideoClip[]           @relation("VideoClipCreator")
   videoReactions               VideoReaction[]
+  waitingListEntries           WaitingList[]
 
-  // Indexes for performance
   @@index([email])
   @@index([primaryRoleId, status])
   @@index([kindeId])
-  @@index([status, lastLoginAt]) // For user activity reports
-  @@index([preferredLocale]) // For locale-based queries
-  // TODO: Add email validation at application level - format: email ~ '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+  @@index([status, lastLoginAt])
+  @@index([preferredLocale])
   @@map("users")
 }
 
-// Many-to-many relationship for users with multiple roles
 model UserRole {
-  id     String @id @default(cuid())
-  userId String
-  roleId String
+  id             String    @id @default(cuid())
+  userId         String
+  roleId         String
+  assignedAt     DateTime  @default(now())
+  assignedBy     String?
+  expiresAt      DateTime?
+  isActive       Boolean   @default(true)
+  assignedByUser User?     @relation("UserRoleAssigner", fields: [assignedBy], references: [id])
+  role           Role      @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  // Role assignment metadata
-  assignedAt DateTime  @default(now())
-  assignedBy String? // User ID who assigned this role
-  expiresAt  DateTime? // Optional role expiration
-  isActive   Boolean   @default(true)
-
-  // Relations
-  user           User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  role           Role  @relation(fields: [roleId], references: [id], onDelete: Cascade)
-  assignedByUser User? @relation("UserRoleAssigner", fields: [assignedBy], references: [id])
-
-  // Prevent duplicate role assignments
   @@unique([userId, roleId])
   @@index([userId])
   @@index([roleId])
@@ -129,36 +91,537 @@ model UserRole {
 }
 
 model Profile {
-  id       String  @id @default(cuid())
-  userId   String  @unique
-  bio      String?
-  avatar   String? // URL to profile image
-  company  String?
-  jobTitle String?
-  website  String?
-  linkedin String?
-  twitter  String?
-
-  // Preferences
-  emailNotifications Boolean @default(true)
-  smsNotifications   Boolean @default(false)
-  marketingEmails    Boolean @default(false)
-
-  // Emergency contact
+  id                    String   @id @default(cuid())
+  userId                String   @unique
+  bio                   String?
+  avatar                String?
+  company               String?
+  jobTitle              String?
+  website               String?
+  linkedin              String?
+  twitter               String?
+  emailNotifications    Boolean  @default(true)
+  smsNotifications      Boolean  @default(false)
+  marketingEmails       Boolean  @default(false)
   emergencyContactName  String?
   emergencyContactPhone String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("profiles")
 }
 
-// ================================
-// EVENT MANAGEMENT
-// ================================
+model Event {
+  id                    String                @id @default(cuid())
+  title                 String
+  slug                  String                @unique
+  description           String?
+  shortDescription      String?
+  type                  EventType             @default(MEETUP)
+  status                EventStatus           @default(DRAFT)
+  capacity              Int
+  price                 Decimal?              @db.Decimal(10, 2)
+  currency              String                @default("EUR")
+  startDate             DateTime
+  endDate               DateTime?
+  timezone              String                @default("Europe/Bratislava")
+  venue                 String?
+  address               String?
+  city                  String?
+  country               String?               @default("Slovakia")
+  isOnline              Boolean               @default(false)
+  onlineUrl             String?
+  registrationStartDate DateTime?
+  registrationEndDate   DateTime?
+  requiresApproval      Boolean               @default(false)
+  allowWaitingList      Boolean               @default(true)
+  maxWaitingList        Int?
+  requiresPayment       Boolean               @default(false)
+  bankAccountId         String?
+  translations          Json?
+  tags                  String[]
+  imageUrl              String?
+  websiteUrl            String?
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+  creatorId             String
+  managerId             String?
+  categoryId            String?
+  documents             EventDocument[]
+  feedback              EventFeedback[]
+  bankAccount           BankAccount?          @relation(fields: [bankAccountId], references: [id])
+  category              EventCategory?        @relation(fields: [categoryId], references: [id])
+  creator               User                  @relation("EventCreator", fields: [creatorId], references: [id])
+  manager               User?                 @relation("EventManager", fields: [managerId], references: [id])
+  payments              Payment[]
+  pendingPayments       PendingPayment[]
+  registrationHistory   RegistrationHistory[]
+  registrations         Registration[]
+  videoClips            VideoClip[]
+  waitingList           WaitingList[]
+
+  @@index([status, startDate])
+  @@index([creatorId])
+  @@index([slug])
+  @@index([startDate])
+  @@index([type, status, startDate])
+  @@index([city, country, startDate])
+  @@index([registrationStartDate, registrationEndDate])
+  @@index([requiresPayment, price])
+  @@index([categoryId, status])
+  @@index([tags])
+  @@map("events")
+}
+
+model EventCategory {
+  id           String   @id @default(cuid())
+  name         String   @unique
+  slug         String   @unique
+  description  String?
+  color        String?
+  icon         String?
+  isActive     Boolean  @default(true)
+  sortOrder    Int      @default(0)
+  translations Json?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  events       Event[]
+
+  @@index([isActive, sortOrder])
+  @@index([slug])
+  @@map("event_categories")
+}
+
+model EventFeedback {
+  id                 String    @id @default(cuid())
+  eventId            String
+  userId             String
+  rating             Int
+  title              String?
+  comment            String?
+  organizationRating Int?
+  contentRating      Int?
+  venueRating        Int?
+  isApproved         Boolean   @default(false)
+  isPublic           Boolean   @default(true)
+  moderatedBy        String?
+  moderatedAt        DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  event              Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId])
+  @@index([eventId, isApproved, isPublic])
+  @@index([rating, createdAt])
+  @@map("event_feedback")
+}
+
+model EventDocument {
+  id                   String   @id @default(cuid())
+  eventId              String
+  title                String
+  description          String?
+  fileName             String
+  filePath             String
+  fileSize             Int
+  mimeType             String
+  type                 String   @default("general")
+  isPublic             Boolean  @default(false)
+  requiresRegistration Boolean  @default(true)
+  uploadedBy           String
+  uploadedAt           DateTime @default(now())
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  event                Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  uploader             User     @relation(fields: [uploadedBy], references: [id])
+
+  @@index([eventId, type, isPublic])
+  @@index([type, requiresRegistration])
+  @@map("event_documents")
+}
+
+model Registration {
+  id                      String                    @id @default(cuid())
+  userId                  String?
+  eventId                 String
+  status                  RegistrationStatus        @default(PENDING)
+  registrationType        RegistrationType          @default(INDIVIDUAL)
+  registrationSource      RegistrationSource        @default(WEB_FORM)
+  isGroupLeader           Boolean                   @default(true)
+  groupLeaderId           String?
+  groupSize               Int                       @default(1)
+  friendPosition          Int?
+  guestEmail              String?
+  guestName               String?
+  guestPhone              String?
+  isGuestRequest          Boolean                   @default(false)
+  friendsData             Json?                     @default("[]")
+  registeredAt            DateTime                  @default(now())
+  confirmedAt             DateTime?
+  cancelledAt             DateTime?
+  notes                   String?
+  dietaryRequirements     String?
+  specialRequests         String?
+  requiresPayment         Boolean                   @default(false)
+  paymentId               String?                   @unique
+  pendingPaymentId        String?
+  paymentStatus           RegistrationPaymentStatus @default(PENDING_VERIFICATION)
+  paymentClaimedAt        DateTime?
+  paymentVerifiedAt       DateTime?
+  paymentRejectedAt       DateTime?
+  paymentRejectionReason  String?
+  paymentMethod           PaymentMethod?
+  friendInfo              Json?
+  registeredBy            String?
+  promotedFromWaitingList Boolean                   @default(false)
+  waitingListPosition     Int?
+  promotedAt              DateTime?
+  event                   Event                     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  groupLeader             Registration?             @relation("GroupMembers", fields: [groupLeaderId], references: [id], onDelete: Cascade)
+  groupMembers            Registration[]            @relation("GroupMembers")
+  payment                 Payment?                  @relation(fields: [paymentId], references: [id])
+  pendingPayment          PendingPayment?           @relation("RegistrationPendingPayment", fields: [pendingPaymentId], references: [id])
+  user                    User?                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, eventId])
+  @@unique([eventId, guestEmail, guestName])
+  @@index([eventId, status])
+  @@index([userId, status])
+  @@index([status, registeredAt])
+  @@index([requiresPayment, paymentId])
+  @@index([confirmedAt])
+  @@map("registrations")
+}
+
+model WaitingList {
+  id                  String           @id @default(cuid())
+  userId              String?
+  eventId             String
+  position            Int
+  joinedAt            DateTime         @default(now())
+  notifiedAt          DateTime?
+  registrationType    RegistrationType @default(INDIVIDUAL)
+  isGroupEntry        Boolean          @default(false)
+  groupSize           Int              @default(1)
+  guestEmail          String?
+  guestName           String?
+  guestPhone          String?
+  isGuestRequest      Boolean          @default(false)
+  friendsData         Json?            @default("[]")
+  notes               String?
+  dietaryRequirements String?
+  specialRequests     String?
+  promotedAt          DateTime?
+  pendingPaymentId    String?
+  event               Event            @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  pendingPayment      PendingPayment?  @relation("WaitingListPendingPayment", fields: [pendingPaymentId], references: [id])
+  user                User?            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, eventId])
+  @@unique([eventId, guestEmail, guestName])
+  @@index([eventId, position])
+  @@index([userId, joinedAt])
+  @@index([isGroupEntry, groupSize])
+  @@index([registrationType, position])
+  @@index([isGuestRequest, guestEmail])
+  @@index([promotedAt, pendingPaymentId])
+  @@index([notifiedAt, position])
+  @@map("waiting_list")
+}
+
+model Payment {
+  id                String          @id @default(cuid())
+  userId            String
+  eventId           String?
+  registrationId    String?         @unique
+  amount            Decimal         @db.Decimal(10, 2)
+  currency          String          @default("EUR")
+  method            PaymentMethod   @default(QR_CODE)
+  status            PaymentStatus   @default(PENDING)
+  bankAccountId     String?
+  variableSymbol    String?         @unique
+  constantSymbol    String?
+  specificSymbol    String?
+  qrCodeData        String?
+  qrCodeUrl         String?
+  paidAt            DateTime?
+  verifiedAt        DateTime?
+  refundedAt        DateTime?
+  claimedAt         DateTime?
+  verifiedBy        String?
+  verificationNotes String?
+  description       String?
+  notes             String?
+  reference         String?
+  pendingPaymentId  String?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  bankAccount       BankAccount?    @relation(fields: [bankAccountId], references: [id])
+  event             Event?          @relation(fields: [eventId], references: [id])
+  pendingPayment    PendingPayment? @relation("PaymentPendingPayment", fields: [pendingPaymentId], references: [id])
+  user              User            @relation(fields: [userId], references: [id])
+  registration      Registration?
+
+  @@index([userId])
+  @@index([eventId])
+  @@index([status, createdAt])
+  @@index([variableSymbol])
+  @@index([method, status])
+  @@index([paidAt, verifiedAt])
+  @@index([currency, amount])
+  @@index([bankAccountId, status])
+  @@map("payments")
+}
+
+model PendingPayment {
+  id             String               @id @default(cuid())
+  userId         String
+  eventId        String
+  amount         Decimal              @db.Decimal(10, 2)
+  currency       String               @default("EUR")
+  type           PendingPaymentType
+  status         PendingPaymentStatus @default(PENDING)
+  paymentMethod  PaymentMethod        @default(BANK_TRANSFER)
+  bankAccountId  String?
+  variableSymbol String?              @unique
+  constantSymbol String?
+  specificSymbol String?
+  qrCodeData     String?
+  qrCodeUrl      String?
+  createdAt      DateTime             @default(now())
+  expiresAt      DateTime             @default(dbgenerated("(now() + '7 days'::interval)"))
+  processedAt    DateTime?
+  cancelledAt    DateTime?
+  description    String?
+  notes          String?
+  metadata       Json?
+  payments       Payment[]            @relation("PaymentPendingPayment")
+  bankAccount    BankAccount?         @relation(fields: [bankAccountId], references: [id])
+  event          Event                @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user           User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  registrations  Registration[]       @relation("RegistrationPendingPayment")
+  waitingList    WaitingList[]        @relation("WaitingListPendingPayment")
+
+  @@unique([userId, eventId, type])
+  @@index([userId, status])
+  @@index([eventId, status])
+  @@index([status, expiresAt])
+  @@index([type, status])
+  @@index([expiresAt])
+  @@index([variableSymbol])
+  @@index([paymentMethod, status])
+  @@map("pending_payments")
+}
+
+model BankAccount {
+  id              String           @id @default(cuid())
+  name            String
+  iban            String           @unique
+  bankName        String?
+  accountNumber   String?
+  bankCode        String?
+  swift           String?
+  isDefault       Boolean          @default(false)
+  isActive        Boolean          @default(true)
+  qrCodeEnabled   Boolean          @default(true)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  events          Event[]
+  payments        Payment[]
+  pendingPayments PendingPayment[]
+
+  @@index([isDefault, isActive])
+  @@index([isActive, qrCodeEnabled])
+  @@index([iban])
+  @@map("bank_accounts")
+}
+
+model RegistrationHistory {
+  id             String             @id @default(cuid())
+  userId         String
+  eventId        String
+  action         RegistrationAction
+  previousStatus String?
+  newStatus      String?
+  reason         String?
+  adminNotes     String?
+  performedById  String?
+  timestamp      DateTime           @default(now())
+  ipAddress      String?
+  userAgent      String?
+  event          Event              @relation(fields: [eventId], references: [id])
+  performedBy    User?              @relation("RegistrationHistoryPerformedBy", fields: [performedById], references: [id])
+  user           User               @relation("RegistrationHistoryUser", fields: [userId], references: [id])
+
+  @@index([userId, eventId])
+  @@index([timestamp])
+  @@map("registration_history")
+}
+
+model AuditLog {
+  id          String      @id @default(cuid())
+  userId      String?
+  action      AuditAction
+  resource    String
+  resourceId  String?
+  oldData     Json?
+  newData     Json?
+  changes     Json?
+  description String?
+  ipAddress   String?
+  userAgent   String?
+  sessionId   String?
+  timestamp   DateTime    @default(now())
+  user        User?       @relation(fields: [userId], references: [id])
+
+  @@index([userId, timestamp])
+  @@index([resource, resourceId])
+  @@index([timestamp])
+  @@index([action, resource, timestamp])
+  @@index([resource, action, timestamp])
+  @@index([sessionId, timestamp])
+  @@map("audit_logs")
+}
+
+model SystemConfig {
+  key         String   @id
+  value       String
+  description String?
+  type        String   @default("string")
+  category    String?
+  isPublic    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([category])
+  @@map("system_config")
+}
+
+model NotificationTemplate {
+  id            String            @id @default(cuid())
+  name          String            @unique
+  type          NotificationType
+  subject       String?
+  content       Json
+  variables     Json?
+  isActive      Boolean           @default(true)
+  isSystem      Boolean           @default(false)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  notifications NotificationLog[]
+
+  @@map("notification_templates")
+}
+
+model NotificationLog {
+  id           String                @id @default(cuid())
+  templateId   String?
+  userId       String?
+  type         NotificationType
+  status       NotificationStatus    @default(PENDING)
+  recipient    String
+  subject      String?
+  content      String
+  sentAt       DateTime?
+  deliveredAt  DateTime?
+  failedAt     DateTime?
+  errorMessage String?
+  eventId      String?
+  metadata     Json?
+  createdAt    DateTime              @default(now())
+  template     NotificationTemplate? @relation(fields: [templateId], references: [id])
+  user         User?                 @relation(fields: [userId], references: [id])
+
+  @@index([userId, createdAt])
+  @@index([status, createdAt])
+  @@index([type, recipient])
+  @@map("notification_logs")
+}
+
+model VideoCategory {
+  id           String      @id @default(cuid())
+  name         String      @unique
+  slug         String      @unique
+  description  String?
+  color        String?
+  icon         String?
+  isActive     Boolean     @default(true)
+  sortOrder    Int         @default(0)
+  translations Json?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  videoClips   VideoClip[]
+
+  @@index([isActive, sortOrder])
+  @@index([slug])
+  @@map("video_categories")
+}
+
+model VideoClip {
+  id              String          @id @default(cuid())
+  title           String
+  description     String?
+  slug            String          @unique
+  youtubeVideoId  String          @unique
+  youtubeUrl      String
+  thumbnailUrl    String?
+  duration        Int?
+  embedCode       String?
+  status          VideoClipStatus @default(DRAFT)
+  privacy         VideoPrivacy    @default(PUBLIC)
+  tags            String[]
+  language        String          @default("en")
+  moderatedBy     String?
+  moderatedAt     DateTime?
+  moderationNotes String?
+  likeCount       Int             @default(0)
+  eventId         String?
+  categoryId      String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  publishedAt     DateTime?
+  creatorId       String
+  category        VideoCategory?  @relation(fields: [categoryId], references: [id])
+  creator         User            @relation("VideoClipCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+  event           Event?          @relation(fields: [eventId], references: [id])
+  reactions       VideoReaction[]
+
+  @@index([status, privacy, publishedAt])
+  @@index([creatorId, status])
+  @@index([eventId, status])
+  @@index([categoryId, status])
+  @@index([tags])
+  @@index([youtubeVideoId])
+  @@index([likeCount, publishedAt])
+  @@index([createdAt, status])
+  @@index([language, status])
+  @@map("video_clips")
+}
+
+model VideoReaction {
+  id        String       @id @default(cuid())
+  type      ReactionType
+  videoId   String
+  userId    String
+  createdAt DateTime     @default(now())
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  video     VideoClip    @relation(fields: [videoId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, videoId])
+  @@index([videoId, type])
+  @@index([userId, createdAt])
+  @@index([type, createdAt])
+  @@map("video_reactions")
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  PENDING_VERIFICATION
+}
 
 enum EventStatus {
   DRAFT
@@ -198,360 +661,23 @@ enum RegistrationSource {
   WALK_IN
 }
 
-model Event {
-  id               String  @id @default(cuid())
-  title            String
-  slug             String  @unique
-  description      String?
-  shortDescription String?
-
-  // Event details
-  type     EventType   @default(MEETUP)
-  status   EventStatus @default(DRAFT)
-  capacity Int
-  price    Decimal?    @db.Decimal(10, 2)
-  currency String      @default("EUR")
-
-  // Scheduling
-  startDate DateTime
-  endDate   DateTime?
-  timezone  String    @default("Europe/Bratislava")
-
-  // Location
-  venue     String?
-  address   String?
-  city      String?
-  country   String? @default("Slovakia")
-  isOnline  Boolean @default(false)
-  onlineUrl String?
-
-  // Registration settings
-  registrationStartDate DateTime?
-  registrationEndDate   DateTime?
-  requiresApproval      Boolean   @default(false)
-  allowWaitingList      Boolean   @default(true)
-  maxWaitingList        Int?
-
-  // Payment settings
-  requiresPayment Boolean @default(false)
-  bankAccountId   String?
-
-  // Internationalization - JSON for multiple languages
-  // Example: {"en": {"title": "Event Title", "description": "..."}, "cs": {...}}
-  translations Json?
-
-  // Metadata
-  tags       String[]
-  imageUrl   String?
-  websiteUrl String?
-
-  // Timestamps
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Foreign keys
-  creatorId  String
-  managerId  String?
-  categoryId String? // Link to event category
-
-  // Relations
-  creator             User                  @relation("EventCreator", fields: [creatorId], references: [id])
-  manager             User?                 @relation("EventManager", fields: [managerId], references: [id])
-  bankAccount         BankAccount?          @relation(fields: [bankAccountId], references: [id])
-  category            EventCategory?        @relation(fields: [categoryId], references: [id])
-  registrations       Registration[]
-  waitingList         WaitingList[]
-  pendingPayments     PendingPayment[]
-  registrationHistory RegistrationHistory[]
-  payments            Payment[]
-  feedback            EventFeedback[]
-  documents           EventDocument[]
-  videoClips          VideoClip[]
-
-  // Performance indexes for complex queries
-  @@index([status, startDate])
-  @@index([creatorId])
-  @@index([slug])
-  @@index([startDate])
-  @@index([type, status, startDate]) // For filtering events by type and status
-  @@index([city, country, startDate]) // For location-based searches
-  @@index([registrationStartDate, registrationEndDate]) // For registration window queries
-  @@index([requiresPayment, price]) // For payment-related filtering
-  @@index([categoryId, status]) // For category-based filtering
-  @@index([tags]) // For tag-based searches using GIN index
-  // TODO: Add validation at application level:
-  // - capacity > 0 AND capacity <= 10000
-  // - price IS NULL OR price >= 0  
-  // - endDate IS NULL OR endDate > startDate
-  // - registrationEndDate IS NULL OR registrationEndDate <= startDate
-  @@map("events")
-}
-
-// ================================
-// EVENT CATEGORIES & FEEDBACK
-// ================================
-
-model EventCategory {
-  id          String  @id @default(cuid())
-  name        String  @unique
-  slug        String  @unique
-  description String?
-  color       String? // Hex color for UI display
-  icon        String? // Icon identifier
-
-  // Category settings
-  isActive  Boolean @default(true)
-  sortOrder Int     @default(0)
-
-  // Internationalization
-  translations Json? // {"en": {"name": "Workshop", "description": "..."}, "cs": {...}}
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  events Event[]
-
-  @@index([isActive, sortOrder])
-  @@index([slug])
-  @@map("event_categories")
-}
-
-model EventFeedback {
-  id      String @id @default(cuid())
-  eventId String
-  userId  String
-
-  // Feedback content
-  rating  Int // 1-5 star rating
-  title   String?
-  comment String?
-
-  // Feedback categories
-  organizationRating Int? // 1-5 rating for organization
-  contentRating      Int? // 1-5 rating for content
-  venueRating        Int? // 1-5 rating for venue
-
-  // Moderation
-  isApproved  Boolean   @default(false)
-  isPublic    Boolean   @default(true)
-  moderatedBy String?
-  moderatedAt DateTime?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  // Prevent duplicate feedback per user per event
-  @@unique([eventId, userId])
-  @@index([eventId, isApproved, isPublic])
-  @@index([rating, createdAt])
-  // TODO: Add rating validation at application level:
-  // - rating >= 1 AND rating <= 5
-  // - organizationRating IS NULL OR (organizationRating >= 1 AND organizationRating <= 5)
-  // - contentRating IS NULL OR (contentRating >= 1 AND contentRating <= 5)
-  // - venueRating IS NULL OR (venueRating >= 1 AND venueRating <= 5)
-  @@map("event_feedback")
-}
-
-model EventDocument {
-  id      String @id @default(cuid())
-  eventId String
-
-  // Document details
-  title       String
-  description String?
-  fileName    String
-  filePath    String
-  fileSize    Int // Size in bytes
-  mimeType    String
-
-  // Document type and access control
-  type                 String  @default("general") // "agenda", "presentation", "handout", "certificate", etc.
-  isPublic             Boolean @default(false) // Public documents can be downloaded by anyone
-  requiresRegistration Boolean @default(true) // Requires event registration to access
-
-  // Upload metadata
-  uploadedBy String
-  uploadedAt DateTime @default(now())
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  event    Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  uploader User  @relation(fields: [uploadedBy], references: [id])
-
-  @@index([eventId, type, isPublic])
-  @@index([type, requiresRegistration])
-  @@map("event_documents")
-}
-
-// ================================
-// REGISTRATION SYSTEM  
-// ================================
-
 enum RegistrationStatus {
-  PENDING // Awaiting approval/payment
-  CONFIRMED // Confirmed attendance
-  CANCELLED // User cancelled
-  REJECTED // Admin rejected
-  ATTENDED // Actually attended event
-  NO_SHOW // Didn't show up
+  PENDING
+  CONFIRMED
+  CANCELLED
+  REJECTED
+  ATTENDED
+  NO_SHOW
 }
 
 enum RegistrationPaymentStatus {
-  PENDING_VERIFICATION                    // Doesn't take spot
-  PAYMENT_SENT_AWAITING_VERIFICATION     // Takes spot
-  PAYMENT_VERIFIED                       // Takes spot (confirmed)
-  VERIFIED_CASH                          // Takes spot (cash payment)
-  REJECTED                               // Back to pending or waiting list
-  WAITING_LIST_PROMOTED                  // New status for promoted users
+  PENDING_VERIFICATION
+  PAYMENT_SENT_AWAITING_VERIFICATION
+  PAYMENT_VERIFIED
+  VERIFIED_CASH
+  REJECTED
+  WAITING_LIST_PROMOTED
 }
-
-model Registration {
-  id      String             @id @default(cuid())
-  userId  String? // Can be null for guest registrations
-  eventId String
-  status  RegistrationStatus @default(PENDING)
-
-  // Enhanced registration metadata
-  registrationType   RegistrationType   @default(INDIVIDUAL)
-  registrationSource RegistrationSource @default(WEB_FORM)
-
-  // Group registration support
-  isGroupLeader  Boolean @default(true) // Is this the primary registrant in a group
-  groupLeaderId  String? // Reference to group leader's registration (if this is a friend)
-  groupSize      Int     @default(1) // Total size of the group (including leader)
-  friendPosition Int? // Position within the group (null for leader, 1+ for friends)
-
-  // Guest registration data (for non-authenticated users)
-  guestEmail     String?
-  guestName      String?
-  guestPhone     String?
-  isGuestRequest Boolean @default(false)
-
-  // Friend data (stored as JSON for group leader registrations)
-  // Schema: [{"name": "John Doe", "email": "john@example.com", "phone": "+420123456789", "dietaryRequirements": "vegetarian", "specialRequests": "wheelchair access", "registrationId": "cuid"}]
-  friendsData Json? @default("[]")
-
-  // Registration details
-  registeredAt DateTime  @default(now())
-  confirmedAt  DateTime?
-  cancelledAt  DateTime?
-
-  // Additional data
-  notes               String?
-  dietaryRequirements String?
-  specialRequests     String?
-
-  // Payment tracking
-  requiresPayment Boolean @default(false)
-  paymentId       String? @unique
-  pendingPaymentId String? // Reference to pending payment
-
-  // New payment status tracking
-  paymentStatus RegistrationPaymentStatus @default(PENDING_VERIFICATION)
-  paymentClaimedAt DateTime?
-  paymentVerifiedAt DateTime?
-  paymentRejectedAt DateTime?
-  paymentRejectionReason String?
-  paymentMethod PaymentMethod? // BANK_TRANSFER, CASH, etc.
-
-  // Friend registration fields
-  friendInfo Json? // Stores friend details
-  registeredBy String? // User who registered the friend
-
-  // Waiting list promotion tracking
-  promotedFromWaitingList Boolean   @default(false)
-  waitingListPosition     Int?
-  promotedAt              DateTime?
-
-  // Relations
-  user           User?           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  event          Event           @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  payment        Payment?        @relation(fields: [paymentId], references: [id])
-  pendingPayment PendingPayment? @relation("RegistrationPendingPayment", fields: [pendingPaymentId], references: [id])
-
-  // Group relationships
-  groupLeader  Registration?  @relation("GroupMembers", fields: [groupLeaderId], references: [id], onDelete: Cascade)
-  groupMembers Registration[] @relation("GroupMembers")
-
-  // Prevent duplicate registrations (considering guest registrations)
-  @@unique([userId, eventId]) // For authenticated users
-  @@unique([eventId, guestEmail, guestName]) // For guest registrations
-  // Performance indexes
-  @@index([eventId, status])
-  @@index([userId, status])
-  @@index([status, registeredAt]) // For admin reporting and timeline analysis
-  @@index([requiresPayment, paymentId]) // For payment tracking
-  @@index([confirmedAt]) // For attendance tracking
-  @@map("registrations")
-}
-
-// ================================
-// ENHANCED WAITING LIST SYSTEM
-// ================================
-
-model WaitingList {
-  id         String    @id @default(cuid())
-  userId     String? // Can be null for guest waiting list entries
-  eventId    String
-  position   Int // Position in waiting list
-  joinedAt   DateTime  @default(now())
-  notifiedAt DateTime? // When user was notified of availability
-
-  // Enhanced waiting list metadata
-  registrationType RegistrationType @default(INDIVIDUAL)
-
-  // Group waiting list support
-  isGroupEntry Boolean @default(false) // Is this a group waiting list entry
-  groupSize    Int     @default(1) // Number of spots needed when promoted
-
-  // Guest waiting list data (for non-authenticated users)
-  guestEmail     String?
-  guestName      String?
-  guestPhone     String?
-  isGuestRequest Boolean @default(false)
-
-  // Friend data for group waiting list entries
-  // Schema: [{"name": "John Doe", "email": "john@example.com", "phone": "+420123456789", "dietaryRequirements": "vegetarian", "specialRequests": "wheelchair access"}]
-  friendsData Json? @default("[]")
-
-  // Additional data
-  notes               String?
-  dietaryRequirements String?
-  specialRequests     String?
-
-  // Promotion tracking
-  promotedAt       DateTime? // When promoted to registration
-  pendingPaymentId String? // Reference to created pending payment when promoted
-
-  // Relations
-  user           User?           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  event          Event           @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  pendingPayment PendingPayment? @relation("WaitingListPendingPayment", fields: [pendingPaymentId], references: [id])
-
-  // Prevent duplicate waiting list entries
-  @@unique([userId, eventId]) // For authenticated users
-  @@unique([eventId, guestEmail, guestName]) // For guest waiting list entries
-  // Performance indexes
-  @@index([eventId, position])
-  @@index([userId, joinedAt])
-  @@index([isGroupEntry, groupSize]) // For group waiting list management
-  @@index([registrationType, position]) // For waiting list analytics
-  @@index([isGuestRequest, guestEmail]) // For guest waiting list management
-  @@index([promotedAt, pendingPaymentId]) // For promotion tracking
-  @@index([notifiedAt, position]) // For notification management
-  @@map("waiting_list")
-}
-
-// ================================
-// PAYMENT SYSTEM
-// ================================
 
 enum PaymentStatus {
   PENDING
@@ -569,186 +695,19 @@ enum PaymentMethod {
   OTHER
 }
 
-model Payment {
-  id             String  @id @default(cuid())
-  userId         String
-  eventId        String?
-  registrationId String? @unique
-
-  amount   Decimal       @db.Decimal(10, 2)
-  currency String        @default("EUR")
-  method   PaymentMethod @default(QR_CODE)
-  status   PaymentStatus @default(PENDING)
-
-  // Bank transfer details
-  bankAccountId  String?
-  variableSymbol String? @unique // Slovak banking variable symbol
-  constantSymbol String?
-  specificSymbol String?
-
-  // QR code data
-  qrCodeData String? // Generated QR code string
-  qrCodeUrl  String? // URL to QR code image
-
-  // Payment tracking
-  paidAt     DateTime?
-  verifiedAt DateTime?
-  refundedAt DateTime?
-
-  // New payment claiming and verification fields
-  claimedAt DateTime? // When user claimed payment
-  verifiedBy String? // Admin who verified
-  verificationNotes String?
-
-  // Additional data
-  description String?
-  notes       String?
-  reference   String? // External payment reference
-
-  // Link to pending payment (for tracking payment lifecycle)
-  pendingPaymentId String? // Reference to original pending payment
-
-  // Timestamps
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  user           User            @relation(fields: [userId], references: [id])
-  event          Event?          @relation(fields: [eventId], references: [id])
-  registration   Registration?
-  pendingPayment PendingPayment? @relation("PaymentPendingPayment", fields: [pendingPaymentId], references: [id])
-  bankAccount    BankAccount?    @relation(fields: [bankAccountId], references: [id])
-
-  @@index([userId])
-  @@index([eventId])
-  @@index([status, createdAt])
-  @@index([variableSymbol])
-  @@index([method, status]) // For payment method analysis
-  @@index([paidAt, verifiedAt]) // For financial reporting
-  @@index([currency, amount]) // For financial analytics
-  @@index([bankAccountId, status]) // For bank account reconciliation
-  // TODO: Add payment amount validation at application level - amount > 0
-  @@map("payments")
-}
-
-// ================================
-// PENDING PAYMENT SYSTEM
-// ================================
-
 enum PendingPaymentStatus {
-  PENDING // Payment is pending
-  EXPIRED // Payment deadline has passed
-  CANCELLED // Payment was cancelled
-  PROCESSED // Payment was processed into actual Payment
+  PENDING
+  EXPIRED
+  CANCELLED
+  PROCESSED
 }
 
 enum PendingPaymentType {
-  REGISTRATION // For event registrations
-  WAITING_LIST_PROMOTION // When promoted from waiting list
-  ADMIN_CREATED // Created by admin
-  SYSTEM_GENERATED // Generated by system processes
+  REGISTRATION
+  WAITING_LIST_PROMOTION
+  ADMIN_CREATED
+  SYSTEM_GENERATED
 }
-
-model PendingPayment {
-  id     String                @id @default(cuid())
-  userId String
-  eventId String
-
-  // Payment details
-  amount   Decimal                @db.Decimal(10, 2)
-  currency String                 @default("EUR")
-  type     PendingPaymentType
-  status   PendingPaymentStatus  @default(PENDING)
-
-  // Payment method and settings
-  paymentMethod PaymentMethod @default(BANK_TRANSFER)
-  bankAccountId String? // Preferred bank account for payment
-
-  // Bank transfer details
-  variableSymbol String? @unique // Slovak banking variable symbol
-  constantSymbol String?
-  specificSymbol String?
-
-  // QR code data
-  qrCodeData String? // Generated QR code string
-  qrCodeUrl  String? // URL to QR code image
-
-  // Timing and deadlines
-  createdAt    DateTime  @default(now())
-  expiresAt    DateTime  @default(dbgenerated("(NOW() + INTERVAL '7 days')")) // Default 7 days
-  processedAt  DateTime? // When converted to actual Payment
-  cancelledAt  DateTime?
-
-  // Context and metadata
-  description String? // Human-readable description
-  notes       String? // Internal notes
-  metadata    Json?   // Additional context data
-
-  // Relations
-  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  event          Event          @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  bankAccount    BankAccount?   @relation(fields: [bankAccountId], references: [id])
-  
-  // Reverse relations
-  registrations Registration[] @relation("RegistrationPendingPayment")
-  waitingList   WaitingList[] @relation("WaitingListPendingPayment")
-  payments      Payment[]     @relation("PaymentPendingPayment")
-
-  // Prevent duplicate pending payments per user per event
-  @@unique([userId, eventId, type])
-  
-  // Performance indexes
-  @@index([userId, status])
-  @@index([eventId, status])
-  @@index([status, expiresAt]) // For finding expired payments
-  @@index([type, status]) // For type-based queries
-  @@index([expiresAt]) // For cleanup jobs
-  @@index([variableSymbol]) // For bank reconciliation
-  @@index([paymentMethod, status]) // For payment method analysis
-  
-  // TODO: Add validation at application level:
-  // - amount > 0
-  // - expiresAt > createdAt
-  // - variableSymbol format validation for Slovak banking
-  @@map("pending_payments")
-}
-
-model BankAccount {
-  id            String  @id @default(cuid())
-  name          String // Display name for the account
-  iban          String  @unique // Primary field - IBAN (required)
-  
-  // Optional fields - auto-extracted from IBAN or manually provided
-  bankName      String?
-  accountNumber String?
-  bankCode      String?
-  swift         String?
-
-  // Bank account settings
-  isDefault Boolean @default(false)
-  isActive  Boolean @default(true)
-
-  // QR code settings
-  qrCodeEnabled Boolean @default(true)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  events          Event[]
-  payments        Payment[]
-  pendingPayments PendingPayment[]
-
-  @@index([isDefault, isActive])
-  @@index([isActive, qrCodeEnabled]) // For active payment methods
-  @@index([iban]) // For IBAN searches
-  // TODO: Add Czech/Slovak IBAN validation at application level - iban ~ '^(CZ|SK)\\d{2}\\s?\\d{4}\\s?\\d{4}\\s?\\d{4}\\s?\\d{4}\\s?\\d{4}$'
-  @@map("bank_accounts")
-}
-
-// ================================
-// AUDIT & HISTORY TRACKING
-// ================================
 
 enum RegistrationAction {
   REGISTERED
@@ -769,34 +728,6 @@ enum RegistrationAction {
   FRIEND_REMOVED_FROM_GROUP
 }
 
-model RegistrationHistory {
-  id      String             @id @default(cuid())
-  userId  String
-  eventId String
-  action  RegistrationAction
-
-  // Context data
-  previousStatus String?
-  newStatus      String?
-  reason         String?
-  adminNotes     String?
-
-  // Metadata
-  performedById String? // Who performed the action (admin/system)
-  timestamp     DateTime @default(now())
-  ipAddress     String?
-  userAgent     String?
-
-  // Relations
-  user        User  @relation("RegistrationHistoryUser", fields: [userId], references: [id])
-  event       Event @relation(fields: [eventId], references: [id])
-  performedBy User? @relation("RegistrationHistoryPerformedBy", fields: [performedById], references: [id])
-
-  @@index([userId, eventId])
-  @@index([timestamp])
-  @@map("registration_history")
-}
-
 enum AuditAction {
   CREATE
   UPDATE
@@ -807,61 +738,6 @@ enum AuditAction {
   EXPORT
   IMPORT
 }
-
-model AuditLog {
-  id         String      @id @default(cuid())
-  userId     String?
-  action     AuditAction
-  resource   String // Table/resource name
-  resourceId String? // ID of the affected resource
-
-  // Change tracking
-  oldData Json? // Previous state
-  newData Json? // New state
-  changes Json? // Specific fields that changed
-
-  // Context
-  description String?
-  ipAddress   String?
-  userAgent   String?
-  sessionId   String?
-
-  timestamp DateTime @default(now())
-
-  // Relations
-  user User? @relation(fields: [userId], references: [id])
-
-  @@index([userId, timestamp])
-  @@index([resource, resourceId])
-  @@index([timestamp])
-  @@index([action, resource, timestamp]) // For audit filtering by action type
-  @@index([resource, action, timestamp]) // For resource-specific audits
-  @@index([sessionId, timestamp]) // For session-based audit trails
-  @@map("audit_logs")
-}
-
-// ================================
-// SYSTEM CONFIGURATION
-// ================================
-
-model SystemConfig {
-  key         String  @id
-  value       String
-  description String?
-  type        String  @default("string") // string, number, boolean, json
-  category    String? // grouping configs
-  isPublic    Boolean @default(false) // can be accessed by frontend
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([category])
-  @@map("system_config")
-}
-
-// ================================
-// EMAIL & NOTIFICATIONS
-// ================================
 
 enum NotificationType {
   EMAIL
@@ -878,66 +754,6 @@ enum NotificationStatus {
   BOUNCED
 }
 
-model NotificationTemplate {
-  id      String           @id @default(cuid())
-  name    String           @unique
-  type    NotificationType
-  subject String?
-
-  // Template content (supports multiple languages)
-  content   Json // {"en": "template", "cs": "šablona"}
-  variables Json? // Available template variables
-
-  isActive Boolean @default(true)
-  isSystem Boolean @default(false) // System templates can't be deleted
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  notifications NotificationLog[]
-
-  @@map("notification_templates")
-}
-
-model NotificationLog {
-  id         String  @id @default(cuid())
-  templateId String?
-  userId     String?
-
-  type   NotificationType
-  status NotificationStatus @default(PENDING)
-
-  recipient String // email, phone, user_id, etc.
-  subject   String?
-  content   String
-
-  // Delivery tracking
-  sentAt       DateTime?
-  deliveredAt  DateTime?
-  failedAt     DateTime?
-  errorMessage String?
-
-  // Context
-  eventId  String?
-  metadata Json? // Additional context data
-
-  createdAt DateTime @default(now())
-
-  // Relations
-  template NotificationTemplate? @relation(fields: [templateId], references: [id])
-  user     User?                 @relation(fields: [userId], references: [id])
-
-  @@index([userId, createdAt])
-  @@index([status, createdAt])
-  @@index([type, recipient])
-  @@map("notification_logs")
-}
-
-// ================================
-// VIDEO CLIPS SHARING SYSTEM
-// ================================
-
 enum VideoClipStatus {
   DRAFT
   PUBLISHED
@@ -949,95 +765,8 @@ enum VideoClipStatus {
 enum VideoPrivacy {
   PUBLIC
   PRIVATE
-  EVENT_ONLY // Only visible to event participants
-  ROLE_RESTRICTED // Based on user roles
-}
-
-model VideoCategory {
-  id          String  @id @default(cuid())
-  name        String  @unique
-  slug        String  @unique
-  description String?
-  color       String? // Hex color for UI display
-  icon        String? // Icon identifier
-
-  // Category settings
-  isActive  Boolean @default(true)
-  sortOrder Int     @default(0)
-
-  // Internationalization
-  translations Json? // {"en": {"name": "Gaming", "description": "..."}, "cs": {...}}
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  videoClips VideoClip[]
-
-  @@index([isActive, sortOrder])
-  @@index([slug])
-  @@map("video_categories")
-}
-
-model VideoClip {
-  id          String  @id @default(cuid())
-  title       String
-  description String?
-  slug        String  @unique
-
-  // YouTube integration
-  youtubeVideoId String  @unique // YouTube video ID (e.g., "dQw4w9WgXcQ")
-  youtubeUrl     String // Full YouTube URL
-  thumbnailUrl   String? // YouTube thumbnail URL
-  duration       Int? // Video duration in seconds
-  embedCode      String? // YouTube embed HTML
-
-  // Content metadata
-  status   VideoClipStatus @default(DRAFT)
-  privacy  VideoPrivacy    @default(PUBLIC)
-  tags     String[] // Array of tags for searchability
-  language String          @default("en") // Video language
-
-  // Moderation
-  moderatedBy     String?
-  moderatedAt     DateTime?
-  moderationNotes String?
-
-  // Analytics
-  likeCount Int @default(0) // Cached count of positive reactions
-
-  // Event association (optional)
-  eventId String?
-
-  // Category association
-  categoryId String?
-
-  // Timestamps
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  publishedAt DateTime?
-
-  // Foreign keys
-  creatorId String
-
-  // Relations
-  creator   User            @relation("VideoClipCreator", fields: [creatorId], references: [id], onDelete: Cascade)
-  event     Event?          @relation(fields: [eventId], references: [id], onDelete: SetNull)
-  category  VideoCategory?  @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  reactions VideoReaction[]
-
-  @@index([status, privacy, publishedAt])
-  @@index([creatorId, status])
-  @@index([eventId, status])
-  @@index([categoryId, status])
-  @@index([tags]) // For tag-based searches using GIN index
-  @@index([youtubeVideoId])
-  @@index([likeCount, publishedAt]) // For popular videos
-  @@index([createdAt, status]) // For chronological listing
-  @@index([language, status]) // For language-specific searches
-  // TODO: Add YouTube URL validation at application level
-  // TODO: Add duration validation (> 0 AND <= 43200 seconds = 12 hours max)
-  @@map("video_clips")
+  EVENT_ONLY
+  ROLE_RESTRICTED
 }
 
 enum ReactionType {
@@ -1052,26 +781,4 @@ enum ReactionType {
   HEART_EYES
   THUMBS_UP
   THUMBS_DOWN
-}
-
-model VideoReaction {
-  id   String       @id @default(cuid())
-  type ReactionType
-
-  // Target - only videos now
-  videoId String
-  userId  String
-
-  createdAt DateTime @default(now())
-
-  // Relations
-  user  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  video VideoClip @relation(fields: [videoId], references: [id], onDelete: Cascade)
-
-  // Prevent duplicate reactions - user can only react once per video
-  @@unique([userId, videoId])
-  @@index([videoId, type])
-  @@index([userId, createdAt])
-  @@index([type, createdAt]) // For trending reaction analysis
-  @@map("video_reactions")
 }

@@ -180,7 +180,8 @@
         "bankName": "Název banky bude automaticky vyplněn",
         "accountNumber": "Číslo účtu bude extrahováno",
         "bankCode": "Kód banky bude extrahován",
-        "swift": "Zadejte SWIFT kód (volitelné)"
+        "swift": "Zadejte SWIFT kód (volitelné)",
+        "selectAccount": "Vyberte bankovní účet"
       },
       "validation": {
         "nameRequired": "Název účtu je povinný",
@@ -320,7 +321,15 @@
         "priceDesc": "Poplatek za registraci na událost (0 pro bezplatné události)",
         "currency": "Měna",
         "currencyDesc": "Měna pro cenu události",
-        "tags": "Tagy události"
+        "tags": "Tagy události",
+        "visibility": "Viditelnost",
+        "visible": "Viditelné",
+        "hidden": "Skryté",
+        "default": "Výchozí",
+        "account": "Účet",
+        "mainEventAccount": "Hlavní účet události",
+        "capacity": "Kapacita",
+        "bankAccount": "Bankovní účet"
       },
       "descriptions": {
         "title": "Dejte své události jasný, popisný název",
@@ -349,7 +358,10 @@
         "address": "Zadejte úplnou adresu",
         "city": "Zadejte název města",
         "country": "Zadejte název země",
-        "tags": "Přidat tag..."
+        "capacity": "100",
+        "price": "150",
+        "tags": "Přidat tag...",
+        "selectBankAccount": "Vyberte bankovní účet"
       },
       "types": {
         "conference": "Konference",
@@ -475,6 +487,34 @@
       "confirmMessage": "Opravdu chcete smazat uživatele \"{name}\"?",
       "warning": "Tuto akci nelze vrátit zpět. Uživatel bude trvale odstraněn z vaší organizace.",
       "cannotDelete": "Uživatele \"{name}\" nelze smazat, protože má aktivní role nebo oprávnění."
+    }
+  },
+  "Validation": {
+    "bankAccount": {
+      "nameRequired": "Název účtu je povinný",
+      "nameMin": "Název účtu musí mít alespoň 2 znaky",
+      "nameMax": "Název účtu musí mít méně než 100 znaků",
+      "ibanRequired": "IBAN je povinný",
+      "ibanInvalid": "Neplatný formát IBAN. Musí být platný český (CZ) nebo slovenský (SK) IBAN",
+      "bankNameLength": "Název banky musí mít mezi 2 a 100 znaky",
+      "accountNumberInvalid": "Neplatný formát čísla účtu",
+      "bankCodeInvalid": "Kód banky musí mít přesně 4 číslice",
+      "swiftInvalid": "Neplatný formát SWIFT/BIC. Musí mít 8 nebo 11 znaků (např. KOMBCZPP)"
+    },
+    "event": {
+      "titleMin": "Název musí mít alespoň 3 znaky",
+      "titleMax": "Název nesmí přesáhnout 200 znaků",
+      "descriptionMax": "Popis nesmí přesáhnout 5000 znaků",
+      "venueRequired": "Místo/Adresa je povinná",
+      "venueMax": "Místo/Adresa nesmí přesáhnout 200 znaků",
+      "capacityInteger": "Kapacita musí být celé číslo",
+      "capacityMin": "Kapacita musí být alespoň 1",
+      "capacityMax": "Kapacita nemůže přesáhnout 10 000",
+      "priceMin": "Cena nemůže být záporná",
+      "priceMax": "Cena nemůže přesáhnout 100 000",
+      "startDateInvalid": "Neplatný formát data začátku",
+      "endDateInvalid": "Neplatný formát data konce",
+      "endDateAfterStart": "Datum konce musí být po datu začátku"
     }
   }
 }

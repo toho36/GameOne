@@ -1,123 +1,164 @@
 import { z } from "zod";
 
-// Simplified event creation validation schema
-export const eventCreationSchema = z
-  .object({
-    // Basic information
-    title: z
-      .string()
-      .min(3, "Title must be at least 3 characters long")
-      .max(200, "Title must not exceed 200 characters")
-      .trim(),
+// Function to create event creation schema with translated messages
+export const createEventCreationSchema = (messages?: {
+  titleMin?: string;
+  titleMax?: string;
+  descriptionMax?: string;
+  venueRequired?: string;
+  venueMax?: string;
+  capacityInteger?: string;
+  capacityMin?: string;
+  capacityMax?: string;
+  priceMin?: string;
+  priceMax?: string;
+  startDateInvalid?: string;
+  endDateInvalid?: string;
+  endDateAfterStart?: string;
+}) => {
+  const msgs = messages || {
+    titleMin: "Title must be at least 3 characters long",
+    titleMax: "Title must not exceed 200 characters",
+    descriptionMax: "Description must not exceed 5000 characters",
+    venueRequired: "Place/Address is required",
+    venueMax: "Place/Address must not exceed 200 characters",
+    capacityInteger: "Capacity must be a whole number",
+    capacityMin: "Capacity must be at least 1",
+    capacityMax: "Capacity cannot exceed 10,000",
+    priceMin: "Price cannot be negative",
+    priceMax: "Price cannot exceed 100,000",
+    startDateInvalid: "Invalid start date format",
+    endDateInvalid: "Invalid end date format",
+    endDateAfterStart: "End date must be after start date",
+  };
 
-    description: z.string().max(5000, "Description must not exceed 5000 characters").optional(),
+  return z
+    .object({
+      // Basic information
+      title: z.string().min(3, msgs.titleMin).max(200, msgs.titleMax).trim(),
 
-    // Location
-    venue: z
-      .string()
-      .min(1, "Place/Address is required")
-      .max(200, "Place/Address must not exceed 200 characters"),
+      description: z.string().max(5000, msgs.descriptionMax).optional(),
 
-    // Event details
-    capacity: z
-      .number()
-      .int("Capacity must be a whole number")
-      .min(1, "Capacity must be at least 1")
-      .max(10000, "Capacity cannot exceed 10,000"),
+      // Location
+      venue: z.string().min(1, msgs.venueRequired).max(200, msgs.venueMax),
 
-    price: z
-      .number()
-      .min(0, "Price cannot be negative")
-      .max(100000, "Price cannot exceed 100,000")
-      .default(0),
+      // Event details
+      capacity: z
+        .number()
+        .int(msgs.capacityInteger)
+        .min(1, msgs.capacityMin)
+        .max(10000, msgs.capacityMax),
 
-    currency: z.string().default("CZK"),
+      price: z.number().min(0, msgs.priceMin).max(100000, msgs.priceMax).default(0),
 
-    // Scheduling
-    startDate: z.union([z.date(), z.string()]).transform((val) => {
-      if (typeof val === "string") {
-        const date = new Date(val);
-        if (isNaN(date.getTime())) {
-          throw new Error("Invalid start date format");
-        }
-        return date;
-      }
-      return val;
-    }),
+      currency: z.string().default("CZK"),
 
-    endDate: z
-      .union([z.date(), z.string()])
-      .transform((val) => {
+      // Scheduling
+      startDate: z.union([z.date(), z.string()]).transform((val) => {
         if (typeof val === "string") {
           const date = new Date(val);
           if (isNaN(date.getTime())) {
-            throw new Error("Invalid end date format");
+            throw new Error(msgs.startDateInvalid);
           }
           return date;
         }
         return val;
-      })
-      .optional(),
+      }),
 
-    // Payment settings
-    bankAccountId: z.string().optional(),
+      endDate: z
+        .union([z.date(), z.string()])
+        .transform((val) => {
+          if (typeof val === "string") {
+            const date = new Date(val);
+            if (isNaN(date.getTime())) {
+              throw new Error(msgs.endDateInvalid);
+            }
+            return date;
+          }
+          return val;
+        })
+        .optional(),
 
-    // Visibility/Status
-    status: z.enum(["DRAFT", "PUBLISHED"]).default("PUBLISHED"),
+      // Payment settings
+      bankAccountId: z.string().optional(),
 
-    // Default required fields for API compatibility
-    type: z.string().default("OTHER"),
-    country: z.string().default("Czech Republic"),
-    timezone: z.string().default("Europe/Prague"),
-    isOnline: z.boolean().default(false),
-    requiresApproval: z.boolean().default(false),
-    allowWaitingList: z.boolean().default(true),
-    requiresPayment: z.boolean().default(false),
-    tags: z.array(z.string()).default([]),
-  })
-  .refine(
-    (data) => {
-      if (data.endDate && data.startDate) {
-        return data.endDate > data.startDate;
+      // Visibility/Status
+      status: z.enum(["DRAFT", "PUBLISHED"]).default("PUBLISHED"),
+
+      // Default required fields for API compatibility
+      type: z.string().default("OTHER"),
+      country: z.string().default("Czech Republic"),
+      timezone: z.string().default("Europe/Prague"),
+      isOnline: z.boolean().default(false),
+      requiresApproval: z.boolean().default(false),
+      allowWaitingList: z.boolean().default(true),
+      requiresPayment: z.boolean().default(false),
+      tags: z.array(z.string()).default([]),
+    })
+    .refine(
+      (data) => {
+        if (data.endDate && data.startDate) {
+          return data.endDate > data.startDate;
+        }
+        return true;
+      },
+      {
+        message: msgs.endDateAfterStart,
+        path: ["endDate"],
       }
-      return true;
-    },
-    {
-      message: "End date must be after start date",
-      path: ["endDate"],
-    }
-  );
+    );
+};
 
-// Event update schema (for editing existing events)
-export const eventUpdateSchema = eventCreationSchema
-  .partial({
-    startDate: true, // Allow editing events that already started
-  })
-  .refine(
-    (data) => {
-      // For updates, we can be more lenient with dates
-      if (data.endDate && data.startDate) {
-        return data.endDate > data.startDate;
+// Default schema for backward compatibility
+export const eventCreationSchema = createEventCreationSchema();
+
+// Function to create event update schema with translated messages
+export const createEventUpdateSchema = (
+  messages?: Parameters<typeof createEventCreationSchema>[0]
+) => {
+  const msgs = messages || {
+    endDateAfterStart: "End date must be after start date",
+  };
+
+  return createEventCreationSchema(messages)
+    .partial({
+      startDate: true, // Allow editing events that already started
+    })
+    .refine(
+      (data) => {
+        // For updates, we can be more lenient with dates
+        if (data.endDate && data.startDate) {
+          return data.endDate > data.startDate;
+        }
+        return true;
+      },
+      {
+        message: msgs.endDateAfterStart,
+        path: ["endDate"],
       }
-      return true;
-    },
-    {
-      message: "End date must be after start date",
-      path: ["endDate"],
-    }
-  );
+    );
+};
+
+// Default schema for backward compatibility
+export const eventUpdateSchema = createEventUpdateSchema();
 
 // Type inference from schema
 export type EventCreationFormData = z.infer<typeof eventCreationSchema>;
 export type EventUpdateFormData = z.infer<typeof eventUpdateSchema>;
 
 // Validation helper functions
-export const validateEventCreation = (data: unknown) => {
-  return eventCreationSchema.safeParse(data);
+export const validateEventCreation = (
+  data: unknown,
+  messages?: Parameters<typeof createEventCreationSchema>[0]
+) => {
+  return createEventCreationSchema(messages).safeParse(data);
 };
 
-export const validateEventUpdate = (data: unknown) => {
-  return eventUpdateSchema.safeParse(data);
+export const validateEventUpdate = (
+  data: unknown,
+  messages?: Parameters<typeof createEventUpdateSchema>[0]
+) => {
+  return createEventUpdateSchema(messages).safeParse(data);
 };
 
 // Form field validation helpers
