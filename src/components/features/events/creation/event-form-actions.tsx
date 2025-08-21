@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -19,9 +20,12 @@ export function EventFormActions({
   cancelLabel,
   saveDraftLabel,
 }: EventFormActionsProps) {
-  const defaultSubmitLabel = mode === "create" ? "Create Event" : "Update Event";
-  const defaultCancelLabel = "Cancel";
-  const defaultSaveDraftLabel = "Save as Draft";
+  const t = useTranslations("Events");
+  const tForms = useTranslations("Forms");
+
+  const defaultSubmitLabel = mode === "create" ? t("form.title.create") : t("form.title.edit");
+  const defaultCancelLabel = tForms("cancel");
+  const defaultSaveDraftLabel = t("success.draftSaved");
 
   return (
     <Card>
@@ -131,9 +135,7 @@ export function EventFormActions({
                 </svg>
               </div>
               <div className="ml-3">
-                <p className="text-sm text-red-800">
-                  Please fix all validation errors before submitting the form.
-                </p>
+                <p className="text-sm text-red-800">{t("errors.validationErrorDesc")}</p>
               </div>
             </div>
           </div>
@@ -152,7 +154,7 @@ export function EventFormActions({
               </div>
               <div className="ml-3">
                 <p className="text-sm text-blue-800">
-                  {mode === "create" ? "Creating your event..." : "Updating your event..."}
+                  {mode === "create" ? tForms("loading") : tForms("saving")}
                 </p>
               </div>
             </div>

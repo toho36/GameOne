@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslations } from "next-intl";
 import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -22,11 +23,15 @@ export function BankAccountSelector({
   options,
   error,
   disabled = false,
-  placeholder = "Select a bank account",
+  placeholder,
   isLoading = false,
   className,
 }: BankAccountSelectorProps) {
+  const t = useTranslations("BankAccounts");
+  const tCommon = useTranslations("Common");
   const [open, setOpen] = React.useState(false);
+
+  const defaultPlaceholder = placeholder || t("form.placeholders.selectAccount");
 
   const selectedAccount = options.find((account) => account.id === value);
 
@@ -48,7 +53,7 @@ export function BankAccountSelector({
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Loading accounts...
+                {tCommon("loading")}
               </>
             ) : selectedAccount ? (
               <div className="flex flex-col items-start">
@@ -58,7 +63,7 @@ export function BankAccountSelector({
                 </span>
               </div>
             ) : (
-              placeholder
+              defaultPlaceholder
             )}
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
@@ -66,8 +71,8 @@ export function BankAccountSelector({
 
         <PopoverContent className="w-full p-0" align="start">
           <Command>
-            <CommandInput placeholder="Search bank accounts..." />
-            <CommandEmpty>{isLoading ? "Loading..." : "No bank accounts found."}</CommandEmpty>
+            <CommandInput placeholder={t("searchPlaceholder")} />
+            <CommandEmpty>{isLoading ? tCommon("loading") : t("noAccounts")}</CommandEmpty>
 
             <CommandGroup>
               {options.map((account) => (
@@ -85,7 +90,7 @@ export function BankAccountSelector({
                         <span className="font-medium">{account.name}</span>
                         {account.isDefault && (
                           <span className="rounded bg-primary px-1.5 py-0.5 text-xs text-primary-foreground">
-                            Default
+                            {t("default")}
                           </span>
                         )}
                       </div>
@@ -109,9 +114,7 @@ export function BankAccountSelector({
       </Popover>
 
       {!isLoading && options.length === 0 && (
-        <p className="text-xs text-muted-foreground">
-          No bank accounts available. Please add a bank account first.
-        </p>
+        <p className="text-xs text-muted-foreground">{t("createFirst")}</p>
       )}
     </div>
   );

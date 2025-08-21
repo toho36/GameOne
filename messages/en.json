@@ -169,7 +169,8 @@
         "bankName": "e.g., Česká spořitelna",
         "accountNumber": "e.g., 2801494468",
         "bankCode": "e.g., 0800",
-        "swift": "Enter SWIFT code (optional)"
+        "swift": "Enter SWIFT code (optional)",
+        "selectAccount": "Select bank account"
       },
       "validation": {
         "nameRequired": "Account name is required",
@@ -309,7 +310,15 @@
         "priceDesc": "Event registration fee (0 for free events)",
         "currency": "Currency",
         "currencyDesc": "Currency for the event price",
-        "tags": "Event Tags"
+        "tags": "Event Tags",
+        "visibility": "Visibility",
+        "visible": "Visible",
+        "hidden": "Hidden",
+        "default": "Default",
+        "account": "Account",
+        "mainEventAccount": "Main event account",
+        "capacity": "Capacity",
+        "bankAccount": "Bank Account"
       },
       "descriptions": {
         "title": "Give your event a clear, descriptive title",
@@ -338,7 +347,10 @@
         "address": "Enter complete address",
         "city": "Enter city name",
         "country": "Enter country name",
-        "tags": "Add a tag..."
+        "capacity": "100",
+        "price": "150",
+        "tags": "Add a tag...",
+        "selectBankAccount": "Select bank account"
       },
       "types": {
         "conference": "Conference",
@@ -464,6 +476,34 @@
       "confirmMessage": "Are you sure you want to delete the user \"{name}\"?",
       "warning": "This action cannot be undone. The user will be permanently removed from your organization.",
       "cannotDelete": "The user \"{name}\" cannot be deleted because they have active roles or permissions."
+    }
+  },
+  "Validation": {
+    "bankAccount": {
+      "nameRequired": "Account name is required",
+      "nameMin": "Account name must be at least 2 characters",
+      "nameMax": "Account name must be less than 100 characters",
+      "ibanRequired": "IBAN is required",
+      "ibanInvalid": "Invalid IBAN format. Must be valid Czech (CZ) or Slovak (SK) IBAN",
+      "bankNameLength": "Bank name must be between 2 and 100 characters",
+      "accountNumberInvalid": "Invalid account number format",
+      "bankCodeInvalid": "Bank code must be exactly 4 digits",
+      "swiftInvalid": "Invalid SWIFT/BIC format. Must be 8 or 11 characters (e.g., KOMBCZPP)"
+    },
+    "event": {
+      "titleMin": "Title must be at least 3 characters long",
+      "titleMax": "Title must not exceed 200 characters",
+      "descriptionMax": "Description must not exceed 5000 characters",
+      "venueRequired": "Place/Address is required",
+      "venueMax": "Place/Address must not exceed 200 characters",
+      "capacityInteger": "Capacity must be a whole number",
+      "capacityMin": "Capacity must be at least 1",
+      "capacityMax": "Capacity cannot exceed 10,000",
+      "priceMin": "Price cannot be negative",
+      "priceMax": "Price cannot exceed 100,000",
+      "startDateInvalid": "Invalid start date format",
+      "endDateInvalid": "Invalid end date format",
+      "endDateAfterStart": "End date must be after start date"
     }
   }
 }
