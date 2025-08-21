@@ -18,63 +18,88 @@ const BANK_CODE_REGEX = /^\d{4}$/;
 // SWIFT/BIC validation (8 or 11 characters)
 const SWIFT_REGEX = /^[A-Z]{6}[A-Z0-9]{2}([A-Z0-9]{3})?$/;
 
-export const bankAccountFormSchema = z.object({
-  name: z
-    .string()
-    .min(1, "Account name is required")
-    .min(2, "Account name must be at least 2 characters")
-    .max(100, "Account name must be less than 100 characters")
-    .trim(),
+// Function to create bank account schema with translated messages
+export const createBankAccountFormSchema = (messages?: {
+  nameRequired?: string;
+  nameMin?: string;
+  nameMax?: string;
+  ibanRequired?: string;
+  ibanInvalid?: string;
+  bankNameLength?: string;
+  accountNumberInvalid?: string;
+  bankCodeInvalid?: string;
+  swiftInvalid?: string;
+}) => {
+  const msgs = messages || {
+    nameRequired: "Account name is required",
+    nameMin: "Account name must be at least 2 characters",
+    nameMax: "Account name must be less than 100 characters",
+    ibanRequired: "IBAN is required",
+    ibanInvalid: "Invalid IBAN format. Must be valid Czech (CZ) or Slovak (SK) IBAN",
+    bankNameLength: "Bank name must be between 2 and 100 characters",
+    accountNumberInvalid: "Invalid account number format",
+    bankCodeInvalid: "Bank code must be exactly 4 digits",
+    swiftInvalid: "Invalid SWIFT/BIC format. Must be 8 or 11 characters (e.g., KOMBCZPP)",
+  };
 
-  // Primary field - IBAN (required)
-  iban: z
-    .string()
-    .min(1, "IBAN is required")
-    .refine((value) => {
-      const cleaned = value.replace(/\s/g, "").toUpperCase();
-      return CZECH_IBAN_REGEX.test(cleaned) || SLOVAK_IBAN_REGEX.test(cleaned);
-    }, "Invalid IBAN format. Must be valid Czech (CZ) or Slovak (SK) IBAN"),
+  return z.object({
+    name: z.string().min(1, msgs.nameRequired).min(2, msgs.nameMin).max(100, msgs.nameMax).trim(),
 
-  // Optional fields - auto-extracted from IBAN or manually provided
-  bankName: z
-    .string()
-    .optional()
-    .refine((value) => {
-      if (!value) return true;
-      return value.trim().length >= 2 && value.trim().length <= 100;
-    }, "Bank name must be between 2 and 100 characters"),
+    // Primary field - IBAN (required)
+    iban: z
+      .string()
+      .min(1, msgs.ibanRequired)
+      .refine((value) => {
+        const cleaned = value.replace(/\s/g, "").toUpperCase();
+        return CZECH_IBAN_REGEX.test(cleaned) || SLOVAK_IBAN_REGEX.test(cleaned);
+      }, msgs.ibanInvalid),
 
-  accountNumber: z
-    .string()
-    .optional()
-    .refine((value) => {
-      if (!value) return true;
-      const cleaned = value.replace(/\s/g, "");
-      return CZECH_ACCOUNT_NUMBER_REGEX.test(cleaned) || SLOVAK_ACCOUNT_NUMBER_REGEX.test(cleaned);
-    }, "Invalid account number format"),
+    // Optional fields - auto-extracted from IBAN or manually provided
+    bankName: z
+      .string()
+      .optional()
+      .refine((value) => {
+        if (!value) return true;
+        return value.trim().length >= 2 && value.trim().length <= 100;
+      }, msgs.bankNameLength),
 
-  bankCode: z
-    .string()
-    .optional()
-    .refine((value) => {
-      if (!value) return true;
-      return BANK_CODE_REGEX.test(value);
-    }, "Bank code must be exactly 4 digits"),
+    accountNumber: z
+      .string()
+      .optional()
+      .refine((value) => {
+        if (!value) return true;
+        const cleaned = value.replace(/\s/g, "");
+        return (
+          CZECH_ACCOUNT_NUMBER_REGEX.test(cleaned) || SLOVAK_ACCOUNT_NUMBER_REGEX.test(cleaned)
+        );
+      }, msgs.accountNumberInvalid),
 
-  swift: z
-    .string()
-    .optional()
-    .refine((value) => {
-      if (!value) return true;
-      return SWIFT_REGEX.test(value.toUpperCase());
-    }, "Invalid SWIFT/BIC format. Must be 8 or 11 characters (e.g., KOMBCZPP)"),
+    bankCode: z
+      .string()
+      .optional()
+      .refine((value) => {
+        if (!value) return true;
+        return BANK_CODE_REGEX.test(value);
+      }, msgs.bankCodeInvalid),
 
-  isDefault: z.boolean().default(false),
+    swift: z
+      .string()
+      .optional()
+      .refine((value) => {
+        if (!value) return true;
+        return SWIFT_REGEX.test(value.toUpperCase());
+      }, msgs.swiftInvalid),
 
-  isActive: z.boolean().default(true),
+    isDefault: z.boolean().default(false),
 
-  qrCodeEnabled: z.boolean().default(true),
-});
+    isActive: z.boolean().default(true),
+
+    qrCodeEnabled: z.boolean().default(true),
+  });
+};
+
+// Default schema for backward compatibility
+export const bankAccountFormSchema = createBankAccountFormSchema();
 
 export const bankAccountUpdateSchema = bankAccountFormSchema.partial();
 
