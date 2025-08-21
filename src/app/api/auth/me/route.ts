@@ -21,10 +21,10 @@ export async function GET() {
       include: {
         userRoles: {
           include: {
-            role: true
-          }
-        }
-      }
+            role: true,
+          },
+        },
+      },
     });
 
     // If user doesn't exist in our database, create them with default role
@@ -32,7 +32,7 @@ export async function GET() {
       try {
         // Get the default USER role
         const defaultRole = await prisma.role.findFirst({
-          where: { name: "USER" }
+          where: { name: "USER" },
         });
 
         if (!defaultRole) {
@@ -45,21 +45,22 @@ export async function GET() {
           data: {
             kindeId: user.id,
             email: user.email || "",
-            name: user.given_name && user.family_name 
-              ? `${user.given_name} ${user.family_name}` 
-              : user.email || "User",
+            name:
+              user.given_name && user.family_name
+                ? `${user.given_name} ${user.family_name}`
+                : user.email || "User",
             firstName: user.given_name,
             lastName: user.family_name,
             status: "ACTIVE",
-            preferredLocale: "en"
+            preferredLocale: "en",
           },
           include: {
             userRoles: {
               include: {
-                role: true
-              }
-            }
-          }
+                role: true,
+              },
+            },
+          },
         });
 
         // Assign default role
@@ -68,16 +69,15 @@ export async function GET() {
             userId: dbUser.id,
             roleId: defaultRole.id,
             assignedBy: dbUser.id, // Self-assigned
-            isActive: true
-          }
+            isActive: true,
+          },
         });
 
-        logger.info("New user created in database", { 
-          userId: dbUser.id, 
+        logger.info("New user created in database", {
+          userId: dbUser.id,
           email: dbUser.email,
-          role: defaultRole.name 
+          role: defaultRole.name,
         });
-
       } catch (createError) {
         logger.error("Error creating user in database:", createError);
         return NextResponse.json({ error: "Failed to create user profile" }, { status: 500 });
@@ -98,15 +98,14 @@ export async function GET() {
       given_name: dbUser.firstName,
       family_name: dbUser.lastName,
       status: dbUser.status,
-      roles: dbUser.userRoles.map(ur => ur.role.name),
-      permissions: dbUser.userRoles.flatMap(ur => {
+      roles: dbUser.userRoles.map((ur) => ur.role.name),
+      permissions: dbUser.userRoles.flatMap((ur) => {
         const rolePermissions = ur.role.permissions as any;
         return Array.isArray(rolePermissions) ? rolePermissions : [];
       }),
       createdAt: dbUser.createdAt,
-      lastLoginAt: dbUser.lastLoginAt
+      lastLoginAt: dbUser.lastLoginAt,
     });
-
   } catch (error) {
     logger.error("Error fetching current user:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
