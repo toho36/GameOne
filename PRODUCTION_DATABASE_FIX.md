@@ -3,16 +3,23 @@
 ## 🚨 Issues Identified
 
 ### 1. **Users Not Being Added to Database**
-- **Problem**: Kinde authentication works but users aren't created in your database
-- **Root Cause**: `/api/auth/me` endpoint only returned Kinde user info, didn't create database records
+
+- **Problem**: Kinde authentication works but users aren't created in your
+  database
+- **Root Cause**: `/api/auth/me` endpoint only returned Kinde user info, didn't
+  create database records
 - **Status**: ✅ **FIXED** - Updated endpoint to auto-create users
 
 ### 2. **Database Connection Errors in Production**
-- **Problem**: `Error validating datasource: the URL must start with the protocol prisma:// or prisma+postgres://`
-- **Root Cause**: Data Proxy configuration mismatch with direct database connection
+
+- **Problem**:
+  `Error validating datasource: the URL must start with the protocol prisma:// or prisma+postgres://`
+- **Root Cause**: Data Proxy configuration mismatch with direct database
+  connection
 - **Status**: ✅ **FIXED** - Removed Data Proxy config
 
 ### 3. **New Database Created on Branch Push**
+
 - **Problem**: Vercel creates new databases for different branches
 - **Root Cause**: Environment variable configuration issues
 - **Status**: 🔧 **NEEDS CONFIGURATION**
@@ -24,12 +31,14 @@
 **File**: `src/app/api/auth/me/route.ts`
 
 **What it does now**:
+
 - ✅ Checks if user exists in database
 - ✅ Automatically creates user if they don't exist
 - ✅ Assigns default USER role
 - ✅ Returns complete user profile with roles and permissions
 
 **Code Changes**:
+
 ```typescript
 // Before: Only returned Kinde user info
 return NextResponse.json({
@@ -41,7 +50,7 @@ return NextResponse.json({
 // After: Creates user in database and returns complete profile
 let dbUser = await prisma.user.findUnique({
   where: { kindeId: user.id },
-  include: { userRoles: { include: { role: true } } }
+  include: { userRoles: { include: { role: true } } },
 });
 
 if (!dbUser) {
@@ -52,18 +61,18 @@ if (!dbUser) {
       email: user.email || "",
       name: `${user.given_name} ${user.family_name}`,
       status: "ACTIVE",
-      preferredLocale: "en"
-    }
+      preferredLocale: "en",
+    },
   });
-  
+
   // Assign default USER role
   await prisma.userRole.create({
     data: {
       userId: dbUser.id,
       roleId: defaultRole.id,
       assignedBy: dbUser.id,
-      isActive: true
-    }
+      isActive: true,
+    },
   });
 }
 ```
@@ -71,10 +80,12 @@ if (!dbUser) {
 ### Fix 2: Database Connection Configuration
 
 **Files Modified**:
+
 - `vercel.json` - Removed `PRISMA_GENERATE_DATAPROXY: "true"`
 - `prisma/schema.prisma` - Removed `engineType = "library"`
 
 **What this fixes**:
+
 - ✅ Eliminates Data Proxy protocol errors
 - ✅ Enables direct PostgreSQL connections
 - ✅ Fixes production database connectivity
@@ -84,6 +95,7 @@ if (!dbUser) {
 ### Environment Variables in Vercel
 
 **Go to your Vercel dashboard**:
+
 1. Select your GameOne project
 2. Go to Settings → Environment Variables
 3. Ensure these are set correctly:
@@ -108,6 +120,7 @@ NODE_ENV="production"
 ### Database URL Format
 
 **Use this format** (NOT Data Proxy):
+
 ```bash
 # ✅ CORRECT - Direct PostgreSQL connection
 DATABASE_URL="postgresql://username:password@host:port/database"
@@ -119,6 +132,7 @@ DATABASE_URL="prisma://aws-us-east-1.prisma-data.com/__PROJECT_ID__"
 ## 🚀 Deployment Steps
 
 ### 1. **Create Pull Request**
+
 ```bash
 # Create feature branch
 git checkout -b fix/production-database-issues
@@ -130,11 +144,13 @@ git push origin fix/production-database-issues
 ```
 
 ### 2. **Verify Environment Variables**
+
 - Check Vercel dashboard for correct `DATABASE_URL`
 - Ensure all Kinde variables are set
 - Verify `NODE_ENV=production`
 
 ### 3. **Deploy and Test**
+
 - Merge PR to master
 - Vercel will auto-deploy
 - Test user registration flow
@@ -143,6 +159,7 @@ git push origin fix/production-database-issues
 ## 🧪 Testing the Fix
 
 ### Test User Creation Locally
+
 ```bash
 # Start your app
 bun run dev
@@ -153,6 +170,7 @@ bun run scripts/check-current-user.ts
 ```
 
 ### Test Production Deployment
+
 1. Deploy to Vercel
 2. Register new user on production
 3. Check Vercel logs for any errors
@@ -161,6 +179,7 @@ bun run scripts/check-current-user.ts
 ## 📊 Monitoring and Debugging
 
 ### Check Production Logs
+
 ```bash
 # In Vercel dashboard
 # Go to Functions → View Function Logs
@@ -168,6 +187,7 @@ bun run scripts/check-current-user.ts
 ```
 
 ### Health Check Endpoint
+
 ```bash
 # Test your health endpoint
 curl https://your-domain.vercel.app/api/health
@@ -183,6 +203,7 @@ curl https://your-domain.vercel.app/api/health
 ```
 
 ### Database Connection Test
+
 ```bash
 # If you have database access
 psql $DATABASE_URL -c "SELECT COUNT(*) FROM users;"
@@ -213,6 +234,7 @@ psql $DATABASE_URL -c "SELECT COUNT(*) FROM users;"
 ## ✅ Success Criteria
 
 **The fix is working when**:
+
 - ✅ New users register with Kinde
 - ✅ Users automatically appear in database
 - ✅ Users can access protected features
@@ -222,6 +244,7 @@ psql $DATABASE_URL -c "SELECT COUNT(*) FROM users;"
 ## 📞 Support
 
 If issues persist after applying these fixes:
+
 1. Check Vercel function logs
 2. Verify all environment variables
 3. Test database connectivity manually
@@ -229,5 +252,4 @@ If issues persist after applying these fixes:
 
 ---
 
-**Last Updated**: $(date)
-**Status**: Ready for deployment
+**Last Updated**: $(date) **Status**: Ready for deployment
