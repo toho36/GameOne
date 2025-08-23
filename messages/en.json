@@ -24,6 +24,11 @@
     "uptime": "Uptime",
     "support": "Support"
   },
+  "Forms": {
+    "cancel": "Cancel",
+    "loading": "Loading...",
+    "saving": "Saving..."
+  },
   "Dashboard": {
     "title": "Dashboard",
     "welcome": "Welcome back,",
@@ -116,11 +121,18 @@
     "deleteAccount": "Delete Account",
     "noAccounts": "No bank accounts found",
     "createFirst": "Create your first bank account to get started",
-    "searchPlaceholder": "Search bank accounts...",
-    "filterAll": "All Accounts",
-    "filterActive": "Active Only",
-    "filterInactive": "Inactive Only",
-    "clearFilters": "Clear Filters",
+    "filters": {
+      "searchPlaceholder": "Search bank accounts...",
+      "status": "Status",
+      "all": "All Accounts",
+      "active": "Active Only",
+      "inactive": "Inactive Only",
+      "clear": "Clear Filters"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
     "accountName": "Account Name",
     "iban": "IBAN",
     "bankName": "Bank Name",
@@ -230,16 +242,17 @@
     "endDate": "End Date",
     "capacity": "Capacity",
     "registrations": "Registrations",
-    "status": "Status",
     "actions": "Actions",
     "edit": "Edit",
     "delete": "Delete",
     "publish": "Publish",
     "unpublish": "Unpublish",
-    "draft": "Draft",
-    "published": "Published",
-    "cancelled": "Cancelled",
-    "completed": "Completed",
+    "status": {
+      "draft": "Draft",
+      "published": "Published",
+      "cancelled": "Cancelled",
+      "completed": "Completed"
+    },
     "filters": {
       "status": "Status",
       "type": "Type",
@@ -422,6 +435,7 @@
     },
     "addUser": "Add User",
     "retryLoading": "Retry Loading Users",
+    "edit": "Edit",
     "form": {
       "title": {
         "create": "Create User",

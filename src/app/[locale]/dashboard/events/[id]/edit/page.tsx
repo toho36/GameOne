@@ -6,12 +6,13 @@ import { EventCreationForm } from "@/components/features/events/creation";
 import { EventCreationFormData } from "@/types/event";
 
 interface EditEventPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default async function EditEventPage({ params }: EditEventPageProps) {
+  const { id } = await params;
   const { getUser } = getKindeServerSession();
   const user = await getUser();
 
@@ -30,7 +31,7 @@ export default async function EditEventPage({ params }: EditEventPageProps) {
 
   // Get event and check permissions
   const event = await prisma.event.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: {
       bankAccount: {
         select: { id: true, name: true },
@@ -76,7 +77,7 @@ export default async function EditEventPage({ params }: EditEventPageProps) {
       </div>
 
       <div className="rounded-lg border border-gray-200 bg-white shadow-sm">
-        <EventCreationForm mode="edit" eventId={params.id} initialData={initialData} />
+        <EventCreationForm mode="edit" eventId={id} initialData={initialData} />
       </div>
     </div>
   );

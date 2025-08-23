@@ -25,15 +25,15 @@ async function createUserWithDefaults(kindeUser: any) {
 }
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 // GET /api/events/[id] - Get single event
 export async function GET(_request: NextRequest, { params }: RouteParams) {
   try {
-    const eventId = params.id;
+    const { id: eventId } = await params;
 
     // Find event by ID or slug
     const event = await prisma.event.findFirst({
@@ -92,7 +92,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "Authentication required" }, { status: 401 });
     }
 
-    const eventId = params.id;
+    const { id: eventId } = await params;
     const body = await request.json();
 
     // Get user from database, create if doesn't exist
@@ -193,7 +193,7 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "Authentication required" }, { status: 401 });
     }
 
-    const eventId = params.id;
+    const { id: eventId } = await params;
 
     // Get user from database, create if doesn't exist
     let dbUser = await prisma.user.findUnique({
