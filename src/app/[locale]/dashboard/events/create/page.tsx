@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
+import { getTranslations } from "next-intl/server";
 
 import { EventCreationForm } from "@/components/features/events/creation";
 
@@ -13,6 +14,7 @@ export const metadata: Metadata = {
 export default async function CreateEventPage() {
   const { getUser } = getKindeServerSession();
   const user = await getUser();
+  const t = await getTranslations("Events");
 
   if (!user) {
     redirect("/api/auth/login");
@@ -33,7 +35,7 @@ export default async function CreateEventPage() {
                         href="/dashboard"
                         className="text-sm text-gray-400 transition-colors hover:text-gray-500"
                       >
-                        Dashboard
+                        {t("form.breadcrumb.dashboard")}
                       </Link>
                     </div>
                   </li>
@@ -52,7 +54,7 @@ export default async function CreateEventPage() {
                         href="/dashboard/events"
                         className="ml-2 text-sm text-gray-400 transition-colors hover:text-gray-500 sm:ml-4"
                       >
-                        Events
+                        {t("form.breadcrumb.events")}
                       </Link>
                     </div>
                   </li>
@@ -68,18 +70,16 @@ export default async function CreateEventPage() {
                         <path d="M5.555 17.776l8-16 .894.448-8 16-.894-.448z" />
                       </svg>
                       <span className="ml-2 text-sm text-gray-500 sm:ml-4" aria-current="page">
-                        Create Event
+                        {t("form.breadcrumb.createEvent")}
                       </span>
                     </div>
                   </li>
                 </ol>
               </nav>
               <h1 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
-                Create New Event
+                {t("form.pageTitle")}
               </h1>
-              <p className="text-sm text-gray-600 sm:text-base">
-                Fill out the details below to create and publish your event
-              </p>
+              <p className="text-sm text-gray-600 sm:text-base">{t("form.pageDescription")}</p>
             </div>
             {/* Mobile-friendly back button */}
             <div className="flex sm:hidden">
@@ -95,7 +95,7 @@ export default async function CreateEventPage() {
                     d="M10 19l-7-7m0 0l7-7m-7 7h18"
                   />
                 </svg>
-                Back to Events
+                {t("form.backToEvents")}
               </Link>
             </div>
           </div>

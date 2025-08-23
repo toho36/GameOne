@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 
 import { prisma } from "@/lib/prisma";
+import { logger } from "@/lib/logger";
 
 interface RouteParams {
   params: Promise<{
@@ -123,7 +124,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         action === "publish" ? "Event published successfully" : "Event unpublished successfully",
     });
   } catch (error) {
-    console.error("Event publish/unpublish error:", error);
+    logger.error("Event publish/unpublish error:", error);
     return NextResponse.json({ error: "Failed to update event" }, { status: 500 });
   }
 }

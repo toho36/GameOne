@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +17,7 @@ import { useBankAccountActions } from "./hooks/use-bank-account-actions";
 import type { BankAccountQueryParams } from "@/types/components/bank-account-management.types";
 
 export function BankAccountManagement() {
+  const t = useTranslations("BankAccounts");
   const [filters, setFilters] = React.useState<BankAccountQueryParams>({
     page: 1,
     limit: 10,
@@ -86,12 +88,12 @@ export function BankAccountManagement() {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Bank Accounts</h1>
-            <p className="text-sm text-gray-600">Manage your organization&apos;s bank accounts</p>
+            <h1 className="text-2xl font-bold text-gray-900">{t("title")}</h1>
+            <p className="text-sm text-gray-600">{t("description")}</p>
           </div>
           <Button onClick={handleCreateBankAccount}>
             <Plus className="mr-2 h-4 w-4" />
-            Add Bank Account
+            {t("addBankAccount")}
           </Button>
         </div>
 

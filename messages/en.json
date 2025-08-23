@@ -116,13 +116,20 @@
   "BankAccounts": {
     "title": "Bank Accounts",
     "description": "Manage your organization's bank accounts",
+    "pageTitle": "Bank Accounts",
+    "pageDescription": "Manage your organization's bank accounts",
     "createAccount": "Create Account",
     "editAccount": "Edit Account",
     "deleteAccount": "Delete Account",
     "noAccounts": "No bank accounts found",
     "createFirst": "Create your first bank account to get started",
+    "create": "Create",
+    "creating": "Creating...",
+    "update": "Update",
+    "updating": "Updating...",
     "filters": {
       "searchPlaceholder": "Search bank accounts...",
+      "search": "Search",
       "status": "Status",
       "all": "All Accounts",
       "active": "Active Only",
@@ -152,6 +159,7 @@
       "sections": {
         "basic": "Basic Information",
         "details": "Account Details",
+        "additional": "Additional Information",
         "settings": "Account Settings"
       },
       "labels": {
@@ -173,7 +181,13 @@
         "isActiveDesc": "Only active accounts can be used for events",
         "qrCodeEnabled": "Enable QR Code Generation",
         "qrCodeDesc": "Allow QR code generation for payments to this account",
-        "autoFilled": "Auto-filled from IBAN, can be overridden"
+        "autoFilled": "Auto-filled from IBAN, can be overridden",
+        "addBankAccount": "Add Bank Account"
+      },
+      "descriptions": {
+        "isDefault": "This account will be used as default for new events",
+        "isActive": "Only active accounts can be used for events",
+        "qrCodeEnabled": "Allow QR code generation for payments to this account"
       },
       "placeholders": {
         "name": "e.g., Primary Business Account",
@@ -212,6 +226,9 @@
       "setDefaultFailed": "Failed to set default account",
       "toggleActiveFailed": "Failed to update account status"
     },
+    "cancel": "Cancel",
+    "deleting": "Deleting...",
+    "default": "Default",
     "success": {
       "created": "Bank account created successfully",
       "updated": "Bank account updated successfully",
@@ -224,6 +241,8 @@
   "Events": {
     "title": "Events",
     "description": "Manage your events and registrations",
+    "pageTitle": "Event Management",
+    "pageDescription": "Create and manage your events",
     "createEvent": "Create Event",
     "editEvent": "Edit Event",
     "deleteEvent": "Delete Event",
@@ -281,6 +300,16 @@
         "create": "Create Event",
         "edit": "Edit Event"
       },
+      "pageTitle": "Create New Event",
+      "pageDescription": "Fill out the details below to create and publish your event",
+      "editPageTitle": "Edit Event",
+      "editPageDescription": "Update your event details below",
+      "breadcrumb": {
+        "dashboard": "Dashboard",
+        "events": "Events",
+        "createEvent": "Create Event"
+      },
+      "backToEvents": "Back to Events",
       "description": {
         "create": "Create a new event for your organization",
         "edit": "Update event information and settings"
@@ -409,6 +438,8 @@
   "Users": {
     "title": "Users",
     "description": "Manage user accounts and permissions",
+    "pageTitle": "User Management",
+    "pageDescription": "Manage users and their roles",
     "createUser": "Create User",
     "editUser": "Edit User",
     "deleteUser": "Delete User",
@@ -433,7 +464,6 @@
       "pendingVerification": "Pending Verification",
       "suspended": "Suspended"
     },
-    "addUser": "Add User",
     "retryLoading": "Retry Loading Users",
     "edit": "Edit",
     "form": {
@@ -485,12 +515,17 @@
       "activated": "User activated successfully",
       "deactivated": "User deactivated successfully"
     },
+    "addUser": "Add User",
     "delete": {
       "title": "Delete User",
       "confirmMessage": "Are you sure you want to delete the user \"{name}\"?",
       "warning": "This action cannot be undone. The user will be permanently removed from your organization.",
       "cannotDelete": "The user \"{name}\" cannot be deleted because they have active roles or permissions."
     }
+  },
+  "Test": {
+    "title": "Dashboard Test Page",
+    "description": "This page confirms that the dashboard route is accessible."
   },
   "Validation": {
     "bankAccount": {

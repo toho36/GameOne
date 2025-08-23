@@ -44,12 +44,24 @@ export const createEventCreationSchema = (messages?: {
 
       // Event details
       capacity: z
-        .number()
-        .int(msgs.capacityInteger)
-        .min(1, msgs.capacityMin)
-        .max(10000, msgs.capacityMax),
+        .union([z.number(), z.string()])
+        .transform((val) => {
+          const numVal = typeof val === "string" ? parseInt(val, 10) : val;
+          return isNaN(numVal) ? 1 : numVal;
+        })
+        .pipe(
+          z.number().int(msgs.capacityInteger).min(1, msgs.capacityMin).max(10000, msgs.capacityMax)
+        ),
 
-      price: z.number().min(0, msgs.priceMin).max(100000, msgs.priceMax).default(0),
+      price: z
+        .union([z.number(), z.string(), z.null(), z.undefined()])
+        .transform((val) => {
+          if (val === null || val === undefined || val === "") return 0;
+          const numVal = typeof val === "string" ? parseFloat(val) : val;
+          return isNaN(numVal) ? 0 : numVal;
+        })
+        .pipe(z.number().min(0, msgs.priceMin).max(100000, msgs.priceMax))
+        .default(0),
 
       currency: z.string().default("CZK"),
 
@@ -166,13 +178,17 @@ export const validateTitle = (title: string) => {
   return z.string().min(3).max(200).safeParse(title);
 };
 
-export const validateCapacity = (capacity: number) => {
-  return z.number().int().min(1).max(10000).safeParse(capacity);
+export const validateCapacity = (capacity: number | string) => {
+  const numVal = typeof capacity === "string" ? parseInt(capacity, 10) : capacity;
+  if (isNaN(numVal)) return { success: false, error: { message: "Invalid capacity value" } };
+  return z.number().int().min(1).max(10000).safeParse(numVal);
 };
 
-export const validatePrice = (price?: number) => {
-  if (price === undefined) return { success: true };
-  return z.number().min(0).max(100000).safeParse(price);
+export const validatePrice = (price?: number | string | null) => {
+  if (price === undefined || price === null || price === "") return { success: true };
+  const numVal = typeof price === "string" ? parseFloat(price) : price;
+  if (isNaN(numVal)) return { success: false, error: { message: "Invalid price value" } };
+  return z.number().min(0).max(100000).safeParse(numVal);
 };
 
 export const validateEmail = (email: string) => {

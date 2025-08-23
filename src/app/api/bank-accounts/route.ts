@@ -4,6 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import { logger } from "@/lib/logger";
 import { requirePermissions } from "@/lib/api/common/auth";
 import { bankAccountsService } from "@/lib/api/bank-accounts/service";
 
@@ -21,7 +22,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error("Bank accounts fetch error:", error);
+    logger.error("Bank accounts fetch error:", error);
     return NextResponse.json({ error: "Failed to fetch bank accounts" }, { status: 500 });
   }
 }
@@ -46,7 +47,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(result.data);
   } catch (error) {
-    console.error("Bank account creation error:", error);
+    logger.error("Bank account creation error:", error);
     return NextResponse.json({ error: "Failed to create bank account" }, { status: 500 });
   }
 }

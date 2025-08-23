@@ -116,23 +116,36 @@
   "BankAccounts": {
     "title": "Bankovní účty",
     "description": "Spravujte bankovní účty vaší organizace",
+    "pageTitle": "Bankovní účty",
+    "pageDescription": "Spravujte bankovní účty vaší organizace",
     "createAccount": "Vytvořit účet",
     "editAccount": "Upravit účet",
     "deleteAccount": "Smazat účet",
     "noAccounts": "Nebyly nalezeny žádné bankovní účty",
     "createFirst": "Vytvořte svůj první bankovní účet a začněte",
-    "searchPlaceholder": "Hledat bankovní účty...",
-    "filterAll": "Všechny účty",
-    "filterActive": "Pouze aktivní",
-    "filterInactive": "Pouze neaktivní",
-    "clearFilters": "Vymazat filtry",
+    "create": "Vytvořit",
+    "creating": "Vytváření...",
+    "update": "Aktualizovat",
+    "updating": "Aktualizace...",
+    "filters": {
+      "searchPlaceholder": "Hledat bankovní účty...",
+      "search": "Hledání",
+      "status": "Stav",
+      "all": "Všechny účty",
+      "active": "Pouze aktivní",
+      "inactive": "Pouze neaktivní",
+      "clear": "Vymazat filtry"
+    },
+    "status": {
+      "active": "Aktivní",
+      "inactive": "Neaktivní"
+    },
     "accountName": "Název účtu",
     "iban": "IBAN",
     "bankName": "Název banky",
     "accountNumber": "Číslo účtu",
     "bankCode": "Kód banky",
     "swift": "SWIFT kód",
-
     "form": {
       "title": {
         "create": "Vytvořit bankovní účet",
@@ -145,6 +158,7 @@
       "sections": {
         "basic": "Základní informace",
         "details": "Detaily účtu",
+        "additional": "Další informace",
         "settings": "Nastavení účtu"
       },
       "labels": {
@@ -161,8 +175,12 @@
         "swift": "SWIFT kód",
         "swiftDesc": "Identifikační kód banky (volitelné)",
         "isDefault": "Výchozí účet",
+        "isDefaultDesc": "Tento účet bude použit jako výchozí pro nové události",
         "isActive": "Aktivní účet",
-        "qrCodeEnabled": "QR kódové platby"
+        "isActiveDesc": "Pouze aktivní účty mohou být použity pro události",
+        "qrCodeEnabled": "QR kódové platby",
+        "qrCodeDesc": "Povolit generování QR kódu pro platby na tento účet",
+        "autoFilled": "Automaticky vyplněno z IBAN, lze přepsat"
       },
       "descriptions": {
         "name": "Přátelský název pro identifikaci tohoto účtu",
@@ -172,7 +190,8 @@
         "swift": "Identifikační kód banky (volitelné)",
         "isDefault": "Nastavit tento účet jako výchozí pro nové události",
         "isActive": "Aktivní účty mohou být použity pro události a transakce",
-        "qrCodeEnabled": "Povolit generování QR kódu pro tento účet"
+        "qrCodeEnabled": "Povolit generování QR kódu pro tento účet",
+        "addBankAccount": "Přidat bankovní účet"
       },
       "filters": {
         "status": "Stav",
@@ -216,6 +235,9 @@
       "setDefaultFailed": "Nepodařilo se nastavit výchozí účet",
       "toggleActiveFailed": "Nepodařilo se aktualizovat stav účtu"
     },
+    "cancel": "Zrušit",
+    "deleting": "Mazání...",
+    "default": "Výchozí",
     "success": {
       "created": "Bankovní účet byl úspěšně vytvořen",
       "updated": "Bankovní účet byl úspěšně aktualizován",
@@ -228,6 +250,8 @@
   "Events": {
     "title": "Události",
     "description": "Spravujte své události a registrace",
+    "pageTitle": "Správa událostí",
+    "pageDescription": "Vytvářejte a spravujte své události",
     "createEvent": "Vytvořit událost",
     "editEvent": "Upravit událost",
     "deleteEvent": "Smazat událost",
@@ -246,16 +270,11 @@
     "endDate": "Datum konce",
     "capacity": "Kapacita",
     "registrations": "Registrace",
-    "status": "Stav",
     "actions": "Akce",
     "edit": "Upravit",
     "delete": "Smazat",
     "publish": "Publikovat",
     "unpublish": "Zrušit publikaci",
-    "draft": "Koncept",
-    "published": "Publikováno",
-    "cancelled": "Zrušeno",
-    "completed": "Dokončeno",
     "status": {
       "draft": "Koncept",
       "published": "Publikováno",
@@ -290,6 +309,16 @@
         "create": "Vytvořit událost",
         "edit": "Upravit událost"
       },
+      "pageTitle": "Vytvořit novou událost",
+      "pageDescription": "Vyplňte níže uvedené údaje pro vytvoření a publikování vaší události",
+      "editPageTitle": "Upravit událost",
+      "editPageDescription": "Aktualizujte níže uvedené údaje o události",
+      "breadcrumb": {
+        "dashboard": "Nástěnka",
+        "events": "Události",
+        "createEvent": "Vytvořit událost"
+      },
+      "backToEvents": "Zpět na události",
       "description": {
         "create": "Vytvořte novou událost pro vaši organizaci",
         "edit": "Aktualizujte informace o události a nastavení"
@@ -408,16 +437,17 @@
       "updated": "Událost aktualizována",
       "deleted": "Událost byla úspěšně smazána",
       "published": "Událost byla úspěšně publikována",
-      "unpublished": "Publikace události byla úspěšně zrušena",
+      "unpublishFailed": "Publikace události byla úspěšně zrušena",
       "draftSaved": "Koncept byl úspěšně uložen",
       "createdDesc": "Vaše událost byla úspěšně vytvořena.",
       "updatedDesc": "Vaše událost byla úspěšně aktualizována."
     }
   },
-
   "Users": {
     "title": "Uživatelé",
     "description": "Spravujte uživatelské účty a oprávnění",
+    "pageTitle": "Správa uživatelů",
+    "pageDescription": "Spravujte uživatele a jejich role",
     "createUser": "Vytvořit uživatele",
     "editUser": "Upravit uživatele",
     "deleteUser": "Smazat uživatele",
@@ -428,7 +458,6 @@
     "filterActive": "Pouze aktivní",
     "filterInactive": "Pouze neaktivní",
     "clearFilters": "Vymazat filtry",
-
     "filters": {
       "status": "Stav",
       "role": "Role",
@@ -500,6 +529,10 @@
       "warning": "Tuto akci nelze vrátit zpět. Uživatel bude trvale odstraněn z vaší organizace.",
       "cannotDelete": "Uživatele \"{name}\" nelze smazat, protože má aktivní role nebo oprávnění."
     }
+  },
+  "Test": {
+    "title": "Testovací stránka nástěnky",
+    "description": "Tato stránka potvrzuje, že cesta k nástěnce je přístupná."
   },
   "Validation": {
     "bankAccount": {

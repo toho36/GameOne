@@ -1,5 +1,6 @@
 import { redirect, notFound } from "next/navigation";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
+import { getTranslations } from "next-intl/server";
 
 import { prisma } from "@/lib/prisma";
 import { EventCreationForm } from "@/components/features/events/creation";
@@ -15,6 +16,7 @@ export default async function EditEventPage({ params }: EditEventPageProps) {
   const { id } = await params;
   const { getUser } = getKindeServerSession();
   const user = await getUser();
+  const t = await getTranslations("Events");
 
   if (!user) {
     redirect("/api/auth/login");
@@ -72,8 +74,8 @@ export default async function EditEventPage({ params }: EditEventPageProps) {
   return (
     <div className="container mx-auto max-w-4xl px-4 py-8">
       <div className="mb-8">
-        <h1 className="mb-2 text-3xl font-bold text-gray-900">Edit Event</h1>
-        <p className="text-gray-600">Update your event details below</p>
+        <h1 className="mb-2 text-3xl font-bold text-gray-900">{t("form.editPageTitle")}</h1>
+        <p className="text-gray-600">{t("form.editPageDescription")}</p>
       </div>
 
       <div className="rounded-lg border border-gray-200 bg-white shadow-sm">
