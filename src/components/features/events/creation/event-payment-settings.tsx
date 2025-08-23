@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslations } from "next-intl";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -20,6 +21,7 @@ export function EventPaymentSettings({
   isLoading,
   isBankAccountsLoading,
 }: EventPaymentSettingsProps) {
+  const t = useTranslations("Events");
   const handleFieldChange = (field: keyof typeof formData, value: any) => {
     onChange({ [field]: value });
   };
@@ -27,16 +29,13 @@ export function EventPaymentSettings({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Payment & Pricing</CardTitle>
-        <CardDescription>Configure pricing and payment settings for your event.</CardDescription>
+        <CardTitle>{t("payment.title")}</CardTitle>
+        <CardDescription>{t("payment.description")}</CardDescription>
       </CardHeader>
 
       <CardContent className="space-y-6">
         {/* Payment Required Toggle */}
-        <FormField
-          label="Event Pricing"
-          description="Choose whether your event is free or requires payment"
-        >
+        <FormField label={t("payment.pricing")} description={t("payment.pricingDescription")}>
           <div className="flex items-center space-x-2">
             <Switch
               id="requires-payment"
@@ -45,7 +44,7 @@ export function EventPaymentSettings({
               disabled={isLoading}
             />
             <Label htmlFor="requires-payment">
-              {formData.requiresPayment ? "Paid Event" : "Free Event"}
+              {formData.requiresPayment ? t("payment.paidEvent") : t("payment.freeEvent")}
             </Label>
           </div>
         </FormField>
@@ -55,10 +54,10 @@ export function EventPaymentSettings({
           <>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <FormField
-                label="Event Price"
+                label={t("payment.eventPrice")}
                 required={formData.requiresPayment}
                 error={errors.price}
-                description="Price per person"
+                description={t("payment.priceDescription")}
               >
                 <Input
                   type="number"
@@ -79,10 +78,10 @@ export function EventPaymentSettings({
               </FormField>
 
               <FormField
-                label="Currency"
+                label={t("payment.currency")}
                 required={formData.requiresPayment}
                 error={errors.currency}
-                description="Currency for payments"
+                description={t("payment.currencyDescription")}
               >
                 <Input
                   placeholder="EUR"
@@ -96,10 +95,10 @@ export function EventPaymentSettings({
             </div>
 
             <FormField
-              label="Bank Account"
+              label={t("payment.bankAccount")}
               required={formData.requiresPayment}
               error={errors.bankAccountId}
-              description="Select the bank account for receiving payments"
+              description={t("payment.bankAccountDescription")}
             >
               <BankAccountSelector
                 value={formData.bankAccountId}
@@ -109,8 +108,8 @@ export function EventPaymentSettings({
                 required={formData.requiresPayment}
                 disabled={isLoading}
                 isLoading={isBankAccountsLoading}
-                placeholder="Select a bank account"
-                description="Choose which bank account will receive payments for this event"
+                placeholder={t("payment.selectBankAccount")}
+                description={t("payment.bankAccountHelp")}
               />
             </FormField>
           </>

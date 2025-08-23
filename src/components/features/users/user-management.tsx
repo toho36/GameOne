@@ -60,13 +60,16 @@ export function UserManagement({ className }: UserManagementProps) {
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || t("errors.roleUpdateFailed"));
+        // Log error and let the component handle UI feedback
+        logger.error("Role update failed:", error);
+        throw new Error(error.error || error.message || t("errors.roleUpdateFailed"));
       }
 
       refetch();
     } catch (error) {
       logger.error("Update user role error:", error);
-      // You could add toast notification here
+      // Re-throw to let the UserList component handle error display
+      throw error;
     }
   };
 

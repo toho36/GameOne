@@ -107,7 +107,8 @@
     "deleted": "Deleted",
     "createdAt": "Created at",
     "updatedAt": "Updated at",
-    "deletedAt": "Deleted at"
+    "deletedAt": "Deleted at",
+    "filters": "Filters"
   },
   "Language": {
     "switchTo": "Switch to {language}",
@@ -362,6 +363,22 @@
         "capacity": "Capacity",
         "bankAccount": "Bank Account"
       },
+      "payment": {
+        "title": "Payment & Pricing",
+        "description": "Configure pricing and payment settings for your event",
+        "pricing": "Event Pricing",
+        "pricingDescription": "Choose whether your event is free or requires payment",
+        "paidEvent": "Paid Event",
+        "freeEvent": "Free Event",
+        "eventPrice": "Event Price",
+        "priceDescription": "Price per person",
+        "currency": "Currency",
+        "currencyDescription": "Currency for payments",
+        "bankAccount": "Bank Account",
+        "bankAccountDescription": "Select the bank account for receiving payments",
+        "selectBankAccount": "Select a bank account",
+        "bankAccountHelp": "Choose which bank account will receive payments for this event"
+      },
       "descriptions": {
         "title": "Give your event a clear, descriptive title",
         "description": "Detailed description of your event",
@@ -409,7 +426,22 @@
       "totalEvents": "Total Events",
       "publishedEvents": "Published Events",
       "draftEvents": "Draft Events",
-      "totalRegistrations": "Total Registrations"
+      "totalRegistrations": "Total Registrations",
+      "published": "Published",
+      "drafts": "Drafts"
+    },
+    "card": {
+      "locationTBD": "Location TBD",
+      "pastEvent": "Past Event",
+      "capacity": "Capacity",
+      "availableSpots": "Available Spots",
+      "price": "Price",
+      "free": "Free",
+      "registration": "Registration",
+      "open": "Open",
+      "closed": "Closed",
+      "waiting": "waiting",
+      "onlineEvent": "Online Event"
     },
     "errors": {
       "loadFailed": "Failed to load events",

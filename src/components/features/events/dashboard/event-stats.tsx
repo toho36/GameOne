@@ -1,4 +1,5 @@
 import { CalendarIcon, EyeIcon, DocumentTextIcon, UsersIcon } from "@heroicons/react/24/outline";
+import { useTranslations } from "next-intl";
 
 import { EventStatsProps } from "@/types/components/event-dashboard.types";
 
@@ -8,27 +9,29 @@ export function EventStats({
   draftEvents,
   totalRegistrations,
 }: EventStatsProps) {
+  const t = useTranslations("Events");
+
   const stats = [
     {
-      name: "Total Events",
+      name: t("stats.totalEvents"),
       value: totalEvents,
       icon: CalendarIcon,
       color: "text-blue-600",
     },
     {
-      name: "Published",
+      name: t("stats.published"),
       value: publishedEvents,
       icon: EyeIcon,
       color: "text-green-600",
     },
     {
-      name: "Drafts",
+      name: t("stats.drafts"),
       value: draftEvents,
       icon: DocumentTextIcon,
       color: "text-yellow-600",
     },
     {
-      name: "Total Registrations",
+      name: t("stats.totalRegistrations"),
       value: totalRegistrations,
       icon: UsersIcon,
       color: "text-purple-600",
