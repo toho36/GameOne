@@ -24,6 +24,11 @@
     "uptime": "Dostupnost",
     "support": "Podpora"
   },
+  "Forms": {
+    "cancel": "Zrušit",
+    "loading": "Načítání...",
+    "saving": "Ukládání..."
+  },
   "Dashboard": {
     "title": "Nástěnka",
     "welcome": "Vítejte zpět,",
@@ -251,6 +256,12 @@
     "published": "Publikováno",
     "cancelled": "Zrušeno",
     "completed": "Dokončeno",
+    "status": {
+      "draft": "Koncept",
+      "published": "Publikováno",
+      "cancelled": "Zrušeno",
+      "completed": "Dokončeno"
+    },
     "filters": {
       "status": "Stav",
       "type": "Typ",
@@ -433,6 +444,7 @@
     },
     "addUser": "Přidat uživatele",
     "retryLoading": "Zkusit znovu načíst uživatele",
+    "edit": "Upravit",
     "form": {
       "title": {
         "create": "Vytvořit uživatele",

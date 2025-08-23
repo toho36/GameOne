@@ -4,9 +4,9 @@ import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { prisma } from "@/lib/prisma";
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 // POST /api/events/[id]/publish - Publish or unpublish event
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "Authentication required" }, { status: 401 });
     }
 
-    const eventId = params.id;
+    const { id: eventId } = await params;
     const body = await request.json();
     const { action } = body; // 'publish' or 'unpublish'
 

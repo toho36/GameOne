@@ -12,12 +12,13 @@ import {
 const BANK_ACCOUNT_PERMISSIONS = ["bank_accounts.manage", "admin.full_access"];
 
 // GET /api/bank-accounts/[id] - Get single bank account
-export async function GET(_request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const authResult = await requirePermissions(BANK_ACCOUNT_PERMISSIONS);
     if (authResult instanceof NextResponse) return authResult;
 
-    const validation = await validateBankAccountExists(params.id);
+    const { id } = await params;
+    const validation = await validateBankAccountExists(id);
     if (!validation.exists) return validation.response;
 
     return NextResponse.json({ bankAccount: validation.bankAccount });
@@ -28,11 +29,12 @@ export async function GET(_request: NextRequest, { params }: { params: { id: str
 }
 
 // PUT /api/bank-accounts/[id] - Update bank account
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const authResult = await requirePermissions(BANK_ACCOUNT_PERMISSIONS);
     if (authResult instanceof NextResponse) return authResult;
 
+    const { id } = await params;
     const body = await request.json();
     const validation = validateBankAccountData(body, true);
 
@@ -44,7 +46,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
     // If setting as default, unset other defaults
     if (validatedData.isDefault) {
-      await ensureSingleDefault(params.id);
+      await ensureSingleDefault(id);
     }
 
     // Prepare update data with proper handling of nullable fields
@@ -63,7 +65,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       updateData.qrCodeEnabled = validatedData.qrCodeEnabled;
 
     const bankAccount = await prisma.bankAccount.update({
-      where: { id: params.id },
+      where: { id },
       data: updateData,
     });
 
@@ -75,18 +77,22 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 }
 
 // DELETE /api/bank-accounts/[id] - Delete bank account
-export async function DELETE(_request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     const authResult = await requirePermissions(BANK_ACCOUNT_PERMISSIONS);
     if (authResult instanceof NextResponse) return authResult;
 
-    const deleteCheck = await checkCanDeleteBankAccount(params.id);
+    const { id } = await params;
+    const deleteCheck = await checkCanDeleteBankAccount(id);
     if (!deleteCheck.canDelete) {
       return deleteCheck.response!;
     }
 
     await prisma.bankAccount.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return NextResponse.json({
