@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
+import { logger } from "@/lib/logger";
 import { requirePermissions } from "@/lib/api/auth/permissions";
 import { validateBankAccountData } from "@/lib/api/bank-accounts/validation";
 import {
@@ -23,7 +24,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
 
     return NextResponse.json({ bankAccount: validation.bankAccount });
   } catch (error) {
-    console.error("Bank account fetch error:", error);
+    logger.error("Bank account fetch error:", error);
     return NextResponse.json({ error: "Failed to fetch bank account" }, { status: 500 });
   }
 }
@@ -71,7 +72,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
     return NextResponse.json({ bankAccount });
   } catch (error) {
-    console.error("Bank account update error:", error);
+    logger.error("Bank account update error:", error);
     return NextResponse.json({ error: "Failed to update bank account" }, { status: 500 });
   }
 }
@@ -100,7 +101,7 @@ export async function DELETE(
       message: "Bank account deleted successfully",
     });
   } catch (error) {
-    console.error("Bank account deletion error:", error);
+    logger.error("Bank account deletion error:", error);
     return NextResponse.json({ error: "Failed to delete bank account" }, { status: 500 });
   }
 }

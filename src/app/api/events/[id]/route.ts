@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 
 import { prisma } from "@/lib/prisma";
+import { logger } from "@/lib/logger";
 import { eventUpdateSchema } from "@/lib/validation/event-creation";
 
 // Helper function to create user with default role and active status
@@ -77,7 +78,7 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json(event);
   } catch (error) {
-    console.error("Event fetch error:", error);
+    logger.error("Event fetch error:", error);
     return NextResponse.json({ error: "Failed to fetch event" }, { status: 500 });
   }
 }
@@ -178,7 +179,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       message: "Event updated successfully",
     });
   } catch (error) {
-    console.error("Event update error:", error);
+    logger.error("Event update error:", error);
     return NextResponse.json({ error: "Failed to update event" }, { status: 500 });
   }
 }
@@ -245,7 +246,7 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams) {
       message: "Event deleted successfully",
     });
   } catch (error) {
-    console.error("Event deletion error:", error);
+    logger.error("Event deletion error:", error);
     return NextResponse.json({ error: "Failed to delete event" }, { status: 500 });
   }
 }

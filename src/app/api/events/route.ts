@@ -4,6 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import { logger } from "@/lib/logger";
 import { getAuthenticatedUser } from "@/lib/api/common/auth";
 import { eventsService } from "@/lib/api/events/service";
 
@@ -21,7 +22,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error("Events fetch error:", error);
+    logger.error("Events fetch error:", error);
     return NextResponse.json({ error: "Failed to fetch events" }, { status: 500 });
   }
 }
@@ -52,7 +53,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(result.data);
   } catch (error) {
-    console.error("Event creation error:", error);
+    logger.error("Event creation error:", error);
     return NextResponse.json({ error: "Failed to create event" }, { status: 500 });
   }
 }

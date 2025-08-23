@@ -24,8 +24,3 @@ export function validateBankAccountData(data: any, isUpdate = false) {
 export function createValidationErrorResponse(errors: Record<string, string[]>) {
   return NextResponse.json({ errors }, { status: 400 });
 }
-
-export default {
-  validateBankAccountData,
-  createValidationErrorResponse,
-};

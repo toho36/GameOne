@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 
 import { prisma } from "@/lib/prisma";
+import { logger } from "@/lib/logger";
 
 // Helper function to create user with default role and active status
 async function createUserWithDefaults(kindeUser: any) {
@@ -136,7 +137,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       message: "User role updated successfully",
     });
   } catch (error) {
-    console.error("User role update error:", error);
+    logger.error("User role update error:", error);
     return NextResponse.json({ error: "Failed to update user role" }, { status: 500 });
   }
 }

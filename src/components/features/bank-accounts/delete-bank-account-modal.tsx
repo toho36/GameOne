@@ -114,7 +114,7 @@ export function DeleteBankAccountModal({
                 </div>
               )}
               <div className="flex justify-between">
-                <span>{t("status")}:</span>
+                <span>{t("Common.status")}:</span>
                 <div className="flex items-center gap-2">
                   <span
                     className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
@@ -123,7 +123,7 @@ export function DeleteBankAccountModal({
                         : "bg-gray-100 text-gray-800"
                     }`}
                   >
-                    {t(bankAccount.isActive ? "active" : "inactive")}
+                    {t(bankAccount.isActive ? "status.active" : "status.inactive")}
                   </span>
                   {bankAccount.isDefault && (
                     <span className="inline-flex items-center rounded-full bg-yellow-100 px-2 py-1 text-xs font-medium text-yellow-800">

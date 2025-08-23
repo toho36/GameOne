@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 
 import { prisma } from "@/lib/prisma";
+import { logger } from "@/lib/logger";
 
 // Helper function to create user with default role and active status
 async function createUserWithDefaults(kindeUser: any) {
@@ -161,7 +162,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Users fetch error:", error);
+    logger.error("Users fetch error:", error);
     return NextResponse.json({ error: "Failed to fetch users" }, { status: 500 });
   }
 }

@@ -75,9 +75,3 @@ export async function requirePermissions(permissions: string[]) {
 
   return authResult;
 }
-
-export default {
-  authenticateUser,
-  hasPermission,
-  requirePermissions,
-};

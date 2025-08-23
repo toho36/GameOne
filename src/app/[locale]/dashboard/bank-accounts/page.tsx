@@ -1,5 +1,6 @@
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 
 import { prisma } from "@/lib/prisma";
 import { BankAccountManagement } from "@/components/features/bank-accounts/bank-account-management";
@@ -49,6 +50,7 @@ async function checkBankAccountManagementPermission(userId: string): Promise<boo
 export default async function BankAccountsPage() {
   const { getUser } = getKindeServerSession();
   const kindeUser = await getUser();
+  const t = await getTranslations("BankAccounts");
 
   if (!kindeUser) {
     redirect("/api/auth/login");
@@ -87,6 +89,10 @@ export default async function BankAccountsPage() {
 
   return (
     <div className="container mx-auto px-4 py-6">
+      <div className="mb-8">
+        <h1 className="mb-2 text-3xl font-bold text-gray-900">{t("pageTitle")}</h1>
+        <p className="text-gray-600">{t("pageDescription")}</p>
+      </div>
       <BankAccountManagement />
     </div>
   );

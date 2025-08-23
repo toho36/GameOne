@@ -104,13 +104,18 @@ export function useBankAccountActions({
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || "Failed to delete bank account");
+        // Set error in form errors instead of using alert
+        setFormErrors({
+          general: `Cannot delete bank account: ${error.error || error.message || "Failed to delete bank account"}`,
+        });
+        throw new Error(error.error || error.message || "Failed to delete bank account");
       }
 
       refetch();
       closeDeleteModal();
     } catch (error) {
       logger.error("Delete bank account failed", error);
+      // Don't re-throw to prevent double error display
     }
   };
 

@@ -94,10 +94,3 @@ export async function checkCanDeleteBankAccount(bankAccountId: string) {
     bankAccount: existingBankAccount,
   };
 }
-
-export default {
-  ensureSingleDefault,
-  checkBankAccountUsage,
-  validateBankAccountExists,
-  checkCanDeleteBankAccount,
-};
