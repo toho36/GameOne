@@ -13,9 +13,11 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useTranslations } from "next-intl";
 import { EventCardProps } from "@/types/components/event-dashboard.types";
 
 export function EventCard({ event, onEdit, onDelete, onToggleStatus }: EventCardProps) {
+  const t = useTranslations("Events");
   const statusColors = {
     DRAFT: "bg-yellow-100 text-yellow-800",
     PUBLISHED: "bg-green-100 text-green-800",
@@ -40,7 +42,7 @@ export function EventCard({ event, onEdit, onDelete, onToggleStatus }: EventCard
       return (
         <div className="flex items-center gap-1 text-sm text-gray-600">
           <GlobeAltIcon className="h-4 w-4" />
-          Online Event
+          {t("card.onlineEvent")}
         </div>
       );
     }
@@ -50,7 +52,7 @@ export function EventCard({ event, onEdit, onDelete, onToggleStatus }: EventCard
         <MapPinIcon className="h-4 w-4" />
         {event.venue
           ? `${event.venue}${event.city ? `, ${event.city}` : ""}`
-          : event.city || "Location TBD"}
+          : event.city || t("card.locationTBD")}
       </div>
     );
   };
@@ -84,7 +86,9 @@ export function EventCard({ event, onEdit, onDelete, onToggleStatus }: EventCard
           </div>
         </div>
 
-        {event.isPastEvent && <Badge className="ml-2 bg-gray-100 text-gray-600">Past Event</Badge>}
+        {event.isPastEvent && (
+          <Badge className="ml-2 bg-gray-100 text-gray-600">{t("card.pastEvent")}</Badge>
+        )}
       </div>
 
       {/* Details Grid */}
@@ -92,18 +96,20 @@ export function EventCard({ event, onEdit, onDelete, onToggleStatus }: EventCard
         <div>
           <div className="mb-1 flex items-center gap-1 text-gray-600">
             <UsersIcon className="h-4 w-4" />
-            Capacity
+            {t("card.capacity")}
           </div>
           <div className="font-medium">
             {event.registrationCount}/{event.capacity}
             {event.waitingListCount > 0 && (
-              <span className="ml-1 text-gray-500">(+{event.waitingListCount} waiting)</span>
+              <span className="ml-1 text-gray-500">
+                (+{event.waitingListCount} {t("card.waiting")})
+              </span>
             )}
           </div>
         </div>
 
         <div>
-          <div className="mb-1 text-gray-600">Available Spots</div>
+          <div className="mb-1 text-gray-600">{t("card.availableSpots")}</div>
           <div
             className={`font-medium ${
               event.availableSpots === 0 ? "text-red-600" : "text-green-600"
@@ -116,21 +122,21 @@ export function EventCard({ event, onEdit, onDelete, onToggleStatus }: EventCard
         <div>
           <div className="mb-1 flex items-center gap-1 text-gray-600">
             <CurrencyDollarIcon className="h-4 w-4" />
-            Price
+            {t("card.price")}
           </div>
           <div className="font-medium">
-            {event.price ? `${event.price} ${event.currency || "CZK"}` : "Free"}
+            {event.price ? `${event.price} ${event.currency || "CZK"}` : t("card.free")}
           </div>
         </div>
 
         <div>
-          <div className="mb-1 text-gray-600">Registration</div>
+          <div className="mb-1 text-gray-600">{t("card.registration")}</div>
           <div
             className={`font-medium ${
               event.isRegistrationOpen ? "text-green-600" : "text-red-600"
             }`}
           >
-            {event.isRegistrationOpen ? "Open" : "Closed"}
+            {event.isRegistrationOpen ? t("card.open") : t("card.closed")}
           </div>
         </div>
       </div>

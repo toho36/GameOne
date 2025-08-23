@@ -107,7 +107,8 @@
     "deleted": "Smazáno",
     "createdAt": "Vytvořeno dne",
     "updatedAt": "Aktualizováno dne",
-    "deletedAt": "Smazáno dne"
+    "deletedAt": "Smazáno dne",
+    "filters": "Filtry"
   },
   "Language": {
     "switchTo": "Přepnout na {language}",
@@ -371,6 +372,22 @@
         "capacity": "Kapacita",
         "bankAccount": "Bankovní účet"
       },
+      "payment": {
+        "title": "Platby a ceny",
+        "description": "Nastavte ceny a platební nastavení pro vaši událost",
+        "pricing": "Cena události",
+        "pricingDescription": "Vyberte, zda je vaše událost bezplatná nebo vyžaduje platbu",
+        "paidEvent": "Placená událost",
+        "freeEvent": "Bezplatná událost",
+        "eventPrice": "Cena události",
+        "priceDescription": "Cena za osobu",
+        "currency": "Měna",
+        "currencyDescription": "Měna pro platby",
+        "bankAccount": "Bankovní účet",
+        "bankAccountDescription": "Vyberte bankovní účet pro příjem plateb",
+        "selectBankAccount": "Vyberte bankovní účet",
+        "bankAccountHelp": "Vyberte, který bankovní účet bude přijímat platby za tuto událost"
+      },
       "descriptions": {
         "title": "Dejte své události jasný, popisný název",
         "description": "Podrobný popis vaší události",
@@ -418,7 +435,22 @@
       "totalEvents": "Celkem událostí",
       "publishedEvents": "Publikované události",
       "draftEvents": "Koncepty událostí",
-      "totalRegistrations": "Celkem registrací"
+      "totalRegistrations": "Celkem registrací",
+      "published": "Publikované",
+      "drafts": "Koncepty"
+    },
+    "card": {
+      "locationTBD": "Místo bude upřesněno",
+      "pastEvent": "Minulá událost",
+      "capacity": "Kapacita",
+      "availableSpots": "Dostupná místa",
+      "price": "Cena",
+      "free": "Zdarma",
+      "registration": "Registrace",
+      "open": "Otevřená",
+      "closed": "Zavřená",
+      "waiting": "čekající",
+      "onlineEvent": "Online událost"
     },
     "errors": {
       "loadFailed": "Nepodařilo se načíst události",

@@ -12,11 +12,17 @@ export function UserList({ users, isLoading, onEdit, onUpdateRole }: UserListPro
   const t = useTranslations("Users");
   const { roles, isLoading: rolesLoading } = useRoles();
   const [updatingUserId, setUpdatingUserId] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleRoleChange = async (userId: string, roleId: string) => {
     setUpdatingUserId(userId);
+    setErrorMessage(null);
     try {
       await onUpdateRole(userId, roleId);
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : t("errors.roleUpdateFailed"));
+      // Reset error after 5 seconds
+      setTimeout(() => setErrorMessage(null), 5000);
     } finally {
       setUpdatingUserId(null);
     }
@@ -82,6 +88,27 @@ export function UserList({ users, isLoading, onEdit, onUpdateRole }: UserListPro
 
   return (
     <div className="space-y-4">
+      {/* Error Message */}
+      {errorMessage && (
+        <div className="rounded-md border border-red-200 bg-red-50 p-4">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm font-medium text-red-800">{t("errors.roleUpdateFailed")}</p>
+              <p className="mt-1 text-sm text-red-700">{errorMessage}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {users.map((user) => (
         <div
           key={user.id}
@@ -109,21 +136,27 @@ export function UserList({ users, isLoading, onEdit, onUpdateRole }: UserListPro
             <div className="flex items-center space-x-2">
               {/* Role Selector */}
               <select
-                value={user.userRoles?.[0]?.role?.name || ""}
+                value={user.primaryRole?.id || ""}
                 onChange={(e) => handleRoleChange(user.id, e.target.value)}
                 disabled={rolesLoading || updatingUserId === user.id}
-                className="rounded-md border border-gray-300 bg-white px-3 py-1 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="rounded-md border border-gray-300 bg-white px-3 py-1 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
                 style={{
                   borderColor: getRoleColor(user.userRoles?.[0]?.role?.name || ""),
                 }}
               >
-                <option value="">{t("form.labels.role")}</option>
+                <option value="">{t("filters.noRole")}</option>
                 {roles.map((role) => (
-                  <option key={role.id} value={role.name}>
+                  <option key={role.id} value={role.id}>
                     {role.displayName || role.name}
                   </option>
                 ))}
               </select>
+
+              {updatingUserId === user.id && (
+                <div className="flex items-center justify-center">
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-500 border-t-transparent"></div>
+                </div>
+              )}
 
               {/* Edit Button */}
               <Button
