@@ -56,7 +56,7 @@
   "Navigation": {
     "home": "Domů",
     "dashboard": "Nástěnka",
-    "events": "Události",
+    "events": "Spravovat události",
     "bankAccounts": "Bankovní účty",
     "users": "Uživatelé",
     "settings": "Nastavení"
@@ -249,7 +249,7 @@
     }
   },
   "Events": {
-    "title": "Události",
+    "title": "Spravovat události",
     "description": "Spravujte své události a registrace",
     "pageTitle": "Správa událostí",
     "pageDescription": "Vytvářejte a spravujte své události",
@@ -316,10 +316,10 @@
       "editPageDescription": "Aktualizujte níže uvedené údaje o události",
       "breadcrumb": {
         "dashboard": "Nástěnka",
-        "events": "Události",
+        "events": "Spravovat události",
         "createEvent": "Vytvořit událost"
       },
-      "backToEvents": "Zpět na události",
+      "backToEvents": "Zpět na spravovat události",
       "description": {
         "create": "Vytvořte novou událost pro vaši organizaci",
         "edit": "Aktualizujte informace o události a nastavení"

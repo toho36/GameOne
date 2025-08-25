@@ -3,7 +3,7 @@ import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { getTranslations } from "next-intl/server";
 
 import { prisma } from "@/lib/prisma";
-import { EventCreationForm } from "@/components/features/events/creation";
+import { EventCreationForm } from "@/components/features/manage-events/creation";
 import { EventCreationFormData } from "@/types/event";
 
 interface EditEventPageProps {
@@ -47,7 +47,7 @@ export default async function EditEventPage({ params }: EditEventPageProps) {
 
   // Check if user has permission to edit
   if (event.creatorId !== dbUser.id && event.managerId !== dbUser.id) {
-    redirect("/dashboard/events");
+    redirect("/manage-events");
   }
 
   // Transform event data for form

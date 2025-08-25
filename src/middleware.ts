@@ -20,15 +20,24 @@ export default function middleware(request: NextRequest) {
 }
 
 export const config = {
-  // Match internationalized pathnames, auth routes, and dashboard
+  // Match internationalized pathnames, auth routes, and feature routes
   matcher: [
     // Internationalized routes
     "/",
     "/(en|cs)/:path*",
     // Auth routes
     "/api/auth/:path*",
-    // Dashboard and other protected routes
-    "/dashboard/:path*",
-    "/(en|cs)/dashboard/:path*",
+    // Feature routes (now siblings, not nested under dashboard)
+    "/manage-events/:path*",
+    "/(en|cs)/manage-events/:path*",
+    "/users/:path*",
+    "/(en|cs)/users/:path*",
+    "/bank-accounts/:path*",
+    "/(en|cs)/bank-accounts/:path*",
+    "/test/:path*",
+    "/(en|cs)/test/:path*",
+    // Dashboard (main page only)
+    "/dashboard",
+    "/(en|cs)/dashboard",
   ],
 };

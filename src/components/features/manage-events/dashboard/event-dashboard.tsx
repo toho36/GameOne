@@ -29,11 +29,11 @@ export function EventDashboard({ className }: EventDashboardProps) {
   } = useEvents({ filters });
 
   const handleCreateEvent = () => {
-    router.push("/dashboard/events/create");
+    router.push("/manage-events/create");
   };
 
   const handleEditEvent = (eventId: string) => {
-    router.push(`/dashboard/events/${eventId}/edit`);
+    router.push(`/manage-events/${eventId}/edit`);
   };
 
   const handleDeleteEvent = async (eventId: string) => {

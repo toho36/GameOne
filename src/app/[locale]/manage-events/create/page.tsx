@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { getTranslations } from "next-intl/server";
 
-import { EventCreationForm } from "@/components/features/events/creation";
+import { EventCreationForm } from "@/components/features/manage-events/creation";
 
 export const metadata: Metadata = {
   title: "Create Event | GameOne",
@@ -51,7 +51,7 @@ export default async function CreateEventPage() {
                         <path d="M5.555 17.776l8-16 .894.448-8 16-.894-.448z" />
                       </svg>
                       <Link
-                        href="/dashboard/events"
+                        href="/manage-events"
                         className="ml-2 text-sm text-gray-400 transition-colors hover:text-gray-500 sm:ml-4"
                       >
                         {t("form.breadcrumb.events")}
@@ -84,7 +84,7 @@ export default async function CreateEventPage() {
             {/* Mobile-friendly back button */}
             <div className="flex sm:hidden">
               <Link
-                href="/dashboard/events"
+                href="/manage-events"
                 className="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
               >
                 <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

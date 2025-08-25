@@ -36,19 +36,16 @@ export function Navigation({ currentLocale }: NavigationProps) {
               {t("dashboard")}
             </Link>
             <Link
-              href="/dashboard/events"
+              href="/manage-events"
               className="text-gray-600 transition-colors hover:text-gray-900"
             >
               {t("events")}
             </Link>
-            <Link
-              href="/dashboard/users"
-              className="text-gray-600 transition-colors hover:text-gray-900"
-            >
+            <Link href="/users" className="text-gray-600 transition-colors hover:text-gray-900">
               {t("users")}
             </Link>
             <Link
-              href="/dashboard/bank-accounts"
+              href="/bank-accounts"
               className="text-gray-600 transition-colors hover:text-gray-900"
             >
               {t("bankAccounts")}
@@ -104,21 +101,21 @@ export function Navigation({ currentLocale }: NavigationProps) {
                 {t("dashboard")}
               </Link>
               <Link
-                href="/dashboard/events"
+                href="/manage-events"
                 className="rounded-md px-3 py-2 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 {t("events")}
               </Link>
               <Link
-                href="/dashboard/users"
+                href="/users"
                 className="rounded-md px-3 py-2 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 {t("users")}
               </Link>
               <Link
-                href="/dashboard/bank-accounts"
+                href="/bank-accounts"
                 className="rounded-md px-3 py-2 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
