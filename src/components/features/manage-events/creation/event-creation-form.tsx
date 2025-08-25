@@ -75,7 +75,7 @@ export function EventCreationForm({
           onSuccess(response);
         } else {
           // Always navigate back to events list
-          router.push(`/dashboard/events`);
+          router.push(`/manage-events`);
         }
       } else {
         toast({
@@ -109,7 +109,7 @@ export function EventCreationForm({
         if (onSuccess) {
           onSuccess(response);
         } else {
-          router.push(`/dashboard/events`);
+          router.push(`/manage-events`);
         }
       } else {
         toast({
@@ -133,7 +133,7 @@ export function EventCreationForm({
     if (onCancel) {
       onCancel();
     } else {
-      router.push(`/dashboard/events`);
+      router.push(`/manage-events`);
     }
   };
 

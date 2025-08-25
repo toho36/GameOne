@@ -111,7 +111,7 @@ export default async function DashboardPage() {
                 <h3 className="mb-6 text-xl font-semibold text-gray-900">{t("actions")}</h3>
                 <div className="space-y-4">
                   <Link
-                    href="/dashboard/events"
+                    href="/manage-events"
                     className="flex items-center gap-3 rounded-lg border border-gray-200 p-4 transition-colors hover:border-blue-300 hover:bg-blue-50"
                   >
                     <div className="flex size-10 items-center justify-center rounded-lg bg-blue-100">
@@ -136,7 +136,7 @@ export default async function DashboardPage() {
                   </Link>
 
                   <Link
-                    href="/dashboard/events/create"
+                    href="/manage-events/create"
                     className="flex items-center gap-3 rounded-lg border border-gray-200 p-4 transition-colors hover:border-green-300 hover:bg-green-50"
                   >
                     <div className="flex size-10 items-center justify-center rounded-lg bg-green-100">
@@ -157,6 +157,56 @@ export default async function DashboardPage() {
                     <div>
                       <p className="font-medium text-gray-900">Create New Event</p>
                       <p className="text-sm text-gray-600">Quick access to event creation</p>
+                    </div>
+                  </Link>
+
+                  <Link
+                    href="/users"
+                    className="flex items-center gap-3 rounded-lg border border-gray-200 p-4 transition-colors hover:border-purple-300 hover:bg-purple-50"
+                  >
+                    <div className="flex size-10 items-center justify-center rounded-lg bg-purple-100">
+                      <svg
+                        className="size-5 text-purple-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                        />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">User Management</p>
+                      <p className="text-sm text-gray-600">Manage users and permissions</p>
+                    </div>
+                  </Link>
+
+                  <Link
+                    href="/bank-accounts"
+                    className="flex items-center gap-3 rounded-lg border border-gray-200 p-4 transition-colors hover:border-orange-300 hover:bg-orange-50"
+                  >
+                    <div className="flex size-10 items-center justify-center rounded-lg bg-orange-100">
+                      <svg
+                        className="size-5 text-orange-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
+                        />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">Bank Accounts</p>
+                      <p className="text-sm text-gray-600">Manage payment accounts</p>
                     </div>
                   </Link>
 

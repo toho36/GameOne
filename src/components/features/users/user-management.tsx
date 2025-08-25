@@ -43,11 +43,11 @@ export function UserManagement({ className }: UserManagementProps) {
   };
 
   const handleCreateUser = () => {
-    router.push("/dashboard/users/create");
+    router.push("/users/create");
   };
 
   const handleEditUser = (userId: string) => {
-    router.push(`/dashboard/users/${userId}/edit`);
+    router.push(`/users/${userId}/edit`);
   };
 
   const handleUpdateUserRole = async (userId: string, roleId: string) => {

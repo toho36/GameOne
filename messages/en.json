@@ -56,7 +56,7 @@
   "Navigation": {
     "home": "Home",
     "dashboard": "Dashboard",
-    "events": "Events",
+    "events": "Manage Events",
     "bankAccounts": "Bank Accounts",
     "users": "Users",
     "settings": "Settings"
@@ -240,7 +240,7 @@
     }
   },
   "Events": {
-    "title": "Events",
+    "title": "Manage Events",
     "description": "Manage your events and registrations",
     "pageTitle": "Event Management",
     "pageDescription": "Create and manage your events",
@@ -307,10 +307,10 @@
       "editPageDescription": "Update your event details below",
       "breadcrumb": {
         "dashboard": "Dashboard",
-        "events": "Events",
+        "events": "Manage Events",
         "createEvent": "Create Event"
       },
-      "backToEvents": "Back to Events",
+      "backToEvents": "Back to Manage Events",
       "description": {
         "create": "Create a new event for your organization",
         "edit": "Update event information and settings"

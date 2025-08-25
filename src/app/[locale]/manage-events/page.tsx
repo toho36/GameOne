@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { getTranslations } from "next-intl/server";
 
-import { EventDashboard } from "@/components/features/events/dashboard";
+import { EventDashboard } from "@/components/features/manage-events/dashboard";
 
 export default async function EventsPage() {
   const { getUser } = getKindeServerSession();
