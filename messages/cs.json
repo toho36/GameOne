@@ -55,8 +55,9 @@
   },
   "Navigation": {
     "home": "Domů",
+    "browseEvents": "Procházet události",
     "dashboard": "Nástěnka",
-    "events": "Spravovat události",
+    "manageEvents": "Spravovat události",
     "bankAccounts": "Bankovní účty",
     "users": "Uživatelé",
     "settings": "Nastavení"
@@ -249,8 +250,21 @@
     }
   },
   "Events": {
-    "title": "Spravovat události",
-    "description": "Spravujte své události a registrace",
+    "title": "Procházet události",
+    "description": "Objevte a zaregistrujte se na nadcházející události",
+    "breadcrumb": {
+      "home": "Domů",
+      "events": "Události"
+    },
+    "search": {
+      "placeholder": "Hledat události...",
+      "label": "Hledat"
+    },
+    "searchPlaceholder": "Hledat události...",
+    "empty": {
+      "title": "Nebyly nalezeny žádné události",
+      "message": "Žádné události neodpovídají vašim aktuálním filtrům. Zkuste upravit kritéria vyhledávání nebo procházet všechny události."
+    },
     "pageTitle": "Správa událostí",
     "pageDescription": "Vytvářejte a spravujte své události",
     "createEvent": "Vytvořit událost",
@@ -260,7 +274,6 @@
     "unpublishEvent": "Zrušit publikaci události",
     "noEvents": "Nebyly nalezeny žádné události",
     "createFirst": "Vytvořte svou první událost a začněte",
-    "searchPlaceholder": "Hledat události...",
     "filterAll": "Všechny události",
     "filterPublished": "Publikované",
     "filterDraft": "Koncepty",
@@ -473,6 +486,264 @@
       "draftSaved": "Koncept byl úspěšně uložen",
       "createdDesc": "Vaše událost byla úspěšně vytvořena.",
       "updatedDesc": "Vaše událost byla úspěšně aktualizována."
+    }
+  },
+  "EventSearch": {
+    "placeholder": "Hledat události...",
+    "search": "Hledat",
+    "clear": "Vymazat"
+  },
+  "EventFilters": {
+    "title": "Filtry",
+    "clearAll": "Vymazat vše",
+    "expand": "Zobrazit více",
+    "collapse": "Zobrazit méně",
+    "search": {
+      "placeholder": "Hledat události...",
+      "label": "Hledat"
+    },
+    "category": {
+      "label": "Kategorie",
+      "placeholder": "Vybrat kategorii",
+      "all": "Všechny kategorie"
+    },
+    "location": {
+      "label": "Místo",
+      "placeholder": "Zadat místo"
+    },
+    "price": {
+      "label": "Cenové rozpětí",
+      "min": "Min. cena",
+      "max": "Max. cena"
+    },
+    "date": {
+      "startDate": "Datum začátku",
+      "endDate": "Datum konce",
+      "selectStart": "Vybrat datum začátku",
+      "selectEnd": "Vybrat datum konce"
+    },
+    "privacy": {
+      "label": "Soukromí",
+      "all": "Vše",
+      "public": "Veřejné",
+      "private": "Soukromé"
+    },
+    "tags": {
+      "label": "Tagy"
+    }
+  },
+  "EventList": {
+    "error": {
+      "title": "Chyba při načítání událostí",
+      "retry": "Zkusit znovu"
+    },
+    "empty": {
+      "title": "Nebyly nalezeny žádné události",
+      "description": "Žádné události neodpovídají vašim aktuálním filtrům. Zkuste upravit kritéria vyhledávání."
+    },
+    "loadMore": {
+      "loading": "Načítání dalších událostí...",
+      "button": "Načíst více událostí"
+    },
+    "results": {
+      "count": "Nalezeno {count} událostí"
+    }
+  },
+  "WaitingList": {
+    "title": "Připojit se k čekací listině",
+    "info": {
+      "title": "Událost je plná",
+      "description": "Tato událost dosáhla své maximální kapacity. Připojte se k čekací listině, abyste byli upozorněni, pokud se uvolní místo."
+    },
+    "specialRequirements": {
+      "label": "Speciální požadavky",
+      "placeholder": "Jakékoliv speciální požadavky nebo ubytování"
+    },
+    "emergencyContact": {
+      "label": "Kontakt pro případ nouze",
+      "name": "Jméno",
+      "namePlaceholder": "Zadat celé jméno",
+      "relationship": "Vztah",
+      "relationshipPlaceholder": "např. Manžel/ka, Rodič, Přítel",
+      "phone": "Telefon",
+      "phonePlaceholder": "Zadat telefonní číslo",
+      "email": "Email",
+      "emailPlaceholder": "Zadat emailovou adresu"
+    },
+    "terms": {
+      "accept": "Přijímám",
+      "link": "obchodní podmínky"
+    },
+    "submit": {
+      "join": "Připojit se k čekací listině",
+      "joining": "Připojování..."
+    },
+    "success": {
+      "title": "Úspěšně připojeno!",
+      "description": "Byli jste přidáni do čekací listiny. Upozorníme vás, pokud se uvolní místo."
+    },
+    "errors": {
+      "termsRequired": "Musíte přijmout obchodní podmínky",
+      "emergencyContactNameRequired": "Jméno kontaktu pro případ nouze je povinné",
+      "emergencyContactPhoneRequired": "Telefon kontaktu pro případ nouze je povinný"
+    }
+  },
+  "RegistrationForm": {
+    "summary": {
+      "title": "Shrnutí registrace",
+      "free": "Zdarma",
+      "price": "Cena za osobu",
+      "participants": "Počet účastníků"
+    },
+    "specialRequirements": {
+      "label": "Speciální požadavky",
+      "placeholder": "Jakékoliv speciální požadavky nebo ubytování"
+    },
+    "emergencyContact": {
+      "label": "Kontakt pro případ nouze",
+      "name": "Jméno",
+      "namePlaceholder": "Zadat celé jméno",
+      "relationship": "Vztah",
+      "relationshipPlaceholder": "např. Manžel/ka, Rodič, Přítel",
+      "phone": "Telefon",
+      "phonePlaceholder": "Zadat telefonní číslo",
+      "email": "Email",
+      "emailPlaceholder": "Zadat emailovou adresu"
+    },
+    "terms": {
+      "accept": "Přijímám",
+      "link": "obchodní podmínky"
+    },
+    "marketing": {
+      "consent": "Souhlasím se zasíláním marketingových sdělení o budoucích událostech"
+    },
+    "submit": {
+      "register": "Registrovat na událost",
+      "loading": "Registrace..."
+    }
+  },
+  "EventRegistration": {
+    "title": "Registrace na událost",
+    "registrationSuccess": {
+      "title": "Registrace úspěšná!"
+    },
+    "status": {
+      "full": "Událost plná",
+      "closed": "Registrace uzavřena"
+    },
+    "summary": {
+      "confirmed": "Potvrzené registrace",
+      "waitingList": "Čekací listina",
+      "availableSpots": "Dostupná místa"
+    },
+    "full": {
+      "title": "Událost je plná",
+      "description": "Tato událost dosáhla své maximální kapacity. Můžete se připojit k čekací listině, abyste byli upozorněni, pokud se uvolní místo."
+    },
+    "closed": {
+      "title": "Registrace je uzavřena",
+      "description": "Registrace na tuto událost je momentálně uzavřena.",
+      "opensLater": "Registrace se otevře {date}"
+    },
+    "unavailable": {
+      "title": "Registrace nedostupná",
+      "description": "Registrace na tuto událost není v tuto chvíli dostupná."
+    },
+    "eventInfo": {
+      "title": "Informace o události",
+      "price": "Cena",
+      "free": "Zdarma",
+      "approval": "Schválení vyžadováno",
+      "approvalRequired": "Ano",
+      "approvalNotRequired": "Ne",
+      "cancellation": "Politika zrušení",
+      "cancellationNotAllowed": "Zrušení této události není povoleno"
+    }
+  },
+  "PaymentClaiming": {
+    "title": "Nárok na platbu",
+    "claimed": {
+      "title": "Platba již uplatněna",
+      "description": "Tato platba již byla uplatněna a zpracována."
+    },
+    "payment": {
+      "amount": "Částka platby",
+      "method": "Způsob platby",
+      "bankAccount": "Detaily bankovního účtu",
+      "accountHolder": "Držitel účtu",
+      "accountNumber": "Číslo účtu",
+      "bankCode": "Kód banky",
+      "iban": "IBAN"
+    },
+    "qrCode": "QR kód",
+    "qrCodeAlt": "QR kód platby",
+    "downloadQR": "Stáhnout QR kód",
+    "instructions": {
+      "description": "Prosím dodržujte tyto kroky pro dokončení platby:"
+    },
+    "claim": {
+      "title": "Uplatnit platbu",
+      "transactionId": "ID transakce",
+      "transactionIdPlaceholder": "Zadat ID transakce",
+      "notes": "Dodatečné poznámky",
+      "notesPlaceholder": "Jakékoliv dodatečné informace o vaší platbě",
+      "claiming": "Uplatňování...",
+      "submit": "Uplatnit platbu"
+    },
+    "additional": {
+      "info": "Dodatečné informace:",
+      "step1": "Ujistěte se, že máte správné ID transakce od vaší banky",
+      "step2": "Zahrňte jakékoliv referenční čísla nebo poznámky z vaší platby",
+      "step3": "Kontaktujte podporu, pokud narazíte na problémy"
+    },
+    "errors": {
+      "transactionIdRequired": "ID transakce je povinné",
+      "claimFailed": "Nepodařilo se uplatnit platbu. Zkuste to prosím znovu.",
+      "networkError": "Chyba sítě. Zkontrolujte prosím vaše připojení a zkuste to znovu."
+    }
+  },
+  "FriendRegistrationForm": {
+    "title": "Registrace přátel",
+    "guests": {
+      "title": "Informace o hostech",
+      "add": "Přidat hosta",
+      "guest": "Host",
+      "name": "Celé jméno",
+      "email": "Emailová adresa",
+      "phone": "Telefonní číslo",
+      "dietary": "Dietní omezení",
+      "dietaryPlaceholder": "např. Vegetarián, Bezlepková, Alergie",
+      "special": "Speciální požadavky",
+      "specialPlaceholder": "Jakékoliv speciální ubytování",
+      "noGuests": "Žádní hosté nepřidáni",
+      "noGuestsDescription": "Zatím jste nepřidali žádné hosty. Přidejte hosty pro jejich registraci na událost.",
+      "addFirst": "Přidejte svého prvního hosta"
+    },
+    "emergencyContact": {
+      "title": "Kontakt pro případ nouze",
+      "name": "Celé jméno",
+      "relationship": "Vztah",
+      "phone": "Telefonní číslo",
+      "email": "Emailová adresa"
+    },
+    "specialRequirements": {
+      "title": "Speciální požadavky",
+      "placeholder": "Jakékoliv speciální požadavky nebo ubytování pro vaši skupinu"
+    },
+    "terms": {
+      "accept": "Přijímám",
+      "andConditions": "obchodní podmínky"
+    },
+    "marketing": {
+      "consent": "Souhlasím se zasíláním marketingových sdělení o budoucích událostech"
+    },
+    "total": {
+      "title": "Celková cena",
+      "description": "Celková cena za všechny registrace včetně hostů"
+    },
+    "actions": {
+      "cancel": "Zrušit",
+      "submitting": "Odesílání..."
     }
   },
   "Users": {

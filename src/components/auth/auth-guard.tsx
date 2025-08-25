@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { useSession, useAuthorization } from "./session-provider";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { AuthButtons } from "./auth-buttons";
