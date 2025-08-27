@@ -6,11 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, Plus, X, User } from "lucide-react";
-import Link from "next/link";
 import type {
   CreateRegistrationRequest,
   GuestInfo,
@@ -37,12 +34,8 @@ export function FriendRegistrationForm({ event, onSubmit, onCancel }: FriendRegi
     eventId: event.id,
     numberOfGuests: 1,
     guestDetails: [],
-    specialRequirements: "",
-    acceptedTerms: false,
-    marketingConsent: false,
     emergencyContact: {
       name: "",
-      relationship: "",
       phone: "",
       email: "",
     },
@@ -50,10 +43,6 @@ export function FriendRegistrationForm({ event, onSubmit, onCancel }: FriendRegi
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const handleInputChange = (field: keyof CreateRegistrationRequest, value: any) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  };
 
   const handleGuestChange = (index: number, field: keyof GuestInfo, value: string) => {
     const newGuests = [...formData.guestDetails];
@@ -79,7 +68,6 @@ export function FriendRegistrationForm({ event, onSubmit, onCancel }: FriendRegi
             email: "",
             phone: "",
             dietaryRestrictions: "",
-            specialRequirements: "",
             metadata: {},
           } as GuestInfo,
         ],
@@ -205,19 +193,6 @@ export function FriendRegistrationForm({ event, onSubmit, onCancel }: FriendRegi
                       placeholder={t("guests.dietaryPlaceholder")}
                     />
                   </div>
-
-                  <div className="md:col-span-2">
-                    <Label htmlFor={`guest-${index}-special`}>{t("guests.special")}</Label>
-                    <Textarea
-                      id={`guest-${index}-special`}
-                      value={guest.specialRequirements}
-                      onChange={(e) =>
-                        handleGuestChange(index, "specialRequirements", e.target.value)
-                      }
-                      placeholder={t("guests.specialPlaceholder")}
-                      rows={2}
-                    />
-                  </div>
                 </div>
               </div>
             ))}
@@ -250,18 +225,6 @@ export function FriendRegistrationForm({ event, onSubmit, onCancel }: FriendRegi
               </div>
 
               <div>
-                <Label htmlFor="emergency-relationship">
-                  {t("emergencyContact.relationship")} *
-                </Label>
-                <Input
-                  id="emergency-relationship"
-                  value={formData.emergencyContact?.relationship || ""}
-                  onChange={(e) => handleEmergencyContactChange("relationship", e.target.value)}
-                  required
-                />
-              </div>
-
-              <div>
                 <Label htmlFor="emergency-phone">{t("emergencyContact.phone")} *</Label>
                 <Input
                   id="emergency-phone"
@@ -281,47 +244,6 @@ export function FriendRegistrationForm({ event, onSubmit, onCancel }: FriendRegi
                   onChange={(e) => handleEmergencyContactChange("email", e.target.value)}
                 />
               </div>
-            </div>
-          </div>
-
-          {/* Special Requirements */}
-          <div>
-            <Label htmlFor="special-requirements">{t("specialRequirements.title")}</Label>
-            <Textarea
-              id="special-requirements"
-              value={formData.specialRequirements}
-              onChange={(e) => handleInputChange("specialRequirements", e.target.value)}
-              placeholder={t("specialRequirements.placeholder")}
-              rows={3}
-            />
-          </div>
-
-          {/* Terms and Marketing */}
-          <div className="space-y-4">
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="terms"
-                checked={formData.acceptedTerms}
-                onCheckedChange={(checked) => handleInputChange("acceptedTerms", checked)}
-                required
-              />
-              <Label htmlFor="terms" className="text-sm">
-                {t("terms.accept")}{" "}
-                <Link href="/terms/" className="text-primary hover:underline">
-                  {t("terms.andConditions")}
-                </Link>
-              </Label>
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="marketing"
-                checked={formData.marketingConsent}
-                onCheckedChange={(checked) => handleInputChange("marketingConsent", checked)}
-              />
-              <Label htmlFor="marketing" className="text-sm text-gray-600">
-                {t("marketing.consent")}
-              </Label>
             </div>
           </div>
 
@@ -351,7 +273,7 @@ export function FriendRegistrationForm({ event, onSubmit, onCancel }: FriendRegi
             <Button type="button" variant="outline" onClick={onCancel}>
               {t("actions.cancel")}
             </Button>
-            <Button type="submit" disabled={loading || !formData.acceptedTerms}>
+            <Button type="submit" disabled={loading}>
               {loading ? t("actions.submitting") : t("actions.submit")}
             </Button>
           </div>

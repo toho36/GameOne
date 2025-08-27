@@ -37,8 +37,19 @@ export async function getPublicEventById(id: string): Promise<PublicEvent | null
 
     // Transform to public format
     const now = new Date();
-    const registrationStart = event.registrationStartDate || event.createdAt;
-    const registrationEnd = event.registrationEndDate || event.startDate;
+
+    // Determine if registration is open based on control mode
+    let registrationOpen = false;
+
+    if (event.registrationStartDate || event.registrationEndDate) {
+      // Both scheduled and manual control modes set dates
+      const registrationStart = event.registrationStartDate || event.createdAt;
+      const registrationEnd = event.registrationEndDate || event.startDate;
+      registrationOpen = now >= registrationStart && now <= registrationEnd;
+    } else {
+      // Fallback for events without registration dates (legacy events)
+      registrationOpen = true;
+    }
 
     const confirmedParticipants = event._count.registrations;
     const availableSpots = event.capacity
@@ -72,7 +83,7 @@ export async function getPublicEventById(id: string): Promise<PublicEvent | null
             sortOrder: 0, // Default value since not selected
           }
         : undefined,
-      registrationOpen: now >= registrationStart && now <= registrationEnd,
+      registrationOpen,
       availableSpots,
       confirmedParticipants,
       waitingListCount: 0, // TODO: Implement waiting list count
@@ -124,8 +135,19 @@ export async function getPublicEvent(slug: string): Promise<PublicEvent | null> 
 
     // Transform to public format
     const now = new Date();
-    const registrationStart = event.registrationStartDate || event.createdAt;
-    const registrationEnd = event.registrationEndDate || event.startDate;
+
+    // Determine if registration is open based on control mode
+    let registrationOpen = false;
+
+    if (event.registrationStartDate || event.registrationEndDate) {
+      // Both scheduled and manual control modes set dates
+      const registrationStart = event.registrationStartDate || event.createdAt;
+      const registrationEnd = event.registrationEndDate || event.startDate;
+      registrationOpen = now >= registrationStart && now <= registrationEnd;
+    } else {
+      // Fallback for events without registration dates (legacy events)
+      registrationOpen = true;
+    }
 
     const confirmedParticipants = event._count.registrations;
     const availableSpots = event.capacity
@@ -159,7 +181,7 @@ export async function getPublicEvent(slug: string): Promise<PublicEvent | null> 
             sortOrder: 0, // Default value since not selected
           }
         : undefined,
-      registrationOpen: now >= registrationStart && now <= registrationEnd,
+      registrationOpen,
       availableSpots,
       confirmedParticipants,
       waitingListCount: 0, // TODO: Implement waiting list count

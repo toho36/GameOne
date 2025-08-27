@@ -59,11 +59,18 @@ export function useEventCreationForm({
       const response = await fetch(`/api/events/${id}`);
       if (response.ok) {
         const event = await response.json();
+        // Determine registration control mode based on existing data
+        const hasRegistrationDates = event.registrationStartDate || event.registrationEndDate;
+        const registrationControlMode = hasRegistrationDates ? "scheduled" : "manual";
+        const registrationManualState = hasRegistrationDates ? "open" : "open"; // Default for existing events
+
         setFormData({
           ...DEFAULT_EVENT_FORM_DATA,
           ...event,
           startDate: new Date(event.startDate),
           endDate: event.endDate ? new Date(event.endDate) : undefined,
+          registrationControlMode,
+          registrationManualState,
           registrationStartDate: event.registrationStartDate
             ? new Date(event.registrationStartDate)
             : undefined,
@@ -171,6 +178,19 @@ export function useEventCreationForm({
           ...formData,
           status: formData.status || "PUBLISHED", // Use form status or default to published
           requiresPayment: !!formData.bankAccountId, // Set based on whether bank account is selected
+          // Handle registration control logic
+          registrationStartDate:
+            formData.registrationControlMode === "scheduled"
+              ? formData.registrationStartDate
+              : formData.registrationManualState === "open"
+                ? new Date()
+                : formData.startDate, // Set to start date for closed state
+          registrationEndDate:
+            formData.registrationControlMode === "scheduled"
+              ? formData.registrationEndDate
+              : formData.registrationManualState === "open"
+                ? formData.startDate
+                : formData.startDate, // Set to start date for closed state (makes it appear closed)
         }),
       });
 
@@ -218,6 +238,19 @@ export function useEventCreationForm({
         body: JSON.stringify({
           ...formData,
           status: "DRAFT", // Save as draft
+          // Handle registration control logic for drafts too
+          registrationStartDate:
+            formData.registrationControlMode === "scheduled"
+              ? formData.registrationStartDate
+              : formData.registrationManualState === "open"
+                ? new Date()
+                : formData.startDate, // Set to start date for closed state
+          registrationEndDate:
+            formData.registrationControlMode === "scheduled"
+              ? formData.registrationEndDate
+              : formData.registrationManualState === "open"
+                ? formData.startDate
+                : formData.startDate, // Set to start date for closed state
         }),
       });
 

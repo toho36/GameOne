@@ -155,8 +155,8 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         country: data.country ?? "Czech Republic",
         isOnline: data.isOnline ?? false,
         onlineUrl: null, // Not used in simplified form
-        registrationStartDate: null, // Not used in simplified form
-        registrationEndDate: null, // Not used in simplified form
+        registrationStartDate: data.registrationStartDate ?? null,
+        registrationEndDate: data.registrationEndDate ?? null,
         requiresApproval: data.requiresApproval ?? false,
         allowWaitingList: data.allowWaitingList ?? true,
         maxWaitingList: null, // Not used in simplified form

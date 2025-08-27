@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
-import { Search, Filter, X, Calendar, MapPin, Tag, DollarSign } from "lucide-react";
+import { Filter, X, Calendar, MapPin, Tag, DollarSign } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -31,7 +31,6 @@ export function EventFilters({ categories, onFiltersChange, onClearFilters }: Ev
   const isInitialMount = useRef(true);
   const [isExpanded, setIsExpanded] = useState(false);
   const [localFilters, setLocalFilters] = useState<EventFilters>({
-    search: "",
     categoryId: undefined,
     startDate: undefined,
     endDate: undefined,
@@ -60,7 +59,6 @@ export function EventFilters({ categories, onFiltersChange, onClearFilters }: Ev
 
   const handleClearFilters = () => {
     const clearedFilters: EventFilters = {
-      search: "",
       categoryId: undefined,
       startDate: undefined,
       endDate: undefined,
@@ -72,10 +70,6 @@ export function EventFilters({ categories, onFiltersChange, onClearFilters }: Ev
     };
     setLocalFilters(clearedFilters);
     onClearFilters();
-  };
-
-  const handleSearchChange = (value: string) => {
-    handleFilterChange("search", value);
   };
 
   const handleCategoryChange = (categoryId: string | undefined) => {
@@ -155,17 +149,6 @@ export function EventFilters({ categories, onFiltersChange, onClearFilters }: Ev
       </CardHeader>
 
       <CardContent className="space-y-4">
-        {/* Search Bar */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
-          <Input
-            placeholder={t("search.placeholder")}
-            value={localFilters.search || ""}
-            onChange={(e) => handleSearchChange(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-
         {/* Basic Filters Row */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {/* Category Filter */}
@@ -376,18 +359,6 @@ export function EventFilters({ categories, onFiltersChange, onClearFilters }: Ev
         {hasActiveFilters && (
           <div className="border-t border-gray-200 pt-4">
             <div className="flex flex-wrap gap-2">
-              {localFilters.search && (
-                <Badge variant="secondary" className="flex items-center gap-1">
-                  {t("search.label")}: {localFilters.search}
-                  <button
-                    onClick={() => handleSearchChange("")}
-                    className="ml-1 hover:text-red-600"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </Badge>
-              )}
-
               {localFilters.categoryId && (
                 <Badge variant="secondary" className="flex items-center gap-1">
                   {t("category.label")}:{" "}

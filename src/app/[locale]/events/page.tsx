@@ -5,7 +5,6 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { EventList } from "@/components/features/events/event-list";
 import { EventFilters } from "@/components/features/events/event-filters";
-import { EventSearch } from "@/components/features/events/event-search";
 import { Link } from "@/i18n/navigation";
 import type {
   PublicEvent,
@@ -22,7 +21,6 @@ export default function EventsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<EventFiltersType>({
-    search: "",
     categoryId: undefined,
     startDate: undefined,
     endDate: undefined,
@@ -55,7 +53,6 @@ export default function EventsPage() {
         });
 
         // Add filters to params
-        if (currentFilters.search) params.append("search", currentFilters.search);
         if (currentFilters.categoryId) params.append("categoryId", currentFilters.categoryId);
         if (currentFilters.location) params.append("location", currentFilters.location);
         if (currentFilters.startDate)
@@ -123,29 +120,9 @@ export default function EventsPage() {
     [fetchEvents]
   );
 
-  // Handle search
-  const handleSearch = useCallback(
-    (query: string) => {
-      const newFilters = { ...filters, search: query };
-      setFilters(newFilters);
-      setPagination((prev) => ({ ...prev, page: 1 }));
-      fetchEvents(1, newFilters);
-    },
-    [filters, fetchEvents]
-  );
-
-  // Handle clear search
-  const handleClearSearch = useCallback(() => {
-    const newFilters = { ...filters, search: "" };
-    setFilters(newFilters);
-    setPagination((prev) => ({ ...prev, page: 1 }));
-    fetchEvents(1, newFilters);
-  }, [filters, fetchEvents]);
-
   // Handle clear all filters
   const handleClearFilters = useCallback(() => {
     const clearedFilters: EventFiltersType = {
-      search: "",
       categoryId: undefined,
       startDate: undefined,
       endDate: undefined,
@@ -214,13 +191,6 @@ export default function EventsPage() {
       </div>
 
       <div className="space-y-6">
-        {/* Search */}
-        <EventSearch
-          onSearch={handleSearch}
-          onClear={handleClearSearch}
-          placeholder={t("search.placeholder")}
-        />
-
         {/* Filters */}
         <EventFilters
           onFiltersChange={handleFiltersChange}

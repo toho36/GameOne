@@ -91,6 +91,35 @@ export const createEventCreationSchema = (messages?: {
         })
         .optional(),
 
+      // Registration control
+      registrationStartDate: z
+        .union([z.date(), z.string()])
+        .transform((val) => {
+          if (typeof val === "string") {
+            const date = new Date(val);
+            if (isNaN(date.getTime())) {
+              throw new Error("Invalid registration start date format");
+            }
+            return date;
+          }
+          return val;
+        })
+        .optional(),
+
+      registrationEndDate: z
+        .union([z.date(), z.string()])
+        .transform((val) => {
+          if (typeof val === "string") {
+            const date = new Date(val);
+            if (isNaN(date.getTime())) {
+              throw new Error("Invalid registration end date format");
+            }
+            return date;
+          }
+          return val;
+        })
+        .optional(),
+
       // Payment settings
       bankAccountId: z.string().optional(),
 

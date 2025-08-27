@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import { Calendar, MapPin, Users, Tag, Clock } from "lucide-react";
+import { Calendar, MapPin, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { PublicEvent } from "@/types/features/event-registration";
@@ -11,9 +11,7 @@ interface EventDetailProps {
 export function EventDetail({ event }: EventDetailProps) {
   const formatDate = (date: Date) => format(date, "PPP");
   const formatTime = (date: Date) => format(date, "p");
-  const formatDateTime = (date: Date) => format(date, "PPP p");
 
-  const isRegistrationOpen = event.registrationOpen;
   const hasAvailableSpots = event.availableSpots !== undefined && event.availableSpots > 0;
 
   return (
@@ -90,65 +88,7 @@ export function EventDetail({ event }: EventDetailProps) {
             </div>
           </CardContent>
         </Card>
-
-        {/* Price */}
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-sm font-medium text-gray-600">
-              <Tag className="h-4 w-4" />
-              Price
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="font-semibold text-gray-900">
-              {event.price ? `${event.price} ${event.currency}` : "Free"}
-            </p>
-          </CardContent>
-        </Card>
       </div>
-
-      {/* Registration Status */}
-      <Card className="border-2">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Clock className="h-5 w-5" />
-            Registration Status
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-gray-600">Registration:</span>
-              <Badge variant={isRegistrationOpen ? "default" : "secondary"}>
-                {isRegistrationOpen ? "Open" : "Closed"}
-              </Badge>
-            </div>
-
-            {event.registrationStartDate && (
-              <div className="flex items-center justify-between">
-                <span className="text-gray-600">Opens:</span>
-                <span className="font-medium">{formatDateTime(event.registrationStartDate)}</span>
-              </div>
-            )}
-
-            {event.registrationEndDate && (
-              <div className="flex items-center justify-between">
-                <span className="text-gray-600">Closes:</span>
-                <span className="font-medium">{formatDateTime(event.registrationEndDate)}</span>
-              </div>
-            )}
-
-            <div className="flex items-center justify-between">
-              <span className="text-gray-600">Available Spots:</span>
-              <span
-                className={`font-medium ${hasAvailableSpots ? "text-green-600" : "text-red-600"}`}
-              >
-                {event.availableSpots !== undefined ? event.availableSpots : "Unlimited"}
-              </span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Description */}
       <Card>
@@ -179,26 +119,6 @@ export function EventDetail({ event }: EventDetailProps) {
           </CardContent>
         </Card>
       )}
-
-      {/* Additional Information */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Additional Information</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3 text-sm text-gray-600">
-            <div className="flex items-center justify-between">
-              <span>Approval Required:</span>
-              <span className="font-medium">{event.requiresApproval ? "Yes" : "No"}</span>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <span>Event Type:</span>
-              <span className="font-medium">Public</span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }

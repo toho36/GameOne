@@ -107,11 +107,8 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
         userId: "anonymous", // TODO: Get from authenticated user
         status: "PENDING",
         groupSize: body.numberOfGuests,
-        specialRequests: body.specialRequirements,
         notes: JSON.stringify({
           emergencyContact: body.emergencyContact,
-          marketingConsent: body.marketingConsent,
-          acceptedTerms: body.acceptedTerms,
           guestDetails: body.guestDetails,
           registrationDate: new Date().toISOString(),
         }),

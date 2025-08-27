@@ -107,7 +107,6 @@ export interface GuestInfo {
   email?: string;
   phone?: string;
   dietaryRestrictions?: string;
-  specialRequirements?: string;
   metadata?: Record<string, any>;
 }
 
@@ -187,15 +186,11 @@ export interface RegistrationFormData {
   eventId: string;
   numberOfGuests: number;
   guestDetails: GuestInfo[];
-  specialRequirements?: string;
-  acceptedTerms: boolean;
-  marketingConsent?: boolean;
   emergencyContact?: EmergencyContact;
 }
 
 export interface EmergencyContact {
   name: string;
-  relationship: string;
   phone: string;
   email?: string;
 }
@@ -206,17 +201,13 @@ export interface RegistrationWizardState {
   totalSteps: number;
   eventId: string;
   formData: {
-    personalInfo: {
-      acceptedTerms: boolean;
-      marketingConsent?: boolean;
-    };
+    personalInfo: {};
     guests: GuestInfo[];
     payment: {
       method?: PaymentMethod;
       billingAddress?: Address;
     };
     additional: {
-      specialRequirements?: string;
       dietaryRestrictions?: string;
       emergencyContact?: EmergencyContact;
     };
@@ -245,9 +236,6 @@ export interface CreateRegistrationRequest {
   eventId: string;
   numberOfGuests: number;
   guestDetails: GuestInfo[];
-  specialRequirements?: string;
-  acceptedTerms: boolean;
-  marketingConsent?: boolean;
   emergencyContact?: EmergencyContact;
 }
 
@@ -268,7 +256,6 @@ export interface RegistrationStatusResponse {
 
 // Event filters
 export interface EventFilters {
-  search?: string;
   status?: EventStatus;
   categoryId?: string;
   startDate?: Date;

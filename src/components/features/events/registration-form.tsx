@@ -6,10 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { User } from "lucide-react";
-import Link from "next/link";
 import type {
   CreateRegistrationRequest,
   EmergencyContact,
@@ -33,12 +31,8 @@ export function RegistrationForm({ event, onSubmit }: RegistrationFormProps) {
     eventId: event.id,
     numberOfGuests: 1,
     guestDetails: [],
-    specialRequirements: "",
-    acceptedTerms: false,
-    marketingConsent: false,
     emergencyContact: {
       name: "",
-      relationship: "",
       phone: "",
       email: "",
     },
@@ -46,10 +40,6 @@ export function RegistrationForm({ event, onSubmit }: RegistrationFormProps) {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const handleInputChange = (field: keyof CreateRegistrationRequest, value: any) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  };
 
   const handleEmergencyContactChange = (field: keyof EmergencyContact, value: string) => {
     setFormData((prev) => ({
@@ -108,21 +98,6 @@ export function RegistrationForm({ event, onSubmit }: RegistrationFormProps) {
         </CardContent>
       </Card>
 
-      {/* Special Requirements */}
-      <div>
-        <Label htmlFor="specialRequirements" className="text-sm font-medium text-gray-700">
-          {t("specialRequirements.label")}
-        </Label>
-        <Textarea
-          id="specialRequirements"
-          value={formData.specialRequirements}
-          onChange={(e) => handleInputChange("specialRequirements", e.target.value)}
-          placeholder={t("specialRequirements.placeholder")}
-          rows={3}
-          className="mt-1"
-        />
-      </div>
-
       {/* Emergency Contact */}
       <div className="space-y-4">
         <Label className="text-sm font-medium text-gray-700">{t("emergencyContact.label")}</Label>
@@ -136,19 +111,6 @@ export function RegistrationForm({ event, onSubmit }: RegistrationFormProps) {
               value={formData.emergencyContact?.name || ""}
               onChange={(e) => handleEmergencyContactChange("name", e.target.value)}
               placeholder={t("emergencyContact.namePlaceholder")}
-              className="mt-1"
-              required
-            />
-          </div>
-
-          <div>
-            <Label className="text-sm font-medium text-gray-700">
-              {t("emergencyContact.relationship")} *
-            </Label>
-            <Input
-              value={formData.emergencyContact?.relationship || ""}
-              onChange={(e) => handleEmergencyContactChange("relationship", e.target.value)}
-              placeholder={t("emergencyContact.relationshipPlaceholder")}
               className="mt-1"
               required
             />
@@ -180,39 +142,6 @@ export function RegistrationForm({ event, onSubmit }: RegistrationFormProps) {
               className="mt-1"
             />
           </div>
-        </div>
-      </div>
-
-      {/* Terms and Conditions */}
-      <div className="space-y-4">
-        <div className="flex items-start gap-3">
-          <input
-            type="checkbox"
-            id="acceptedTerms"
-            checked={formData.acceptedTerms}
-            onChange={(e) => handleInputChange("acceptedTerms", e.target.checked)}
-            className="mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-            required
-          />
-          <Label htmlFor="acceptedTerms" className="text-sm text-gray-700">
-            {t("terms.accept")}{" "}
-            <Link href="/terms" className="text-primary hover:underline">
-              {t("terms.link")}
-            </Link>
-          </Label>
-        </div>
-
-        <div className="flex items-start gap-3">
-          <input
-            type="checkbox"
-            id="marketingConsent"
-            checked={formData.marketingConsent}
-            onChange={(e) => handleInputChange("marketingConsent", e.target.checked)}
-            className="mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-          />
-          <Label htmlFor="marketingConsent" className="text-sm text-gray-700">
-            {t("marketing.consent")}
-          </Label>
         </div>
       </div>
 

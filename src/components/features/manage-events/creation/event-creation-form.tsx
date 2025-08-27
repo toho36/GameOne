@@ -12,6 +12,10 @@ import type { EventCreationFormProps } from "@/types/components/event-creation-f
 import { useEventCreationForm } from "./hooks/use-event-creation-form";
 import { useBankAccounts } from "./hooks/use-bank-accounts";
 import { EventFormActions } from "./event-form-actions";
+import { EventBasicFields } from "./components/event-basic-fields";
+import { EventScheduleFields } from "./components/event-schedule-fields";
+import { EventPaymentSettings } from "./components/event-payment-settings";
+import { EventRegistrationControl } from "./components/event-registration-control";
 
 export function EventCreationForm({
   initialData,
@@ -74,7 +78,6 @@ export function EventCreationForm({
         if (onSuccess) {
           onSuccess(response);
         } else {
-          // Always navigate back to events list
           router.push(`/manage-events`);
         }
       } else {
@@ -203,188 +206,41 @@ export function EventCreationForm({
         </div>
       )}
 
-      {/* Simplified Form Fields */}
+      {/* Form Fields */}
       <div className="space-y-6">
-        {/* Title */}
-        <div className="space-y-2">
-          <label htmlFor="title" className="block text-sm font-medium text-gray-900">
-            {t("form.labels.title")} *
-          </label>
-          <input
-            type="text"
-            id="title"
-            value={formData.title}
-            onChange={(e) => updateFormData({ title: e.target.value })}
-            placeholder={t("form.placeholders.title")}
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            disabled={isLoading}
-          />
-          {errors.title && <p className="text-sm text-red-600">{errors.title}</p>}
-        </div>
+        {/* Basic Information */}
+        <EventBasicFields
+          formData={formData}
+          errors={errors}
+          isLoading={isLoading}
+          updateFormData={updateFormData}
+        />
 
-        {/* Description */}
-        <div className="space-y-2">
-          <label htmlFor="description" className="block text-sm font-medium text-gray-900">
-            {t("form.labels.description")} *
-          </label>
-          <textarea
-            id="description"
-            rows={4}
-            value={formData.description || ""}
-            onChange={(e) => updateFormData({ description: e.target.value })}
-            placeholder={t("form.placeholders.description")}
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            disabled={isLoading}
-          />
-          {errors.description && <p className="text-sm text-red-600">{errors.description}</p>}
-        </div>
-
-        {/* Place/Address */}
-        <div className="space-y-2">
-          <label htmlFor="venue" className="block text-sm font-medium text-gray-900">
-            {t("form.labels.venue")}
-          </label>
-          <input
-            type="text"
-            id="venue"
-            value={formData.venue || ""}
-            onChange={(e) => updateFormData({ venue: e.target.value })}
-            placeholder={t("form.placeholders.venue")}
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            disabled={isLoading}
-          />
-          {errors.venue && <p className="text-sm text-red-600">{errors.venue}</p>}
-        </div>
-
-        {/* Price and Capacity Row */}
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-          {/* Price */}
-          <div className="space-y-2">
-            <label htmlFor="price" className="block text-sm font-medium text-gray-900">
-              {t("form.labels.price")} (CZK)
-            </label>
-            <input
-              type="number"
-              id="price"
-              min="0"
-              value={formData.price || 0}
-              onChange={(e) => updateFormData({ price: parseFloat(e.target.value) || 0 })}
-              placeholder={t("form.placeholders.price")}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              disabled={isLoading}
-            />
-            {errors.price && <p className="text-sm text-red-600">{errors.price}</p>}
-          </div>
-
-          {/* Capacity */}
-          <div className="space-y-2">
-            <label htmlFor="capacity" className="block text-sm font-medium text-gray-900">
-              {t("form.labels.capacity")}
-            </label>
-            <input
-              type="number"
-              id="capacity"
-              min="1"
-              value={formData.capacity}
-              onChange={(e) => updateFormData({ capacity: parseInt(e.target.value) || 1 })}
-              placeholder={t("form.placeholders.capacity")}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              disabled={isLoading}
-            />
-            {errors.capacity && <p className="text-sm text-red-600">{errors.capacity}</p>}
-          </div>
-        </div>
-
-        {/* Date and Time Row */}
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-          {/* Start Date & Time */}
-          <div className="space-y-2">
-            <label htmlFor="startDate" className="block text-sm font-medium text-gray-900">
-              {t("form.labels.startDate")} *
-            </label>
-            <input
-              type="datetime-local"
-              id="startDate"
-              value={
-                formData.startDate
-                  ? new Date(
-                      formData.startDate.getTime() - formData.startDate.getTimezoneOffset() * 60000
-                    )
-                      .toISOString()
-                      .slice(0, 16)
-                  : ""
-              }
-              onChange={(e) => updateFormData({ startDate: new Date(e.target.value) })}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              disabled={isLoading}
-            />
-            {errors.startDate && <p className="text-sm text-red-600">{errors.startDate}</p>}
-          </div>
-
-          {/* End Date & Time */}
-          <div className="space-y-2">
-            <label htmlFor="endDate" className="block text-sm font-medium text-gray-900">
-              {t("form.labels.endDate")}
-            </label>
-            <input
-              type="datetime-local"
-              id="endDate"
-              value={
-                formData.endDate
-                  ? new Date(
-                      formData.endDate.getTime() - formData.endDate.getTimezoneOffset() * 60000
-                    )
-                      .toISOString()
-                      .slice(0, 16)
-                  : ""
-              }
-              onChange={(e) =>
-                updateFormData({ endDate: e.target.value ? new Date(e.target.value) : undefined })
-              }
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              disabled={isLoading}
-            />
-            {errors.endDate && <p className="text-sm text-red-600">{errors.endDate}</p>}
-          </div>
-        </div>
+        {/* Date and Time */}
+        <EventScheduleFields
+          formData={formData}
+          errors={errors}
+          isLoading={isLoading}
+          updateFormData={updateFormData}
+        />
 
         {/* Bank Account for Payments */}
-        <div className="space-y-2">
-          <label htmlFor="bankAccount" className="block text-sm font-medium text-gray-900">
-            {t("form.labels.bankAccount")}
-          </label>
-          <select
-            id="bankAccount"
-            value={formData.bankAccountId || ""}
-            onChange={(e) => updateFormData({ bankAccountId: e.target.value })}
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            disabled={isLoading || isBankAccountsLoading}
-          >
-            <option value="">{t("form.placeholders.selectBankAccount")}</option>
-            {bankAccounts.map((account) => (
-              <option key={account.id} value={account.id}>
-                {account.name} - {account.bankName}
-              </option>
-            ))}
-          </select>
-          {bankAccounts.length > 0 && formData.bankAccountId && (
-            <div className="mt-2 rounded-md bg-gray-50 p-3 text-sm text-gray-600">
-              <div className="font-medium">
-                {bankAccounts.find((a) => a.id === formData.bankAccountId)?.name} (
-                {t("form.labels.default")})
-              </div>
-              <div>
-                {t("form.labels.account")}:{" "}
-                {bankAccounts.find((a) => a.id === formData.bankAccountId)?.accountNumber}
-              </div>
-              <div>
-                {bankAccounts.find((a) => a.id === formData.bankAccountId)?.bankName} -{" "}
-                {t("form.labels.mainEventAccount")}
-              </div>
-            </div>
-          )}
-          {errors.bankAccountId && <p className="text-sm text-red-600">{errors.bankAccountId}</p>}
-        </div>
+        <EventPaymentSettings
+          formData={formData}
+          errors={errors}
+          bankAccounts={bankAccounts}
+          isLoading={isLoading}
+          isBankAccountsLoading={isBankAccountsLoading}
+          updateFormData={updateFormData}
+        />
+
+        {/* Registration Control */}
+        <EventRegistrationControl
+          formData={formData}
+          errors={errors}
+          isLoading={isLoading}
+          updateFormData={updateFormData}
+        />
 
         {/* Visibility */}
         <div className="space-y-2">
