@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { useTranslations } from "next-intl";
 
 import type { EventCreationFormData, EventCreationFormErrors } from "@/types/event";
 
@@ -9,6 +8,7 @@ interface EventRegistrationControlProps {
   formData: EventCreationFormData;
   errors: EventCreationFormErrors;
   isLoading: boolean;
+  // eslint-disable-next-line no-unused-vars
   updateFormData: (data: Partial<EventCreationFormData>) => void;
 }
 
@@ -18,7 +18,6 @@ export function EventRegistrationControl({
   isLoading,
   updateFormData,
 }: EventRegistrationControlProps) {
-  const t = useTranslations("Events");
 
   return (
     <div className="space-y-4">
@@ -124,9 +123,7 @@ export function EventRegistrationControl({
                   }
                   onChange={(e) =>
                     updateFormData({
-                      registrationStartDate: e.target.value
-                        ? new Date(e.target.value)
-                        : undefined,
+                      registrationStartDate: e.target.value ? new Date(e.target.value) : undefined,
                     })
                   }
                   className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"

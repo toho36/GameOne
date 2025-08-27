@@ -9,6 +9,7 @@ interface EventScheduleFieldsProps {
   formData: EventCreationFormData;
   errors: EventCreationFormErrors;
   isLoading: boolean;
+  // eslint-disable-next-line no-unused-vars
   updateFormData: (data: Partial<EventCreationFormData>) => void;
 }
 
@@ -56,9 +57,7 @@ export function EventScheduleFields({
           id="endDate"
           value={
             formData.endDate
-              ? new Date(
-                  formData.endDate.getTime() - formData.endDate.getTimezoneOffset() * 60000
-                )
+              ? new Date(formData.endDate.getTime() - formData.endDate.getTimezoneOffset() * 60000)
                   .toISOString()
                   .slice(0, 16)
               : ""
