@@ -12,6 +12,7 @@ import type {
   EventFilters as EventFiltersType,
   PaginationInfo,
 } from "@/types/features/event-registration";
+import { getJson } from "@/lib/api/client";
 
 export default function EventsPage() {
   const t = useTranslations("Events");
@@ -67,20 +68,24 @@ export default function EventsPage() {
         if (currentFilters.tags && currentFilters.tags.length > 0)
           params.append("tags", currentFilters.tags.join(","));
 
-        const response = await fetch(`/api/events/public?${params}`);
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch events");
-        }
-
-        const data = await response.json();
-
-        if (data.success) {
-          setEvents(data.data);
-          setPagination(data.pagination);
-        } else {
-          throw new Error(data.error?.message || "Failed to fetch events");
-        }
+        const payload = await getJson<any>(`/api/events/public?${params}`);
+        const nextEvents: PublicEvent[] = Array.isArray(payload)
+          ? payload
+          : Array.isArray(payload?.data)
+            ? payload.data
+            : Array.isArray(payload?.events)
+              ? payload.events
+              : [];
+        const nextPagination: PaginationInfo = payload?.pagination ?? {
+          page,
+          limit: pagination.limit,
+          total: nextEvents.length,
+          totalPages: 1,
+          hasNext: false,
+          hasPrev: false,
+        };
+        setEvents(nextEvents);
+        setPagination(nextPagination);
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : "An error occurred";
         setError(errorMessage);
@@ -94,17 +99,13 @@ export default function EventsPage() {
   // Fetch categories
   const fetchCategories = async () => {
     try {
-      const response = await fetch("/api/events/categories");
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch categories");
-      }
-
-      const data = await response.json();
-
-      if (data.success) {
-        setCategories(data.data);
-      }
+      const payload = await getJson<any>("/api/events/categories");
+      const next = Array.isArray(payload)
+        ? payload
+        : Array.isArray(payload?.data)
+          ? payload.data
+          : [];
+      setCategories(next);
     } catch {
       // Silently fail for categories, not critical
     }

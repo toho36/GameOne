@@ -3,6 +3,8 @@
 import { useState, useCallback, useEffect } from "react";
 
 import { logger } from "@/lib/logger";
+import { getJson, postJson, putJson } from "@/lib/api/client";
+import { normalizeApiError } from "@/lib/api/errors";
 import { validateEventCreation, formatValidationErrors } from "@/lib/validation/event-creation";
 import { DEFAULT_EVENT_FORM_DATA } from "@/types/event";
 
@@ -56,31 +58,27 @@ export function useEventCreationForm({
   const loadEventData = async (id: string) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/events/${id}`);
-      if (response.ok) {
-        const event = await response.json();
-        // Determine registration control mode based on existing data
-        const hasRegistrationDates = event.registrationStartDate || event.registrationEndDate;
-        const registrationControlMode = hasRegistrationDates ? "scheduled" : "manual";
-        const registrationManualState = hasRegistrationDates ? "open" : "open"; // Default for existing events
+      const event = await getJson<any>(`/api/events/${id}`);
+      const hasRegistrationDates = event.registrationStartDate || event.registrationEndDate;
+      const registrationControlMode = hasRegistrationDates ? "scheduled" : "manual";
+      const registrationManualState = hasRegistrationDates ? "open" : "open"; // Default for existing events
 
-        setFormData({
-          ...DEFAULT_EVENT_FORM_DATA,
-          ...event,
-          startDate: new Date(event.startDate),
-          endDate: event.endDate ? new Date(event.endDate) : undefined,
-          registrationControlMode,
-          registrationManualState,
-          registrationStartDate: event.registrationStartDate
-            ? new Date(event.registrationStartDate)
-            : undefined,
-          registrationEndDate: event.registrationEndDate
-            ? new Date(event.registrationEndDate)
-            : undefined,
-        });
-      }
+      setFormData({
+        ...DEFAULT_EVENT_FORM_DATA,
+        ...event,
+        startDate: new Date(event.startDate),
+        endDate: event.endDate ? new Date(event.endDate) : undefined,
+        registrationControlMode,
+        registrationManualState,
+        registrationStartDate: event.registrationStartDate
+          ? new Date(event.registrationStartDate)
+          : undefined,
+        registrationEndDate: event.registrationEndDate
+          ? new Date(event.registrationEndDate)
+          : undefined,
+      });
     } catch (error) {
-      logger.error("Failed to load event data for editing", error);
+      logger.error("Failed to load event data for editing", normalizeApiError(error));
     } finally {
       setIsLoading(false);
     }
@@ -160,62 +158,41 @@ export function useEventCreationForm({
       }
 
       const endpoint = mode === "create" ? "/api/events" : `/api/events/${eventId}`;
-      const method = mode === "create" ? "POST" : "PUT";
-
-      logger.debug("Sending event creation request", {
-        endpoint,
-        method,
+      const payload = {
+        ...formData,
         status: formData.status || "PUBLISHED",
         requiresPayment: !!formData.bankAccountId,
-      });
+        registrationStartDate:
+          formData.registrationControlMode === "scheduled"
+            ? formData.registrationStartDate
+            : formData.registrationManualState === "open"
+              ? new Date()
+              : formData.startDate,
+        registrationEndDate:
+          formData.registrationControlMode === "scheduled"
+            ? formData.registrationEndDate
+            : formData.registrationManualState === "open"
+              ? formData.startDate
+              : formData.startDate,
+      };
 
-      const response = await fetch(endpoint, {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ...formData,
-          status: formData.status || "PUBLISHED", // Use form status or default to published
-          requiresPayment: !!formData.bankAccountId, // Set based on whether bank account is selected
-          // Handle registration control logic
-          registrationStartDate:
-            formData.registrationControlMode === "scheduled"
-              ? formData.registrationStartDate
-              : formData.registrationManualState === "open"
-                ? new Date()
-                : formData.startDate, // Set to start date for closed state
-          registrationEndDate:
-            formData.registrationControlMode === "scheduled"
-              ? formData.registrationEndDate
-              : formData.registrationManualState === "open"
-                ? formData.startDate
-                : formData.startDate, // Set to start date for closed state (makes it appear closed)
-        }),
-      });
+      logger.debug("Sending event creation request", { endpoint, mode });
 
-      const result = await response.json();
-      logger.debug("Event creation response received", { status: response.status });
+      const result =
+        mode === "create"
+          ? await postJson<any>(endpoint, payload)
+          : await putJson<any>(endpoint, payload);
 
-      if (response.ok) {
-        return {
-          success: true,
-          event: result.event,
-          message:
-            mode === "create" ? "Event created successfully!" : "Event updated successfully!",
-        };
-      } else {
-        return {
-          success: false,
-          errors: result.errors || {},
-          message: result.message || "An error occurred while saving the event.",
-        };
-      }
+      return {
+        success: true,
+        event: (result as any)?.event,
+        message: mode === "create" ? "Event created successfully!" : "Event updated successfully!",
+      };
     } catch (error) {
-      logger.error("Event form submission failed", error);
+      logger.error("Event form submission failed", normalizeApiError(error));
       return {
         success: false,
-        message: "An unexpected error occurred. Please try again.",
+        message: normalizeApiError(error),
       };
     } finally {
       setIsSubmitting(false);
@@ -228,52 +205,39 @@ export function useEventCreationForm({
 
     try {
       const endpoint = mode === "create" ? "/api/events" : `/api/events/${eventId}`;
-      const method = mode === "create" ? "POST" : "PUT";
 
-      const response = await fetch(endpoint, {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ...formData,
-          status: "DRAFT", // Save as draft
-          // Handle registration control logic for drafts too
-          registrationStartDate:
-            formData.registrationControlMode === "scheduled"
-              ? formData.registrationStartDate
-              : formData.registrationManualState === "open"
-                ? new Date()
-                : formData.startDate, // Set to start date for closed state
-          registrationEndDate:
-            formData.registrationControlMode === "scheduled"
-              ? formData.registrationEndDate
-              : formData.registrationManualState === "open"
-                ? formData.startDate
-                : formData.startDate, // Set to start date for closed state
-        }),
-      });
+      const payload = {
+        ...formData,
+        status: "DRAFT",
+        registrationStartDate:
+          formData.registrationControlMode === "scheduled"
+            ? formData.registrationStartDate
+            : formData.registrationManualState === "open"
+              ? new Date()
+              : formData.startDate,
+        registrationEndDate:
+          formData.registrationControlMode === "scheduled"
+            ? formData.registrationEndDate
+            : formData.registrationManualState === "open"
+              ? formData.startDate
+              : formData.startDate,
+      };
 
-      const result = await response.json();
+      const result =
+        mode === "create"
+          ? await postJson<any>(endpoint, payload)
+          : await putJson<any>(endpoint, payload);
 
-      if (response.ok) {
-        return {
-          success: true,
-          event: result.event,
-          message: "Draft saved successfully!",
-        };
-      } else {
-        return {
-          success: false,
-          errors: result.errors || {},
-          message: result.message || "Failed to save draft.",
-        };
-      }
+      return {
+        success: true,
+        event: (result as any)?.event,
+        message: "Draft saved successfully!",
+      };
     } catch (error) {
-      logger.error("Event draft save failed", error);
+      logger.error("Event draft save failed", normalizeApiError(error));
       return {
         success: false,
-        message: "Failed to save draft. Please try again.",
+        message: normalizeApiError(error),
       };
     } finally {
       setIsSubmitting(false);

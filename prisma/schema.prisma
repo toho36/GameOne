@@ -52,15 +52,12 @@ model User {
   notificationLogs             NotificationLog[]
   payments                     Payment[]
   pendingPayments              PendingPayment[]
-  profile                      Profile?
   performedRegistrationActions RegistrationHistory[] @relation("RegistrationHistoryPerformedBy")
   registrationHistory          RegistrationHistory[] @relation("RegistrationHistoryUser")
   eventRegistrations           Registration[]
   assignedUserRoles            UserRole[]            @relation("UserRoleAssigner")
   userRoles                    UserRole[]
   primaryRole                  Role?                 @relation(fields: [primaryRoleId], references: [id])
-  createdVideoClips            VideoClip[]           @relation("VideoClipCreator")
-  videoReactions               VideoReaction[]
   waitingListEntries           WaitingList[]
 
   @@index([email])
@@ -89,27 +86,6 @@ model UserRole {
   @@map("user_roles")
 }
 
-model Profile {
-  id                    String   @id @default(cuid())
-  userId                String   @unique
-  bio                   String?
-  avatar                String?
-  company               String?
-  jobTitle              String?
-  website               String?
-  linkedin              String?
-  twitter               String?
-  emailNotifications    Boolean  @default(true)
-  smsNotifications      Boolean  @default(false)
-  marketingEmails       Boolean  @default(false)
-  emergencyContactName  String?
-  emergencyContactPhone String?
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
-  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("profiles")
-}
 
 model Event {
   id                    String                @id @default(cuid())
@@ -157,7 +133,6 @@ model Event {
   pendingPayments       PendingPayment[]
   registrationHistory   RegistrationHistory[]
   registrations         Registration[]
-  videoClips            VideoClip[]
   waitingList           WaitingList[]
 
   @@index([status, startDate])
@@ -539,81 +514,8 @@ model NotificationLog {
   @@map("notification_logs")
 }
 
-model VideoCategory {
-  id           String      @id @default(cuid())
-  name         String      @unique
-  slug         String      @unique
-  description  String?
-  color        String?
-  icon         String?
-  isActive     Boolean     @default(true)
-  sortOrder    Int         @default(0)
-  translations Json?
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
-  videoClips   VideoClip[]
 
-  @@index([isActive, sortOrder])
-  @@index([slug])
-  @@map("video_categories")
-}
 
-model VideoClip {
-  id              String          @id @default(cuid())
-  title           String
-  description     String?
-  slug            String          @unique
-  youtubeVideoId  String          @unique
-  youtubeUrl      String
-  thumbnailUrl    String?
-  duration        Int?
-  embedCode       String?
-  status          VideoClipStatus @default(DRAFT)
-  privacy         VideoPrivacy    @default(PUBLIC)
-  tags            String[]
-  language        String          @default("en")
-  moderatedBy     String?
-  moderatedAt     DateTime?
-  moderationNotes String?
-  likeCount       Int             @default(0)
-  eventId         String?
-  categoryId      String?
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-  publishedAt     DateTime?
-  creatorId       String
-  category        VideoCategory?  @relation(fields: [categoryId], references: [id])
-  creator         User            @relation("VideoClipCreator", fields: [creatorId], references: [id], onDelete: Cascade)
-  event           Event?          @relation(fields: [eventId], references: [id])
-  reactions       VideoReaction[]
-
-  @@index([status, privacy, publishedAt])
-  @@index([creatorId, status])
-  @@index([eventId, status])
-  @@index([categoryId, status])
-  @@index([tags])
-  @@index([youtubeVideoId])
-  @@index([likeCount, publishedAt])
-  @@index([createdAt, status])
-  @@index([language, status])
-  @@map("video_clips")
-}
-
-model VideoReaction {
-  id        String       @id @default(cuid())
-  type      ReactionType
-  videoId   String
-  userId    String
-  createdAt DateTime     @default(now())
-  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  video     VideoClip    @relation(fields: [videoId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, videoId])
-  @@index([videoId, type])
-  @@index([userId, createdAt])
-  @@index([type, createdAt])
-  @@map("video_reactions")
-}
 
 enum UserStatus {
   ACTIVE
@@ -753,31 +655,5 @@ enum NotificationStatus {
   BOUNCED
 }
 
-enum VideoClipStatus {
-  DRAFT
-  PUBLISHED
-  MODERATED
-  REJECTED
-  ARCHIVED
-}
 
-enum VideoPrivacy {
-  PUBLIC
-  PRIVATE
-  EVENT_ONLY
-  ROLE_RESTRICTED
-}
 
-enum ReactionType {
-  LIKE
-  LOVE
-  LAUGH
-  WOW
-  ANGRY
-  SAD
-  FIRE
-  CLAP
-  HEART_EYES
-  THUMBS_UP
-  THUMBS_DOWN
-}

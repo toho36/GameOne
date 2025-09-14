@@ -66,7 +66,7 @@ export async function getAuthenticatedUser(): Promise<
     };
   }
 
-  // Get user from database with auto-creation
+  // Try to find user by Kinde ID first
   let dbUser = await prisma.user.findUnique({
     where: { kindeId: kindeUser.id },
     include: {
@@ -78,6 +78,35 @@ export async function getAuthenticatedUser(): Promise<
     },
   });
 
+  // If not found, try linking existing user by email and attach kindeId
+  if (!dbUser && kindeUser.email) {
+    const existingByEmail = await prisma.user.findUnique({
+      where: { email: kindeUser.email },
+      include: {
+        primaryRole: true,
+        userRoles: {
+          where: { isActive: true },
+          include: { role: true },
+        },
+      },
+    });
+
+    if (existingByEmail) {
+      dbUser = await prisma.user.update({
+        where: { id: existingByEmail.id },
+        data: { kindeId: kindeUser.id },
+        include: {
+          primaryRole: true,
+          userRoles: {
+            where: { isActive: true },
+            include: { role: true },
+          },
+        },
+      });
+    }
+  }
+
+  // If still not found, create a new user with defaults
   if (!dbUser) {
     dbUser = await createUserWithDefaults(kindeUser);
   }
@@ -104,13 +133,23 @@ export function checkUserPermissions(
     if (role.name === "ADMIN") return true;
 
     try {
-      const permissions = Array.isArray(role.permissions)
+      const permissions: string[] = Array.isArray(role.permissions)
         ? role.permissions
         : JSON.parse(role.permissions as string);
 
-      return requiredPermissions.some(
-        (perm) => permissions.includes(perm) || permissions.includes("admin.full_access")
-      );
+      // Normalize permissions (trim spaces)
+      const perms = permissions.map((p) => p.trim());
+
+      const has = (required: string): boolean => {
+        if (perms.includes("*")) return true; // global wildcard
+        if (perms.includes("admin.full_access")) return true; // legacy admin override
+        if (perms.includes(required)) return true; // exact match
+        const domain = required.split(".")[0];
+        if (perms.includes(`${domain}.*`)) return true; // domain wildcard
+        return false;
+      };
+
+      return requiredPermissions.some((perm) => has(perm));
     } catch {
       return false;
     }

@@ -15,15 +15,7 @@ async function main() {
       priority: 1,
       isSystem: true,
       isDefault: true,
-      permissions: [
-        "events.view",
-        "events.register",
-        "profile.update",
-        "profile.view",
-        "videos.view",
-        "videos.create",
-        "videos.react",
-      ],
+      permissions: ["events.view", "events.register"],
     },
     {
       name: "REGULAR",
@@ -33,16 +25,7 @@ async function main() {
       priority: 2,
       isSystem: true,
       isDefault: false,
-      permissions: [
-        "events.view",
-        "events.register",
-        "events.early_access",
-        "profile.update",
-        "profile.view",
-        "videos.view",
-        "videos.create",
-        "videos.react",
-      ],
+      permissions: ["events.view", "events.register", "events.early_access"],
     },
     {
       name: "EVENT_MANAGER",
@@ -56,14 +39,9 @@ async function main() {
         "events.view",
         "events.create",
         "events.update",
-        "events.manage_registrations",
-        "events.export_data",
-        "users.view_registrations",
-        "profile.update",
-        "profile.view",
-        "videos.view",
-        "videos.create",
-        "videos.react",
+        "events.export",
+        "registrations.view",
+        "registrations.manage",
       ],
     },
     {
@@ -79,40 +57,31 @@ async function main() {
         "events.create",
         "events.update",
         "events.delete",
-        "events.manage_registrations",
-        "events.export_data",
+        "events.export",
+        "registrations.view",
+        "registrations.manage",
         "users.view",
         "users.moderate",
-        "users.view_registrations",
-        "users.export_data",
+        "users.export",
         "payments.view",
-        "payments.manage_accounts",
-        "payments.refund",
         "payments.verify",
-        "bankaccounts.create",
-        "bankaccounts.update",
-        "bankaccounts.view",
-        "bankaccounts.delete",
+        "payments.refund",
+        "bank-accounts.create",
+        "bank-accounts.update",
+        "bank-accounts.view",
+        "bank-accounts.delete",
         "reports.view",
         "reports.financial",
         "reports.analytics",
         "reports.export",
-        "documents.view",
-        "documents.upload",
-        "documents.delete",
-        "categories.create",
-        "categories.update",
-        "categories.delete",
+        "event-documents.view",
+        "event-documents.upload",
+        "event-documents.delete",
+        "event-categories.create",
+        "event-categories.update",
+        "event-categories.delete",
         "audit.view",
         "audit.export",
-        "profile.update",
-        "profile.view",
-        "videos.view",
-        "videos.create",
-        "videos.react",
-        "video_categories.create",
-        "video_categories.update",
-        "video_categories.delete",
       ],
     },
     {
@@ -130,8 +99,9 @@ async function main() {
         "reports.*",
         "admin.*",
         "system.*",
-        "videos.*",
-        "video_categories.*",
+        "bank-accounts.*",
+        "event-categories.*",
+        "event-documents.*",
       ],
     },
   ];
@@ -419,132 +389,277 @@ async function main() {
     console.log(`✅ Created/updated event category: ${category.name}`);
   }
 
-  // Create default video categories
-  const defaultVideoCategories = [
-    {
-      name: "Gaming",
-      slug: "gaming",
-      description: "Gaming highlights, tutorials, and gameplay clips",
-      color: "#8B5CF6",
-      icon: "gamepad",
-      isActive: true,
-      sortOrder: 1,
-      translations: {
-        en: {
-          name: "Gaming",
-          description: "Gaming highlights, tutorials, and gameplay clips",
-        },
-        cs: {
-          name: "Gaming",
-          description: "Herní momenty, tutoriály a záznamy z her",
-        },
-      },
-    },
-    {
-      name: "Tutorials",
-      slug: "tutorials",
-      description: "Educational content and how-to videos",
-      color: "#3B82F6",
-      icon: "book",
-      isActive: true,
-      sortOrder: 2,
-      translations: {
-        en: {
-          name: "Tutorials",
-          description: "Educational content and how-to videos",
-        },
-        cs: {
-          name: "Tutoriály",
-          description: "Vzdělávací obsah a návodová videa",
-        },
-      },
-    },
-    {
-      name: "Highlights",
-      slug: "highlights",
-      description: "Best moments and memorable clips from events",
-      color: "#F59E0B",
-      icon: "star",
-      isActive: true,
-      sortOrder: 3,
-      translations: {
-        en: {
-          name: "Highlights",
-          description: "Best moments and memorable clips from events",
-        },
-        cs: {
-          name: "Nejlepší momenty",
-          description: "Nejlepší okamžiky a nezapomenutelné záběry z akcí",
-        },
-      },
-    },
-    {
-      name: "Community",
-      slug: "community",
-      description: "Community-generated content and discussions",
-      color: "#10B981",
-      icon: "users",
-      isActive: true,
-      sortOrder: 4,
-      translations: {
-        en: {
-          name: "Community",
-          description: "Community-generated content and discussions",
-        },
-        cs: {
-          name: "Komunita",
-          description: "Obsah vytvořený komunitou a diskuze",
-        },
-      },
-    },
-    {
-      name: "Event Recaps",
-      slug: "event-recaps",
-      description: "Event summaries and retrospectives",
-      color: "#EF4444",
-      icon: "calendar",
-      isActive: true,
-      sortOrder: 5,
-      translations: {
-        en: {
-          name: "Event Recaps",
-          description: "Event summaries and retrospectives",
-        },
-        cs: {
-          name: "Shrnutí akcí",
-          description: "Souhrny akcí a retrospektivy",
-        },
-      },
-    },
-    {
-      name: "Interviews",
-      slug: "interviews",
-      description: "Interviews with speakers, organizers, and community members",
-      color: "#06B6D4",
-      icon: "microphone",
-      isActive: true,
-      sortOrder: 6,
-      translations: {
-        en: {
-          name: "Interviews",
-          description: "Interviews with speakers, organizers, and community members",
-        },
-        cs: {
-          name: "Rozhovory",
-          description: "Rozhovory s řečníky, organizátory a členy komunity",
-        },
-      },
-    },
-  ];
+  // Seed demo users, events, registrations, and payments for MVP flows
+  // Users
+  const [roleAdmin, roleManager, roleModerator, roleUser, roleRegular] = await Promise.all([
+    prisma.role.findUnique({ where: { name: "ADMIN" } }),
+    prisma.role.findUnique({ where: { name: "EVENT_MANAGER" } }),
+    prisma.role.findUnique({ where: { name: "MODERATOR" } }),
+    prisma.role.findUnique({ where: { name: "USER" } }),
+    prisma.role.findUnique({ where: { name: "REGULAR" } }),
+  ]);
 
-  for (const categoryData of defaultVideoCategories) {
-    const videoCategory = await prisma.videoCategory.upsert({
-      where: { slug: categoryData.slug },
-      update: categoryData,
-      create: categoryData,
-    });
-    console.log(`✅ Created/updated video category: ${videoCategory.name}`);
-  }
+  const adminUser = await prisma.user.upsert({
+    where: { email: "admin@example.com" },
+    update: { name: "Admin User", status: "ACTIVE", primaryRoleId: roleAdmin?.id },
+    create: {
+      email: "admin@example.com",
+      name: "Admin User",
+      status: "ACTIVE",
+      primaryRoleId: roleAdmin?.id,
+    },
+  });
+  // Admin user requested
+  const adminViet = await prisma.user.upsert({
+    where: { email: "tohoangviet1998@gmail.com" },
+    update: { name: "Viet To Hoang", status: "ACTIVE", primaryRoleId: roleAdmin?.id },
+    create: {
+      email: "tohoangviet1998@gmail.com",
+      name: "Viet To Hoang",
+      status: "ACTIVE",
+      primaryRoleId: roleAdmin?.id,
+    },
+  });
+
+  const managerUser = await prisma.user.upsert({
+    where: { email: "manager@example.com" },
+    update: { name: "Event Manager", status: "ACTIVE", primaryRoleId: roleManager?.id },
+    create: {
+      email: "manager@example.com",
+      name: "Event Manager",
+      status: "ACTIVE",
+      primaryRoleId: roleManager?.id,
+    },
+  });
+  const moderatorUser = await prisma.user.upsert({
+    where: { email: "moderator@example.com" },
+    update: { name: "Moderator", status: "ACTIVE", primaryRoleId: roleModerator?.id },
+    create: {
+      email: "moderator@example.com",
+      name: "Moderator",
+      status: "ACTIVE",
+      primaryRoleId: roleModerator?.id,
+    },
+  });
+  const attendeeOne = await prisma.user.upsert({
+    where: { email: "attendee1@example.com" },
+    update: {
+      name: "Attendee One",
+      status: "ACTIVE",
+      primaryRoleId: roleRegular?.id ?? roleUser?.id,
+    },
+    create: {
+      email: "attendee1@example.com",
+      name: "Attendee One",
+      status: "ACTIVE",
+      primaryRoleId: roleRegular?.id ?? roleUser?.id,
+    },
+  });
+  const attendeeTwo = await prisma.user.upsert({
+    where: { email: "attendee2@example.com" },
+    update: {
+      name: "Attendee Two",
+      status: "ACTIVE",
+      primaryRoleId: roleRegular?.id ?? roleUser?.id,
+    },
+    create: {
+      email: "attendee2@example.com",
+      name: "Attendee Two",
+      status: "ACTIVE",
+      primaryRoleId: roleRegular?.id ?? roleUser?.id,
+    },
+  });
+  const attendeeThree = await prisma.user.upsert({
+    where: { email: "attendee3@example.com" },
+    update: {
+      name: "Attendee Three",
+      status: "ACTIVE",
+      primaryRoleId: roleRegular?.id ?? roleUser?.id,
+    },
+    create: {
+      email: "attendee3@example.com",
+      name: "Attendee Three",
+      status: "ACTIVE",
+      primaryRoleId: roleRegular?.id ?? roleUser?.id,
+    },
+  });
+
+  console.log(
+    `✅ Created/updated users:`,
+    adminUser.email,
+    adminViet.email,
+    managerUser.email,
+    moderatorUser.email
+  );
+
+  // Fetch references
+  const defaultAccount = await prisma.bankAccount.findFirst({ where: { isDefault: true } });
+  const workshopCategory = await prisma.eventCategory.findUnique({ where: { slug: "workshop" } });
+  const meetupCategory = await prisma.eventCategory.findUnique({ where: { slug: "meetup" } });
+
+  const now = new Date();
+  const daysFromNow = (d: number) => new Date(Date.now() + d * 24 * 60 * 60 * 1000);
+
+  // Paid event requiring bank transfer verification
+  const paidEvent = await prisma.event.upsert({
+    where: { slug: "spring-tennis-open" },
+    update: {},
+    create: {
+      slug: "spring-tennis-open",
+      title: "Spring Tennis Open",
+      type: "MEETUP",
+      status: "PUBLISHED",
+      capacity: 30,
+      price: 25,
+      currency: "EUR",
+      startDate: daysFromNow(14),
+      endDate: daysFromNow(14),
+      registrationStartDate: daysFromNow(-7),
+      registrationEndDate: daysFromNow(13),
+      requiresApproval: false,
+      allowWaitingList: true,
+      requiresPayment: true,
+      bankAccountId: defaultAccount?.id || null,
+      tags: ["tennis", "outdoor"],
+      city: "Bratislava",
+      country: "Slovakia",
+      creatorId: managerUser.id,
+      managerId: moderatorUser.id,
+      categoryId: workshopCategory?.id || null,
+    },
+  });
+  console.log(`✅ Created/updated event: ${paidEvent.title}`);
+
+  // Free event (no payment required)
+  const freeEvent = await prisma.event.upsert({
+    where: { slug: "community-run" },
+    update: {},
+    create: {
+      slug: "community-run",
+      title: "Community Run",
+      type: "MEETUP",
+      status: "PUBLISHED",
+      capacity: 100,
+      price: null,
+      currency: "EUR",
+      startDate: daysFromNow(10),
+      endDate: daysFromNow(10),
+      registrationStartDate: daysFromNow(-5),
+      registrationEndDate: daysFromNow(9),
+      requiresApproval: false,
+      allowWaitingList: true,
+      requiresPayment: false,
+      bankAccountId: null,
+      tags: ["running", "community"],
+      city: "Prague",
+      country: "Czech Republic",
+      creatorId: managerUser.id,
+      managerId: moderatorUser.id,
+      categoryId: meetupCategory?.id || null,
+    },
+  });
+  console.log(`✅ Created/updated event: ${freeEvent.title}`);
+
+  // Registrations and payments for paid event
+  // 1) Attendee One - pending payment verification
+  const pp1 = await prisma.pendingPayment.create({
+    data: {
+      userId: attendeeOne.id,
+      eventId: paidEvent.id,
+      amount: 25,
+      currency: "EUR",
+      type: "REGISTRATION",
+      bankAccountId: defaultAccount?.id || null,
+      description: "Registration fee pending verification",
+    },
+  });
+
+  await prisma.registration.create({
+    data: {
+      userId: attendeeOne.id,
+      eventId: paidEvent.id,
+      status: "PENDING",
+      groupSize: 1,
+      requiresPayment: true,
+      pendingPaymentId: pp1.id,
+      paymentStatus: "PENDING_VERIFICATION",
+      notes: "Awaiting bank transfer",
+    },
+  });
+
+  // 2) Attendee Two - payment verified and confirmed
+  const reg2 = await prisma.registration.create({
+    data: {
+      userId: attendeeTwo.id,
+      eventId: paidEvent.id,
+      status: "CONFIRMED",
+      confirmedAt: now,
+      groupSize: 1,
+      requiresPayment: true,
+      paymentStatus: "PAYMENT_VERIFIED",
+    },
+  });
+
+  const pay2 = await prisma.payment.create({
+    data: {
+      userId: attendeeTwo.id,
+      eventId: paidEvent.id,
+      registrationId: reg2.id,
+      amount: 25,
+      currency: "EUR",
+      method: "BANK_TRANSFER",
+      status: "COMPLETED",
+      bankAccountId: defaultAccount?.id || null,
+      paidAt: now,
+      verifiedAt: now,
+      description: "Registration fee received and verified",
+    },
+  });
+
+  await prisma.registration.update({
+    where: { id: reg2.id },
+    data: { paymentId: pay2.id },
+  });
+
+  // 3) Attendee Three - payment rejected
+  const pp3 = await prisma.pendingPayment.create({
+    data: {
+      userId: attendeeThree.id,
+      eventId: paidEvent.id,
+      amount: 25,
+      currency: "EUR",
+      type: "REGISTRATION",
+      bankAccountId: defaultAccount?.id || null,
+      description: "Incorrect amount sent",
+    },
+  });
+
+  await prisma.registration.create({
+    data: {
+      userId: attendeeThree.id,
+      eventId: paidEvent.id,
+      status: "REJECTED",
+      groupSize: 1,
+      requiresPayment: true,
+      pendingPaymentId: pp3.id,
+      paymentStatus: "REJECTED",
+      paymentRejectedAt: now,
+      paymentRejectionReason: "Amount mismatch",
+    },
+  });
+
+  // Free event registration (no payment)
+  await prisma.registration.create({
+    data: {
+      userId: attendeeOne.id,
+      eventId: freeEvent.id,
+      status: "CONFIRMED",
+      confirmedAt: now,
+      groupSize: 1,
+      requiresPayment: false,
+      paymentStatus: "WAITING_LIST_PROMOTED", // Not relevant, but keep a valid enum
+    },
+  });
 
   console.log("🎉 Database seeded successfully!");
 }

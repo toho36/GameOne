@@ -26,13 +26,14 @@ async function seedRoles() {
       isSystem: false,
       isDefault: false,
       permissions: [
-        "events.create",
-        "events.manage",
         "events.view",
-        "events.edit",
+        "events.create",
+        "events.update",
         "events.delete",
-        "bank_accounts.view",
-        "bank_accounts.manage",
+        "bank-accounts.view",
+        "bank-accounts.create",
+        "bank-accounts.update",
+        "bank-accounts.delete",
       ],
     },
     {
@@ -43,7 +44,7 @@ async function seedRoles() {
       priority: 10,
       isSystem: false,
       isDefault: true,
-      permissions: ["events.view", "events.register", "profile.view", "profile.edit"],
+      permissions: ["events.view", "events.register"],
     },
     {
       name: "MODERATOR",

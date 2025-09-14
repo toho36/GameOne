@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Clock, Users, AlertCircle } from "lucide-react";
 import Link from "next/link";
+import { postJson } from "@/lib/api/client";
+import { normalizeApiError } from "@/lib/api/errors";
 
 interface WaitingListPositionProps {
   eventId: string;
@@ -66,27 +68,16 @@ export function WaitingListPosition({ eventId }: WaitingListPositionProps) {
     setError(null);
 
     try {
-      const response = await fetch(`/api/events/${eventId}/waiting-list`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          eventId,
-          specialRequirements: formData.specialRequirements,
-          emergencyContact: formData.emergencyContact,
-          acceptedTerms: formData.acceptedTerms,
-        }),
+      await postJson(`/api/events/${eventId}/waiting-list`, {
+        eventId,
+        specialRequirements: formData.specialRequirements,
+        emergencyContact: formData.emergencyContact,
+        acceptedTerms: formData.acceptedTerms,
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to join waiting list");
-      }
 
       setSuccess(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to join waiting list");
+      setError(normalizeApiError(err));
     } finally {
       setIsJoining(false);
     }

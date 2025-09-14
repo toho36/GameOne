@@ -5,9 +5,9 @@ import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 
 interface RouteParams {
-  params: Promise<{
+  params: {
     id: string;
-  }>;
+  };
 }
 
 // POST /api/events/[id]/publish - Publish or unpublish event
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "Authentication required" }, { status: 401 });
     }
 
-    const { id: eventId } = await params;
+    const { id: eventId } = params;
     const body = await request.json();
     const { action } = body; // 'publish' or 'unpublish'
 
