@@ -5,6 +5,8 @@ import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { getJson, postJson } from "@/lib/api/client";
+import { normalizeApiError } from "@/lib/api/errors";
 import { RegistrationForm } from "./registration-form";
 import { RegistrationStatus } from "./registration-status";
 import { WaitingListPosition } from "./waiting-list-position";
@@ -40,13 +42,12 @@ export function EventRegistration({ event }: EventRegistrationProps) {
   const handlePaymentClaimed = async () => {
     // Refresh registration status after payment is claimed
     try {
-      const response = await fetch(`/api/events/${event.id}/registration-status`);
-      if (response.ok) {
-        const status = await response.json();
-        setRegistrationStatus(status);
-      }
-    } catch {
-      setError("Failed to check registration status");
+      const status = await getJson<RegistrationStatusResponse>(
+        `/api/events/${event.id}/registration-status`
+      );
+      setRegistrationStatus(status);
+    } catch (e) {
+      setError(normalizeApiError(e));
     }
   };
 
@@ -108,23 +109,13 @@ export function EventRegistration({ event }: EventRegistrationProps) {
             onSubmit={async (formData) => {
               setIsLoading(true);
               try {
-                // Handle the registration submission
-                const response = await fetch(`/api/events/${event.id}/register`, {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify(formData),
-                });
-
-                if (!response.ok) {
-                  const errorData = await response.json();
-                  throw new Error(errorData.error?.message || "Registration failed");
-                }
-
-                const result = await response.json();
-                handleRegistrationSuccess(result.data);
+                const result = await postJson<RegistrationStatusResponse>(
+                  `/api/events/${event.id}/register`,
+                  formData as any
+                );
+                handleRegistrationSuccess(result);
               } catch (error) {
-                const errorMessage = error instanceof Error ? error.message : "Registration failed";
-                handleRegistrationError(errorMessage);
+                handleRegistrationError(normalizeApiError(error));
               } finally {
                 setIsLoading(false);
               }

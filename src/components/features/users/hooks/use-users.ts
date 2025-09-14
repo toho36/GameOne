@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useMemo, useCallback } from "react";
 
 import {
   UsersResponse,
@@ -8,74 +8,48 @@ import {
   UseUsersOptions,
   UseUsersReturn,
 } from "@/types/components/user-management.types";
+import { getJson } from "@/lib/api/client";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
+import { normalizeApiError } from "@/lib/api/errors";
+import { usersKeys } from "@/lib/api/query-keys";
 
 export function useUsers(options: UseUsersOptions = {}): UseUsersReturn {
   const { filters: initialFilters = {}, page: initialPage = 1, limit = 20 } = options;
 
-  const [users, setUsers] = useState<UsersResponse["users"]>([]);
-  const [pagination, setPagination] = useState<UsersResponse["pagination"]>({
-    page: initialPage,
+  const [filters, setFilters] = useState<UserFilters>(initialFilters);
+  const [page, setPage] = useState(initialPage);
+
+  const search = useMemo(() => {
+    const params = new URLSearchParams({
+      page: String(page),
+      limit: String(limit),
+      ...Object.fromEntries(
+        Object.entries(filters).filter(([, v]) => v !== undefined && v !== null && v !== "")
+      ),
+    });
+    return params.toString();
+  }, [filters, page, limit]);
+
+  const query = useQuery({
+    queryKey: usersKeys.list({ filters, page, limit }),
+    queryFn: () => getJson<UsersResponse>(`/api/users?${search}`),
+    staleTime: 30_000,
+    placeholderData: keepPreviousData,
+  });
+
+  const data = query.data as any;
+  const users = Array.isArray(data?.users) ? data.users : [];
+  const pagination = (data?.pagination as UsersResponse["pagination"]) ?? {
+    page,
     limit,
     totalCount: 0,
     totalPages: 0,
     hasMore: false,
-  });
-  const [filters, setFilters] = useState<UserFilters>(initialFilters);
-  const [page, setPage] = useState(initialPage);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchUsers = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const searchParams = new URLSearchParams({
-        page: page.toString(),
-        limit: limit.toString(),
-        ...Object.fromEntries(
-          Object.entries(filters).filter(
-            ([, value]) => value !== undefined && value !== null && value !== ""
-          )
-        ),
-      });
-
-      const response = await fetch(`/api/users?${searchParams}`);
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          throw new Error("Authentication required. Please log in again.");
-        } else if (response.status === 403) {
-          throw new Error("insufficient_permissions");
-        } else if (response.status >= 500) {
-          throw new Error("Server error. Please try again in a few moments.");
-        } else {
-          throw new Error("Failed to fetch users. Please check your connection.");
-        }
-      }
-
-      const data: UsersResponse = await response.json();
-
-      setUsers(data.users);
-      setPagination(data.pagination);
-    } catch (err) {
-      if (err instanceof TypeError && err.message.includes("fetch")) {
-        setError("Network error. Please check your internet connection and try again.");
-      } else {
-        setError(err instanceof Error ? err.message : "An unexpected error occurred");
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  }, [page, limit, filters]);
-
-  useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
+  };
 
   const handleSetFilters = useCallback((newFilters: UserFilters) => {
     setFilters(newFilters);
-    setPage(1); // Reset to first page when filters change
+    setPage(1);
   }, []);
 
   const handleSetPage = useCallback((newPage: number) => {
@@ -85,9 +59,9 @@ export function useUsers(options: UseUsersOptions = {}): UseUsersReturn {
   return {
     users,
     pagination,
-    isLoading,
-    error,
-    refetch: fetchUsers,
+    isLoading: query.isLoading,
+    error: query.error ? normalizeApiError(query.error) : null,
+    refetch: query.refetch,
     setFilters: handleSetFilters,
     setPage: handleSetPage,
   };

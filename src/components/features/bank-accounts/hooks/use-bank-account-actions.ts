@@ -1,6 +1,12 @@
 import { useState } from "react";
 
 import { logger } from "@/lib/logger";
+import { normalizeApiError } from "@/lib/api/errors";
+import {
+  useCreateBankAccount,
+  useUpdateBankAccount,
+  useDeleteBankAccount,
+} from "@/components/features/bank-accounts/hooks/use-bank-account-mutations";
 import type { BankAccount, BankAccountFormData, BankAccountFormErrors } from "@/types/bank-account";
 
 interface UseBankAccountActionsProps {
@@ -17,41 +23,25 @@ export function useBankAccountActions({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formErrors, setFormErrors] = useState<BankAccountFormErrors>({});
 
+  const createBankAccount = useCreateBankAccount();
+  const updateBankAccount = useUpdateBankAccount();
+  const deleteBankAccount = useDeleteBankAccount();
+
   const handleToggleActive = async (bankAccountId: string, isActive: boolean) => {
     try {
-      const response = await fetch(`/api/bank-accounts/${bankAccountId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ isActive }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Failed to update bank account");
-      }
-
+      await updateBankAccount.mutateAsync({ id: bankAccountId, payload: { isActive } });
       refetch();
     } catch (error) {
-      logger.error("Update bank account status failed", error);
+      logger.error("Update bank account status failed", normalizeApiError(error));
     }
   };
 
   const handleSetDefault = async (bankAccountId: string) => {
     try {
-      const response = await fetch(`/api/bank-accounts/${bankAccountId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ isDefault: true }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Failed to set default bank account");
-      }
-
+      await updateBankAccount.mutateAsync({ id: bankAccountId, payload: { isDefault: true } });
       refetch();
     } catch (error) {
-      logger.error("Set default bank account failed", error);
+      logger.error("Set default bank account failed", normalizeApiError(error));
     }
   };
 
@@ -63,32 +53,22 @@ export function useBankAccountActions({
     setFormErrors({});
 
     try {
-      const url = editingBankAccount
-        ? `/api/bank-accounts/${editingBankAccount.id}`
-        : "/api/bank-accounts";
-
-      const method = editingBankAccount ? "PUT" : "POST";
-
-      const response = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        if (error.errors) {
-          setFormErrors(error.errors);
+      try {
+        if (editingBankAccount) {
+          await updateBankAccount.mutateAsync({ id: editingBankAccount.id, payload: data as any });
         } else {
-          setFormErrors({ general: error.message || "Failed to save bank account" });
+          await createBankAccount.mutateAsync(data as any);
         }
-        throw new Error(error.message || "Failed to save bank account");
+      } catch (e: any) {
+        const message = normalizeApiError(e);
+        setFormErrors({ general: message });
+        throw e;
       }
 
       refetch();
       closeCreateModal();
     } catch (error) {
-      logger.error("Bank account form submission failed", error);
+      logger.error("Bank account form submission failed", normalizeApiError(error));
     } finally {
       setIsSubmitting(false);
     }
@@ -98,24 +78,12 @@ export function useBankAccountActions({
     if (!deletingBankAccount) return;
 
     try {
-      const response = await fetch(`/api/bank-accounts/${deletingBankAccount.id}`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        // Set error in form errors instead of using alert
-        setFormErrors({
-          general: `Cannot delete bank account: ${error.error || error.message || "Failed to delete bank account"}`,
-        });
-        throw new Error(error.error || error.message || "Failed to delete bank account");
-      }
-
+      await deleteBankAccount.mutateAsync(deletingBankAccount.id);
       refetch();
       closeDeleteModal();
     } catch (error) {
-      logger.error("Delete bank account failed", error);
-      // Don't re-throw to prevent double error display
+      setFormErrors({ general: `Cannot delete bank account: ${normalizeApiError(error)}` });
+      logger.error("Delete bank account failed", normalizeApiError(error));
     }
   };
 

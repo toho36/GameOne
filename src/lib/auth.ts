@@ -1,5 +1,14 @@
 import type { NextRequest } from "next/server";
 import { logger } from "./logger";
+// Strict env accessors for required configuration
+function getEnvOrThrow(key: string): string {
+  const value = process.env[key];
+  if (!value) {
+    throw new Error(`Missing required environment variable: ${key}`);
+  }
+  return value;
+}
+
 // ================================
 // ENVIRONMENT DETECTION
 // ================================
@@ -18,7 +27,7 @@ export function isLocalEnvironment(): boolean {
 export function getBaseUrl(): string {
   if (typeof window !== "undefined") {
     // Client-side
-    return isLocalEnvironment() ? "http://localhost:3000" : "https://gameonebaby.vercel.app";
+    return window.location.origin;
   }
   // Server-side
   return process.env["VERCEL_URL"]
@@ -33,8 +42,8 @@ export function getAuthConfig() {
   const baseUrl = getBaseUrl();
 
   return {
-    authUrl: process.env["NEXT_PUBLIC_KINDE_AUTH_URL"] ?? "https://gameone.kinde.com",
-    clientId: process.env["NEXT_PUBLIC_KINDE_CLIENT_ID"] ?? "f5a3fab0fe644cf080282bcd90979fe4",
+    authUrl: getEnvOrThrow("NEXT_PUBLIC_KINDE_AUTH_URL"),
+    clientId: getEnvOrThrow("NEXT_PUBLIC_KINDE_CLIENT_ID"),
     logoutUrl: process.env["NEXT_PUBLIC_KINDE_LOGOUT_URL"] ?? baseUrl,
     redirectUrl: process.env["NEXT_PUBLIC_KINDE_REDIRECT_URL"] ?? `${baseUrl}/dashboard`,
     baseUrl,
@@ -92,10 +101,10 @@ export function getKindeConfigForRequest(request: NextRequest) {
     : "http://localhost:3000";
 
   return {
-    authUrl: process.env["NEXT_PUBLIC_KINDE_AUTH_URL"] ?? "https://gameone.kinde.com",
-    clientId: process.env["NEXT_PUBLIC_KINDE_CLIENT_ID"] ?? "f5a3fab0fe644cf080282bcd90979fe4",
-    logoutUrl: isProduction ? baseUrl : "http://localhost:3000",
-    redirectUrl: isProduction ? `${baseUrl}/dashboard` : "http://localhost:3000/dashboard",
+    authUrl: getEnvOrThrow("NEXT_PUBLIC_KINDE_AUTH_URL"),
+    clientId: getEnvOrThrow("NEXT_PUBLIC_KINDE_CLIENT_ID"),
+    logoutUrl: process.env["NEXT_PUBLIC_KINDE_LOGOUT_URL"] ?? baseUrl,
+    redirectUrl: process.env["NEXT_PUBLIC_KINDE_REDIRECT_URL"] ?? `${baseUrl}/dashboard`,
     baseUrl,
     isProduction,
   };

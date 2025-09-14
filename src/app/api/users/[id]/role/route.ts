@@ -25,9 +25,9 @@ async function createUserWithDefaults(kindeUser: any) {
 }
 
 interface RouteParams {
-  params: Promise<{
+  params: {
     id: string;
-  }>;
+  };
 }
 
 // PUT /api/users/[id]/role - Update user's primary role
@@ -40,7 +40,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "Authentication required" }, { status: 401 });
     }
 
-    const { id: userId } = await params;
+    const { id: userId } = params;
     const body = await request.json();
     const { roleId } = body;
 

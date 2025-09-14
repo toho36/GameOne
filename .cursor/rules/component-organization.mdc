@@ -4,6 +4,28 @@ alwaysApply: true
 
 # Component Organization and Patterns - STRICT ENFORCEMENT
 
+
+## Data Fetching Standard (Ky + React Query)
+
+- Do not use raw fetch() in components or hooks. Use the centralized Ky client helpers from `src/lib/api/client.ts`: `getJson`, `postJson`, `putJson`, `patchJson`, `deleteJson`.
+- API routes may return either raw payloads or `{ success, data }`. The client auto‑unwraps; treat the return as the actual payload.
+- Prefer React Query for server state: caching, retries, deduping, and revalidation.
+
+Example (useQuery + Ky):
+
+````typescript
+import { useQuery } from "@tanstack/react-query";
+import { getJson } from "@/lib/api/client";
+
+export function useEventsList(params: { page: number; limit: number }) {
+  const search = new URLSearchParams({ page: String(params.page), limit: String(params.limit) }).toString();
+  return useQuery({
+    queryKey: ["events", params],
+    queryFn: () => getJson<{ events: any[]; pagination: any }>(`/api/events?${search}`),
+  });
+}
+````
+
 ## 🚨 CRITICAL RULES - NO EXCEPTIONS
 
 ### ABSOLUTE REQUIREMENTS
@@ -164,7 +186,7 @@ export interface ComponentNameProps extends ComponentProps<'div'> {
   // Required props first
   title: string
   data: ComponentData[]
-  // Optional props with defaults  
+  // Optional props with defaults
   variant?: ComponentVariant
   size?: ComponentSize
   onAction?: (id: string) => void
@@ -456,9 +478,8 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
   const refreshEvents = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/events');
-      const data = await response.json();
-      setEvents(data.events);
+      const data = await getJson<any>("/api/events");
+      setEvents(Array.isArray((data as any)?.events) ? (data as any).events : Array.isArray(data) ? (data as any) : []);
       setError(null);
     } catch (err) {
       setError('Failed to load events');
@@ -581,9 +602,7 @@ export function DataFetcher<T>({ url, children }: DataFetcherProps<T>) {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await fetch(url);
-      if (!response.ok) throw new Error('Failed to fetch');
-      const result = await response.json();
+      const result = await getJson<any>(url);
       setData(result);
       setError(null);
     } catch (err) {
@@ -689,17 +708,8 @@ export function EventDetails({ eventId }: EventDetailsProps) {
     async function loadEvent() {
       try {
         setLoading(true);
-        const response = await fetch(`/api/events/${eventId}`);
-
-        if (!response.ok) {
-          if (response.status === 404) {
-            throw new Error('Event not found');
-          }
-          throw new Error('Failed to load event');
-        }
-
-        const data = await response.json();
-        setEvent(data.event);
+        const data = await getJson<any>(`/api/events/${eventId}`);
+        setEvent((data as any)?.event ?? null);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Unknown error');
       } finally {

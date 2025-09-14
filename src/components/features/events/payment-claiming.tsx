@@ -11,6 +11,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Copy, Download, CheckCircle, AlertCircle } from "lucide-react";
+import { postJson } from "@/lib/api/client";
+import { normalizeApiError } from "@/lib/api/errors";
 import type { PaymentInfo, ClaimPaymentRequest } from "@/types/features/event-registration";
 
 interface PaymentClaimingProps {
@@ -43,23 +45,11 @@ export function PaymentClaiming({ payment, onPaymentClaimed }: PaymentClaimingPr
     setError(null);
 
     try {
-      const response = await fetch(`/api/events/${payment.registrationId}/claim-payment`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (response.ok) {
-        setIsClaimed(true);
-        onPaymentClaimed();
-      } else {
-        const errorData = await response.json();
-        setError(errorData.error || t("errors.claimFailed"));
-      }
-    } catch {
-      setError(t("errors.networkError"));
+      await postJson(`/api/events/${payment.registrationId}/claim-payment`, formData as any);
+      setIsClaimed(true);
+      onPaymentClaimed();
+    } catch (e) {
+      setError(normalizeApiError(e) || t("errors.claimFailed"));
     } finally {
       setIsClaiming(false);
     }

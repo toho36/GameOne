@@ -1,7 +1,11 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useMemo, useCallback } from "react";
 
+import { getJson } from "@/lib/api/client";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
+import { normalizeApiError } from "@/lib/api/errors";
+import { bankAccountsKeys } from "@/lib/api/query-keys";
 import type { BankAccountsResponse } from "@/types/bank-account";
 import type {
   UseBankAccountsOptions,
@@ -11,88 +15,45 @@ import type {
 export function useBankAccounts(options: UseBankAccountsOptions = {}): UseBankAccountsReturn {
   const { search, isActive, ownerId, page: initialPage = 1, limit = 20 } = options;
 
-  const [bankAccounts, setBankAccounts] = useState<BankAccountsResponse["bankAccounts"]>([]);
-  const [pagination, setPagination] = useState({
-    page: initialPage,
-    limit,
-    totalCount: 0,
-    totalPages: 0,
-    hasMore: false,
-  });
   const [filters, setFiltersState] = useState({
     search: search || "",
     isActive,
     ownerId,
   });
   const [page, setPage] = useState(initialPage);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  const fetchBankAccounts = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
+  const qs = useMemo(() => {
+    const params = new URLSearchParams({
+      page: String(page),
+      limit: String(limit),
+      ...Object.fromEntries(
+        Object.entries(filters).filter(([, v]) => v !== undefined && v !== null && v !== "")
+      ),
+    });
+    return params.toString();
+  }, [filters, page, limit]);
 
-    try {
-      const searchParams = new URLSearchParams({
-        page: page.toString(),
-        limit: limit.toString(),
-        ...Object.fromEntries(
-          Object.entries(filters).filter(
-            ([, value]) => value !== undefined && value !== null && value !== ""
-          )
-        ),
-      });
+  const query = useQuery({
+    queryKey: bankAccountsKeys.list({ filters, page, limit }),
+    queryFn: async () => getJson<BankAccountsResponse>(`/api/bank-accounts?${qs}`),
+    staleTime: 30_000,
+    placeholderData: keepPreviousData,
+  });
 
-      const response = await fetch(`/api/bank-accounts?${searchParams}`);
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          throw new Error("Authentication required. Please log in again.");
-        } else if (response.status === 403) {
-          throw new Error("insufficient_permissions");
-        } else if (response.status >= 500) {
-          throw new Error("Server error. Please try again in a few moments.");
-        } else {
-          throw new Error("Failed to fetch bank accounts. Please check your connection.");
-        }
-      }
-
-      const data: BankAccountsResponse = await response.json();
-
-      setBankAccounts(Array.isArray(data) ? data : data.bankAccounts || []);
-
-      // Handle pagination if provided
-      if (data.pagination) {
-        setPagination(data.pagination);
-      } else {
-        // Fallback for simple array response
-        setPagination({
-          page: 1,
-          limit: Array.isArray(data) ? data.length : data.bankAccounts?.length || 0,
-          totalCount: Array.isArray(data) ? data.length : data.bankAccounts?.length || 0,
-          totalPages: 1,
-          hasMore: false,
-        });
-      }
-    } catch (err) {
-      if (err instanceof TypeError && err.message.includes("fetch")) {
-        setError("Network error. Please check your internet connection and try again.");
-      } else {
-        setError(err instanceof Error ? err.message : "An unexpected error occurred");
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  }, [page, limit, filters]);
-
-  useEffect(() => {
-    fetchBankAccounts();
-  }, [fetchBankAccounts]);
+  const data = query.data as any;
+  const bankAccounts = Array.isArray(data) ? data : data?.bankAccounts || [];
+  const pagination = (data?.pagination as any) ?? {
+    page,
+    limit,
+    totalCount: Array.isArray(data) ? data.length : data?.bankAccounts?.length || 0,
+    totalPages: 1,
+    hasMore: false,
+  };
 
   const setFilters = useCallback(
     (newFilters: { search?: string; isActive?: boolean; ownerId?: string }) => {
       setFiltersState((prev) => ({ ...prev, ...newFilters }));
-      setPage(1); // Reset to first page when filters change
+      setPage(1);
     },
     []
   );
@@ -104,9 +65,9 @@ export function useBankAccounts(options: UseBankAccountsOptions = {}): UseBankAc
   return {
     bankAccounts,
     pagination,
-    isLoading,
-    error,
-    refetch: fetchBankAccounts,
+    isLoading: query.isLoading,
+    error: query.error ? normalizeApiError(query.error) : null,
+    refetch: query.refetch,
     setFilters,
     setPage: handleSetPage,
   };

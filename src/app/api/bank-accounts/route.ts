@@ -12,7 +12,7 @@ import { bankAccountsService } from "@/lib/api/bank-accounts/service";
 export async function GET(request: NextRequest) {
   try {
     // Check authentication and permissions
-    const authResult = await requirePermissions(["bank_accounts.manage"]);
+    const authResult = await requirePermissions(["bank-accounts.view"]);
     if (!authResult.success) {
       return authResult.response;
     }
@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     // Check authentication and permissions
-    const authResult = await requirePermissions(["bank_accounts.manage"]);
+    const authResult = await requirePermissions(["bank-accounts.create"]);
     if (!authResult.success) {
       return authResult.response;
     }

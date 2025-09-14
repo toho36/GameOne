@@ -1,59 +1,48 @@
 /**
  * Events API endpoint - Thin handler for GameOne
- * Refactored from 254 lines following project standards
+ * Uses permission checks, response helpers, and delegates to service layer
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { logger } from "@/lib/logger";
-import { getAuthenticatedUser } from "@/lib/api/common/auth";
+import { requirePermissions } from "@/lib/api/common/auth";
+import { ok, created, error as errorResponse } from "@/lib/api/common/response";
 import { eventsService } from "@/lib/api/events/service";
 
 // GET /api/events - List events with filtering and pagination
 export async function GET(request: NextRequest) {
   try {
-    // Get authenticated user
-    const authResult = await getAuthenticatedUser();
-    if (!authResult.success) {
-      return authResult.response;
-    }
+    const authResult = await requirePermissions(["events.view"]);
+    if (!authResult.success) return authResult.response;
 
-    // Delegate to service
     const result = await eventsService.getEvents(request, authResult.data.user.id);
-
-    return NextResponse.json(result);
-  } catch (error) {
-    logger.error("Events fetch error:", error);
-    return NextResponse.json({ error: "Failed to fetch events" }, { status: 500 });
+    return ok(result);
+  } catch (err) {
+    logger.error("Events fetch error:", err);
+    return errorResponse("Failed to fetch events", 500);
   }
 }
 
 // POST /api/events - Create new event
 export async function POST(request: NextRequest) {
   try {
-    // Get authenticated user
-    const authResult = await getAuthenticatedUser();
-    if (!authResult.success) {
-      return authResult.response;
-    }
+    const authResult = await requirePermissions(["events.create"]);
+    if (!authResult.success) return authResult.response;
 
     const body = await request.json();
-
-    // Delegate to service
     const result = await eventsService.createEvent(body, authResult.data.user.id);
 
     if (!result.success) {
-      return NextResponse.json(
-        {
-          error: result.error,
-          errors: result.errors,
-        },
-        { status: result.status || 400 }
+      return errorResponse(
+        result.error || "Validation failed",
+        result.status || 400,
+        result.errors
       );
     }
 
-    return NextResponse.json(result.data);
-  } catch (error) {
-    logger.error("Event creation error:", error);
-    return NextResponse.json({ error: "Failed to create event" }, { status: 500 });
+    return created(result.data);
+  } catch (err) {
+    logger.error("Event creation error:", err);
+    return errorResponse("Failed to create event", 500);
   }
 }

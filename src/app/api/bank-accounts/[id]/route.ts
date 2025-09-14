@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
-import { requirePermissions } from "@/lib/api/auth/permissions";
+import { requirePermissions } from "@/lib/api/common/auth";
 import { validateBankAccountData } from "@/lib/api/bank-accounts/validation";
 import {
   validateBankAccountExists,
@@ -10,15 +10,13 @@ import {
   checkCanDeleteBankAccount,
 } from "@/lib/api/bank-accounts/operations";
 
-const BANK_ACCOUNT_PERMISSIONS = ["bank_accounts.manage", "admin.full_access"];
-
 // GET /api/bank-accounts/[id] - Get single bank account
-export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(_request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const authResult = await requirePermissions(BANK_ACCOUNT_PERMISSIONS);
-    if (authResult instanceof NextResponse) return authResult;
+    const authResult = await requirePermissions(["bank-accounts.view"]);
+    if (!authResult.success) return authResult.response;
 
-    const { id } = await params;
+    const { id } = params;
     const validation = await validateBankAccountExists(id);
     if (!validation.exists) return validation.response;
 
@@ -30,12 +28,12 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
 }
 
 // PUT /api/bank-accounts/[id] - Update bank account
-export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const authResult = await requirePermissions(BANK_ACCOUNT_PERMISSIONS);
-    if (authResult instanceof NextResponse) return authResult;
+    const authResult = await requirePermissions(["bank-accounts.update"]);
+    if (!authResult.success) return authResult.response;
 
-    const { id } = await params;
+    const { id } = params;
     const body = await request.json();
     const validation = validateBankAccountData(body, true);
 
@@ -78,15 +76,12 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 }
 
 // DELETE /api/bank-accounts/[id] - Delete bank account
-export async function DELETE(
-  _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function DELETE(_request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const authResult = await requirePermissions(BANK_ACCOUNT_PERMISSIONS);
-    if (authResult instanceof NextResponse) return authResult;
+    const authResult = await requirePermissions(["bank-accounts.delete"]);
+    if (!authResult.success) return authResult.response;
 
-    const { id } = await params;
+    const { id } = params;
     const deleteCheck = await checkCanDeleteBankAccount(id);
     if (!deleteCheck.canDelete) {
       return deleteCheck.response!;

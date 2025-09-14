@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import type { KindeUser } from "@/lib/kinde-auth";
 import { logger } from "@/lib/logger";
+import { getJson } from "@/lib/api/client";
 export interface SessionData {
   user: KindeUser | null;
   isAuthenticated: boolean;
@@ -46,45 +47,42 @@ export function SessionProvider({
     try {
       setSessionData((prev) => ({ ...prev, isLoading: true, error: null }));
 
-      const response = await fetch("/api/auth/me", {
-        method: "GET",
-        headers: {
-          "Cache-Control": "no-cache",
-        },
+      const userData = await getJson<any>("/api/auth/me", {
+        headers: { "Cache-Control": "no-cache" },
       });
 
-      if (response.ok) {
-        const userData = await response.json();
+      // Fetch additional session data in parallel
+      const [permissionsRes, orgRes] = await Promise.allSettled([
+        getJson<any>("/api/auth/permissions"),
+        getJson<any>("/api/auth/organization"),
+      ]);
 
-        // Fetch additional session data in parallel
-        const [permissionsRes, orgRes] = await Promise.allSettled([
-          fetch("/api/auth/permissions"),
-          fetch("/api/auth/organization"),
-        ]);
+      let permissions: string[] = [];
+      let organization: { orgCode: string; orgName: string } | null = null;
 
-        let permissions: string[] = [];
-        let organization = null;
+      if (permissionsRes.status === "fulfilled") {
+        const permData = permissionsRes.value;
+        permissions = permData.permissions ?? [];
+      }
 
-        if (permissionsRes.status === "fulfilled" && permissionsRes.value.ok) {
-          const permData = await permissionsRes.value.json();
-          permissions = permData.permissions ?? [];
-        }
+      if (orgRes.status === "fulfilled") {
+        const orgData = orgRes.value;
+        organization = orgData.organization ?? null;
+      }
 
-        if (orgRes.status === "fulfilled" && orgRes.value.ok) {
-          const orgData = await orgRes.value.json();
-          organization = orgData.organization ?? null;
-        }
-
-        setSessionData({
-          user: userData,
-          isAuthenticated: true,
-          isLoading: false,
-          error: null,
-          permissions,
-          organization,
-        });
-      } else if (response.status === 401) {
-        // User is not authenticated
+      setSessionData({
+        user: userData,
+        isAuthenticated: true,
+        isLoading: false,
+        error: null,
+        permissions,
+        organization,
+      });
+    } catch (error: any) {
+      logger.error("Session fetch error:", error);
+      const status = error?.response?.status ?? error?.status;
+      if (status === 401) {
+        // Not authenticated is not an error state
         setSessionData({
           user: null,
           isAuthenticated: false,
@@ -93,11 +91,8 @@ export function SessionProvider({
           permissions: [],
           organization: null,
         });
-      } else {
-        throw new Error(`Authentication check failed: ${response.status}`);
+        return;
       }
-    } catch (error) {
-      logger.error("Session fetch error:", error);
       setSessionData({
         user: null,
         isAuthenticated: false,
