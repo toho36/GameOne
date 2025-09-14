@@ -3,7 +3,11 @@ export function normalizeApiError(err: unknown): string {
   const status: number | undefined = anyErr?.response?.status ?? anyErr?.status;
 
   // Network errors
-  if (anyErr?.name === "TypeError" && typeof anyErr?.message === "string" && anyErr.message.includes("fetch")) {
+  if (
+    anyErr?.name === "TypeError" &&
+    typeof anyErr?.message === "string" &&
+    anyErr.message.includes("fetch")
+  ) {
     return "Network error. Please check your internet connection and try again.";
   }
 
@@ -31,4 +35,3 @@ export function normalizeApiError(err: unknown): string {
       return anyErr?.message || "An unexpected error occurred";
   }
 }
-

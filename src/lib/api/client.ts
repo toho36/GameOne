@@ -53,4 +53,3 @@ export async function deleteJson<T>(url: string, options?: Options): Promise<T> 
   const res = await api.delete(url, options).json<any>();
   return unwrapData<T>(res);
 }
-

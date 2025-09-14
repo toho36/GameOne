@@ -29,4 +29,3 @@ export const rolesKeys = {
   lists: () => [...rolesKeys.all(), "list"] as const,
   list: (params?: unknown) => [...rolesKeys.lists(), params ?? {}] as const,
 };
-
