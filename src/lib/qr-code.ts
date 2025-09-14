@@ -1,5 +1,7 @@
 import type { BankAccount } from "@/types/bank-account";
 import { logger } from "@/lib/logger";
+import { getJson } from "@/lib/api/client";
+import { normalizeApiError } from "@/lib/api/errors";
 
 // Get default bank account from configuration
 export function getDefaultBankAccount(): BankAccount {
@@ -90,15 +92,12 @@ export async function generateQRCodeURLWithDatabaseAccount(
   // This would typically fetch from database
   // For now, using a mock implementation
   try {
-    const response = await fetch(`/api/bank-accounts/${bankAccountId}`);
-    if (!response.ok) {
-      throw new Error(`Bank account not found: ${bankAccountId}`);
-    }
-
-    const { bankAccount } = await response.json();
+    const { bankAccount } = await getJson<{ bankAccount: BankAccount }>(
+      `/api/bank-accounts/${bankAccountId}`
+    );
     return generateQRCodeURL(name, eventDate, price, bankAccount.accountNumber);
   } catch (error) {
-    logger.error("Error fetching bank account for QR code generation", error);
+    logger.error("Error fetching bank account for QR code generation", normalizeApiError(error));
     // Fallback to default account
     return generateQRCodeURL(name, eventDate, price);
   }

@@ -39,7 +39,7 @@ async function checkBankAccountManagementPermission(userId: string): Promise<boo
         : JSON.parse(role.permissions as string);
 
       return (
-        permissions.includes("bank_accounts.manage") || permissions.includes("admin.full_access")
+        permissions.includes("bank-accounts.view") || permissions.includes("admin.full_access")
       );
     } catch {
       return false;

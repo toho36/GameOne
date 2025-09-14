@@ -55,8 +55,9 @@
   },
   "Navigation": {
     "home": "Home",
+    "browseEvents": "Browse Events",
     "dashboard": "Dashboard",
-    "events": "Manage Events",
+    "manageEvents": "Manage Events",
     "bankAccounts": "Bank Accounts",
     "users": "Users",
     "settings": "Settings"
@@ -240,8 +241,21 @@
     }
   },
   "Events": {
-    "title": "Manage Events",
-    "description": "Manage your events and registrations",
+    "title": "Browse Events",
+    "description": "Discover and register for upcoming events",
+    "breadcrumb": {
+      "home": "Home",
+      "events": "Events"
+    },
+    "search": {
+      "placeholder": "Search events...",
+      "label": "Search"
+    },
+    "searchPlaceholder": "Search events...",
+    "empty": {
+      "title": "No events found",
+      "message": "No events match your current filters. Try adjusting your search criteria or browse all events."
+    },
     "pageTitle": "Event Management",
     "pageDescription": "Create and manage your events",
     "createEvent": "Create Event",
@@ -251,7 +265,6 @@
     "unpublishEvent": "Unpublish Event",
     "noEvents": "No events found",
     "createFirst": "Create your first event to get started",
-    "searchPlaceholder": "Search events...",
     "filterAll": "All Events",
     "filterPublished": "Published",
     "filterDraft": "Draft",
@@ -466,7 +479,264 @@
       "updatedDesc": "Your event has been updated successfully."
     }
   },
-
+  "EventSearch": {
+    "placeholder": "Search events...",
+    "search": "Search",
+    "clear": "Clear"
+  },
+  "EventFilters": {
+    "title": "Filters",
+    "clearAll": "Clear All",
+    "expand": "Show More",
+    "collapse": "Show Less",
+    "search": {
+      "placeholder": "Search events...",
+      "label": "Search"
+    },
+    "category": {
+      "label": "Category",
+      "placeholder": "Select category",
+      "all": "All Categories"
+    },
+    "location": {
+      "label": "Location",
+      "placeholder": "Enter location"
+    },
+    "price": {
+      "label": "Price Range",
+      "min": "Min price",
+      "max": "Max price"
+    },
+    "date": {
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "selectStart": "Select start date",
+      "selectEnd": "Select end date"
+    },
+    "privacy": {
+      "label": "Privacy",
+      "all": "All",
+      "public": "Public",
+      "private": "Private"
+    },
+    "tags": {
+      "label": "Tags"
+    }
+  },
+  "EventList": {
+    "error": {
+      "title": "Error loading events",
+      "retry": "Try again"
+    },
+    "empty": {
+      "title": "No events found",
+      "description": "No events match your current filters. Try adjusting your search criteria."
+    },
+    "loadMore": {
+      "loading": "Loading more events...",
+      "button": "Load more events"
+    },
+    "results": {
+      "count": "{count} event{count, plural, one {} other {s}} found"
+    }
+  },
+  "WaitingList": {
+    "title": "Join Waiting List",
+    "info": {
+      "title": "Event is Full",
+      "description": "This event has reached its maximum capacity. Join the waiting list to be notified if a spot becomes available."
+    },
+    "specialRequirements": {
+      "label": "Special Requirements",
+      "placeholder": "Any special requirements or accommodations needed"
+    },
+    "emergencyContact": {
+      "label": "Emergency Contact",
+      "name": "Name",
+      "namePlaceholder": "Enter full name",
+      "relationship": "Relationship",
+      "relationshipPlaceholder": "e.g., Spouse, Parent, Friend",
+      "phone": "Phone",
+      "phonePlaceholder": "Enter phone number",
+      "email": "Email",
+      "emailPlaceholder": "Enter email address"
+    },
+    "terms": {
+      "accept": "I accept the",
+      "link": "terms and conditions"
+    },
+    "submit": {
+      "join": "Join Waiting List",
+      "joining": "Joining..."
+    },
+    "success": {
+      "title": "Successfully Joined!",
+      "description": "You have been added to the waiting list. We will notify you if a spot becomes available."
+    },
+    "errors": {
+      "termsRequired": "You must accept the terms and conditions",
+      "emergencyContactNameRequired": "Emergency contact name is required",
+      "emergencyContactPhoneRequired": "Emergency contact phone is required"
+    }
+  },
+  "RegistrationForm": {
+    "summary": {
+      "title": "Registration Summary",
+      "free": "Free",
+      "price": "Price per person",
+      "participants": "Number of participants"
+    },
+    "specialRequirements": {
+      "label": "Special Requirements",
+      "placeholder": "Any special requirements or accommodations needed"
+    },
+    "emergencyContact": {
+      "label": "Emergency Contact",
+      "name": "Name",
+      "namePlaceholder": "Enter full name",
+      "relationship": "Relationship",
+      "relationshipPlaceholder": "e.g., Spouse, Parent, Friend",
+      "phone": "Phone",
+      "phonePlaceholder": "Enter phone number",
+      "email": "Email",
+      "emailPlaceholder": "Enter email address"
+    },
+    "terms": {
+      "accept": "I accept the",
+      "link": "terms and conditions"
+    },
+    "marketing": {
+      "consent": "I agree to receive marketing communications about future events"
+    },
+    "submit": {
+      "register": "Register for Event",
+      "loading": "Registering..."
+    }
+  },
+  "EventRegistration": {
+    "title": "Event Registration",
+    "registrationSuccess": {
+      "title": "Registration Successful!"
+    },
+    "status": {
+      "full": "Event Full",
+      "closed": "Registration Closed"
+    },
+    "summary": {
+      "confirmed": "Confirmed registrations",
+      "waitingList": "Waiting list",
+      "availableSpots": "Available spots"
+    },
+    "full": {
+      "title": "Event is Full",
+      "description": "This event has reached its maximum capacity. You can join the waiting list to be notified if a spot becomes available."
+    },
+    "closed": {
+      "title": "Registration is Closed",
+      "description": "Registration for this event is currently closed.",
+      "opensLater": "Registration opens on {date}"
+    },
+    "unavailable": {
+      "title": "Registration Unavailable",
+      "description": "Registration is not available for this event at this time."
+    },
+    "eventInfo": {
+      "title": "Event Information",
+      "price": "Price",
+      "free": "Free",
+      "approval": "Approval Required",
+      "approvalRequired": "Yes",
+      "approvalNotRequired": "No",
+      "cancellation": "Cancellation Policy",
+      "cancellationNotAllowed": "Cancellations are not allowed for this event"
+    }
+  },
+  "PaymentClaiming": {
+    "title": "Payment Claiming",
+    "claimed": {
+      "title": "Payment Already Claimed",
+      "description": "This payment has already been claimed and processed."
+    },
+    "payment": {
+      "amount": "Payment Amount",
+      "method": "Payment Method",
+      "bankAccount": "Bank Account Details",
+      "accountHolder": "Account Holder",
+      "accountNumber": "Account Number",
+      "bankCode": "Bank Code",
+      "iban": "IBAN"
+    },
+    "qrCode": "QR Code",
+    "qrCodeAlt": "Payment QR Code",
+    "downloadQR": "Download QR Code",
+    "instructions": {
+      "description": "Please follow these steps to complete your payment:"
+    },
+    "claim": {
+      "title": "Claim Payment",
+      "transactionId": "Transaction ID",
+      "transactionIdPlaceholder": "Enter your transaction ID",
+      "notes": "Additional Notes",
+      "notesPlaceholder": "Any additional information about your payment",
+      "claiming": "Claiming...",
+      "submit": "Claim Payment"
+    },
+    "additional": {
+      "info": "Additional Information:",
+      "step1": "Make sure you have the correct transaction ID from your bank",
+      "step2": "Include any reference numbers or notes from your payment",
+      "step3": "Contact support if you encounter any issues"
+    },
+    "errors": {
+      "transactionIdRequired": "Transaction ID is required",
+      "claimFailed": "Failed to claim payment. Please try again.",
+      "networkError": "Network error. Please check your connection and try again."
+    }
+  },
+  "FriendRegistrationForm": {
+    "title": "Friend Registration",
+    "guests": {
+      "title": "Guest Information",
+      "add": "Add Guest",
+      "guest": "Guest",
+      "name": "Full Name",
+      "email": "Email Address",
+      "phone": "Phone Number",
+      "dietary": "Dietary Restrictions",
+      "dietaryPlaceholder": "e.g., Vegetarian, Gluten-free, Allergies",
+      "special": "Special Requirements",
+      "specialPlaceholder": "Any special accommodations needed",
+      "noGuests": "No Guests Added",
+      "noGuestsDescription": "You haven't added any guests yet. Add guests to register them for the event.",
+      "addFirst": "Add your first guest"
+    },
+    "emergencyContact": {
+      "title": "Emergency Contact",
+      "name": "Full Name",
+      "relationship": "Relationship",
+      "phone": "Phone Number",
+      "email": "Email Address"
+    },
+    "specialRequirements": {
+      "title": "Special Requirements",
+      "placeholder": "Any special requirements or accommodations needed for your group"
+    },
+    "terms": {
+      "accept": "I accept the",
+      "andConditions": "terms and conditions"
+    },
+    "marketing": {
+      "consent": "I agree to receive marketing communications about future events"
+    },
+    "total": {
+      "title": "Total Cost",
+      "description": "Total cost for all registrations including guests"
+    },
+    "actions": {
+      "cancel": "Cancel",
+      "submitting": "Submitting..."
+    }
+  },
   "Users": {
     "title": "Users",
     "description": "Manage user accounts and permissions",

@@ -171,8 +171,8 @@ export class EventsService {
         country: validatedData.country ?? "Czech Republic",
         isOnline: validatedData.isOnline ?? false,
         onlineUrl: null, // Not used in simplified form
-        registrationStartDate: null, // Not used in simplified form
-        registrationEndDate: null, // Not used in simplified form
+        registrationStartDate: validatedData.registrationStartDate ?? null,
+        registrationEndDate: validatedData.registrationEndDate ?? null,
         requiresApproval: validatedData.requiresApproval ?? false,
         allowWaitingList: validatedData.allowWaitingList ?? true,
         maxWaitingList: null, // Not used in simplified form

@@ -1,11 +1,11 @@
 "use client";
 
-import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { UserProfile } from "@/components/auth";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { useState } from "react";
 import { type Locale } from "@/i18n/routing";
+import { Link } from "@/i18n/navigation";
 
 interface NavigationProps {
   currentLocale: Locale;
@@ -32,6 +32,9 @@ export function Navigation({ currentLocale }: NavigationProps) {
             <Link href="/" className="text-gray-600 transition-colors hover:text-gray-900">
               {t("home")}
             </Link>
+            <Link href="/events" className="text-gray-600 transition-colors hover:text-gray-900">
+              {t("browseEvents")}
+            </Link>
             <Link href="/dashboard" className="text-gray-600 transition-colors hover:text-gray-900">
               {t("dashboard")}
             </Link>
@@ -39,7 +42,7 @@ export function Navigation({ currentLocale }: NavigationProps) {
               href="/manage-events"
               className="text-gray-600 transition-colors hover:text-gray-900"
             >
-              {t("events")}
+              {t("manageEvents")}
             </Link>
             <Link href="/users" className="text-gray-600 transition-colors hover:text-gray-900">
               {t("users")}
@@ -94,6 +97,13 @@ export function Navigation({ currentLocale }: NavigationProps) {
                 {t("home")}
               </Link>
               <Link
+                href="/events"
+                className="rounded-md px-3 py-2 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                {t("browseEvents")}
+              </Link>
+              <Link
                 href="/dashboard"
                 className="rounded-md px-3 py-2 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
                 onClick={() => setIsMobileMenuOpen(false)}
@@ -105,7 +115,7 @@ export function Navigation({ currentLocale }: NavigationProps) {
                 className="rounded-md px-3 py-2 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                {t("events")}
+                {t("manageEvents")}
               </Link>
               <Link
                 href="/users"

@@ -169,22 +169,31 @@ export async function GET(request: NextRequest) {
 
 // Helper function to check user management permissions
 async function checkUserManagementPermission(user: any): Promise<boolean> {
-  // Check if primary role allows user management
+  // ADMIN bypass
   const primaryRole = user.primaryRole;
   if (primaryRole?.name === "ADMIN") return true;
 
-  // Check permissions in primary role
-  if (primaryRole?.permissions) {
-    const permissions = primaryRole.permissions as string[];
-    if (permissions.includes("users.manage") || permissions.includes("*")) return true;
-  }
+  const permits = (perms: string[] | null | undefined) => {
+    if (!perms) return false;
+    try {
+      const list: string[] = Array.isArray(perms) ? perms : JSON.parse(perms as any);
+      const normalized = list.map((p) => p.trim());
+      return (
+        normalized.includes("users.moderate") ||
+        normalized.includes("users.*") ||
+        normalized.includes("*") ||
+        normalized.includes("admin.full_access")
+      );
+    } catch {
+      return false;
+    }
+  };
 
-  // Check permissions in additional roles
+  if (permits(primaryRole?.permissions as any)) return true;
+
   for (const userRole of user.userRoles) {
     if (userRole.role.name === "ADMIN") return true;
-
-    const permissions = userRole.role.permissions as string[];
-    if (permissions.includes("users.manage") || permissions.includes("*")) return true;
+    if (permits(userRole.role.permissions as any)) return true;
   }
 
   return false;

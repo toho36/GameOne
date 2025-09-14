@@ -44,7 +44,9 @@
       "Bash(npx prisma migrate:*)",
       "Bash(npx prisma:*)",
       "Bash(psql:*)",
-      "Bash(npm run dev:*)"
+      "Bash(npm run dev:*)",
+      "Bash(powershell:*)",
+      "mcp__ide__getDiagnostics"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"

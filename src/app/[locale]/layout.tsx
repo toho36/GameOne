@@ -8,6 +8,7 @@ import { Inter } from "next/font/google";
 import { routing, type Locale } from "@/i18n/routing";
 import { Navigation } from "@/components/layout/navigation";
 import { SessionProvider } from "@/components/auth";
+import { ReactQueryProvider } from "@/components/providers/react-query-provider";
 import { getCurrentUser, getUserPermissions } from "@/lib/kinde-auth";
 
 const inter = Inter({
@@ -56,7 +57,7 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
         <NextIntlClientProvider messages={messages}>
           <SessionProvider initialSession={initialSession}>
             <Navigation currentLocale={locale as Locale} />
-            {children}
+            <ReactQueryProvider>{children}</ReactQueryProvider>
           </SessionProvider>
         </NextIntlClientProvider>
       </body>

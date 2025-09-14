@@ -1,16 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { logger } from "@/lib/logger";
+import { postJson } from "@/lib/api/client";
+import { normalizeApiError } from "@/lib/api/errors";
 import { EventList } from "./event-list";
 import { EventFilters as EventFiltersComponent } from "./event-filters";
 import { EventStats } from "./event-stats";
 import { useEvents } from "./hooks/use-events";
+import { useDeleteEvent } from "./hooks/use-event-mutations";
 import { EventDashboardProps, EventFilters } from "@/types/components/event-dashboard.types";
 
 export function EventDashboard({ className }: EventDashboardProps) {
@@ -36,25 +39,19 @@ export function EventDashboard({ className }: EventDashboardProps) {
     router.push(`/manage-events/${eventId}/edit`);
   };
 
+  const deleteEvent = useDeleteEvent();
   const handleDeleteEvent = async (eventId: string) => {
     // eslint-disable-next-line no-alert
     if (!confirm(t("deleteEvent") + "?")) return;
 
     try {
-      const response = await fetch(`/api/events/${eventId}`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Failed to delete event");
-      }
-
+      await deleteEvent.mutateAsync(eventId);
       refetch();
     } catch (error) {
-      logger.error("Event deletion failed", error);
+      const message = normalizeApiError(error);
+      logger.error("Event deletion failed", message);
       // eslint-disable-next-line no-alert
-      alert(error instanceof Error ? error.message : "Failed to delete event");
+      alert(message);
     }
   };
 
@@ -62,22 +59,13 @@ export function EventDashboard({ className }: EventDashboardProps) {
     const action = currentStatus === "PUBLISHED" ? "unpublish" : "publish";
 
     try {
-      const response = await fetch(`/api/events/${eventId}/publish`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || `Failed to ${action} event`);
-      }
-
+      await postJson(`/api/events/${eventId}/publish`, { action });
       refetch();
     } catch (error) {
-      logger.error(`Event ${action} operation failed`, error);
+      const message = normalizeApiError(error);
+      logger.error(`Event ${action} operation failed`, message);
       // eslint-disable-next-line no-alert
-      alert(error instanceof Error ? error.message : `Failed to ${action} event`);
+      alert(message);
     }
   };
 
@@ -91,11 +79,15 @@ export function EventDashboard({ className }: EventDashboardProps) {
     updateFilters({});
   };
 
-  // Calculate stats
-  const totalEvents = pagination.totalCount;
-  const publishedEvents = events.filter((e) => e.status === "PUBLISHED").length;
-  const draftEvents = events.filter((e) => e.status === "DRAFT").length;
-  const totalRegistrations = events.reduce((sum, e) => sum + e.registrationCount, 0);
+  // Calculate stats (defensive against undefined)
+  const totalEvents = pagination?.totalCount ?? 0;
+  const publishedEvents = Array.isArray(events)
+    ? events.filter((e) => e.status === "PUBLISHED").length
+    : 0;
+  const draftEvents = Array.isArray(events) ? events.filter((e) => e.status === "DRAFT").length : 0;
+  const totalRegistrations = Array.isArray(events)
+    ? events.reduce((sum, e) => sum + e.registrationCount, 0)
+    : 0;
 
   const renderErrorState = () => (
     <div className="space-y-6">

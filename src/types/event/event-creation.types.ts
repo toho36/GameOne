@@ -1,6 +1,10 @@
 /* eslint-disable no-unused-vars */
 import type { EventType, EventStatus } from "@prisma/client";
 
+// Registration control types
+export type RegistrationControlMode = "manual" | "scheduled";
+export type RegistrationManualState = "open" | "closed";
+
 // Simplified event creation form data interface
 export interface EventCreationFormData {
   // Basic information
@@ -18,6 +22,12 @@ export interface EventCreationFormData {
   // Scheduling
   startDate: Date;
   endDate?: Date;
+
+  // Registration control
+  registrationControlMode: RegistrationControlMode;
+  registrationManualState: RegistrationManualState;
+  registrationStartDate?: Date;
+  registrationEndDate?: Date;
 
   // Payment settings
   bankAccountId?: string;
@@ -46,6 +56,10 @@ export interface EventCreationFormErrors {
   currency?: string;
   startDate?: string;
   endDate?: string;
+  registrationControlMode?: string;
+  registrationManualState?: string;
+  registrationStartDate?: string;
+  registrationEndDate?: string;
   bankAccountId?: string;
   status?: string;
   type?: string;
@@ -200,6 +214,10 @@ export const DEFAULT_EVENT_FORM_DATA: EventCreationFormData = {
   currency: "CZK",
   startDate: new Date(Date.now() + 24 * 60 * 60 * 1000), // Tomorrow
   endDate: undefined,
+  registrationControlMode: "manual",
+  registrationManualState: "open",
+  registrationStartDate: undefined,
+  registrationEndDate: undefined,
   bankAccountId: undefined,
   status: "PUBLISHED",
   // Default fields for API compatibility

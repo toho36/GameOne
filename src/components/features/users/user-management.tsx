@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { MagnifyingGlassIcon, UserPlusIcon } from "@heroicons/react/24/outline";
 
@@ -9,7 +9,9 @@ import { Button } from "@/components/ui/button";
 import { UserList } from "@/components/features/users/user-list";
 import { UserFilters } from "@/components/features/users/user-filters";
 import { useUsers } from "@/components/features/users/hooks/use-users";
+import { useUpdateUserRole } from "@/components/features/users/hooks/use-user-mutations";
 import { logger } from "@/lib/logger";
+import { normalizeApiError } from "@/lib/api/errors";
 import {
   UserManagementProps,
   UserFilters as UserFiltersType,
@@ -50,26 +52,17 @@ export function UserManagement({ className }: UserManagementProps) {
     router.push(`/users/${userId}/edit`);
   };
 
+  const updateUserRole = useUpdateUserRole();
+
   const handleUpdateUserRole = async (userId: string, roleId: string) => {
     try {
-      const response = await fetch(`/api/users/${userId}/role`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ roleId }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        // Log error and let the component handle UI feedback
-        logger.error("Role update failed:", error);
-        throw new Error(error.error || error.message || t("errors.roleUpdateFailed"));
-      }
-
+      await updateUserRole.mutateAsync({ id: userId, roleId });
       refetch();
     } catch (error) {
-      logger.error("Update user role error:", error);
+      const message = normalizeApiError(error) || t("errors.roleUpdateFailed");
+      logger.error("Update user role error:", message);
       // Re-throw to let the UserList component handle error display
-      throw error;
+      throw new Error(message);
     }
   };
 
