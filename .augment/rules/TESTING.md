@@ -42,14 +42,14 @@ describe('EventCard', () => {
 ## Hook test skeleton
 
 ```ts
-import { renderHook, act } from '@testing-library/react'
-import { useToast } from '@/hooks/use-toast'
+import { renderHook, act } from "@testing-library/react";
+import { useToast } from "@/hooks/use-toast";
 
-test('useToast exposes toast function', () => {
-  const { result } = renderHook(() => useToast())
-  act(() => result.current.toast({ title: 'Hello' }))
+test("useToast exposes toast function", () => {
+  const { result } = renderHook(() => useToast());
+  act(() => result.current.toast({ title: "Hello" }));
   // assert side-effect or state in provider
-})
+});
 ```
 
 ## API route tests (optional light coverage)

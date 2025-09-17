@@ -30,28 +30,32 @@ Standardize on ky + React Query. Do not use raw `fetch`.
 Fetching list with params:
 
 ```ts
-import { useQuery } from '@tanstack/react-query'
-import { getJson } from '@/lib/api/client'
-import { eventsKeys } from '@/lib/api/query-keys'
+import { useQuery } from "@tanstack/react-query";
+import { getJson } from "@/lib/api/client";
+import { eventsKeys } from "@/lib/api/query-keys";
 
 export function usePublicEvents(params: { page: number; limit: number }) {
   return useQuery({
     queryKey: eventsKeys.list(params),
-    queryFn: () => getJson<{ events: any[]; pagination: any }>(`/api/events?page=${params.page}&limit=${params.limit}`),
-  })
+    queryFn: () =>
+      getJson<{ events: any[]; pagination: any }>(
+        `/api/events?page=${params.page}&limit=${params.limit}`
+      ),
+  });
 }
 ```
 
 Posting data with mutation:
 
 ```ts
-import { useMutation } from '@tanstack/react-query'
-import { postJson } from '@/lib/api/client'
+import { useMutation } from "@tanstack/react-query";
+import { postJson } from "@/lib/api/client";
 
 export function useRegister(eventId: string) {
   return useMutation({
-    mutationFn: (payload: { numberOfGuests: number }) => postJson(`/api/events/${eventId}/register`, payload),
-  })
+    mutationFn: (payload: { numberOfGuests: number }) =>
+      postJson(`/api/events/${eventId}/register`, payload),
+  });
 }
 ```
 
@@ -66,19 +70,22 @@ export function useRegister(eventId: string) {
 Example handler sketch:
 
 ```ts
-import { NextResponse } from 'next/server'
-import { z } from 'zod'
+import { NextResponse } from "next/server";
+import { z } from "zod";
 
-const schema = z.object({ page: z.coerce.number().min(1).default(1) })
+const schema = z.object({ page: z.coerce.number().min(1).default(1) });
 
 export async function GET(req: Request) {
   try {
-    const url = new URL(req.url)
-    const page = schema.parse({ page: url.searchParams.get('page') }).page
-    const data = await listEvents({ page })
-    return NextResponse.json({ success: true, data })
+    const url = new URL(req.url);
+    const page = schema.parse({ page: url.searchParams.get("page") }).page;
+    const data = await listEvents({ page });
+    return NextResponse.json({ success: true, data });
   } catch (err) {
-    return NextResponse.json({ success: false, error: 'Invalid request' }, { status: 400 })
+    return NextResponse.json(
+      { success: false, error: "Invalid request" },
+      { status: 400 }
+    );
   }
 }
 ```
