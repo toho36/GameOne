@@ -37,8 +37,11 @@ experience** with minimal email communication.
 
 ### 1. User Self-Registration
 
-**Actor**: Regular user  
-**Preconditions**: User has verified account, event is open for registration  
+**Actor**: Regular user
+
+**Preconditions**: User has verified account, event is open for registration,
+and the event has a bank account configured
+
 **Flow**:
 
 1. User clicks "Register" on event page
@@ -59,8 +62,11 @@ visible
 
 ### 2. Friend Registration
 
-**Actor**: User registering for someone else  
-**Preconditions**: User has verified account, event allows friend registration  
+**Actor**: User registering for someone else
+
+**Preconditions**: User has verified account, event allows friend registration,
+and the event has a bank account configured
+
 **Flow**:
 
 1. User fills friend's name (required) + optional contact info
@@ -74,16 +80,15 @@ visible
 - Friend doesn't need account
 - Registering user is responsible for payment
 - Friend gets same event access as regular registrant
-- Limit number of friends per user (e.g., max 3)
+- Limit number of friends per user (max 5, global)
 
 **Postconditions**: Friend registration created with `PENDING_VERIFICATION`
 status
 
 ### 3. Payment Claiming Process
 
-**Actor**: User who registered  
-**Preconditions**: User has `PENDING_VERIFICATION` status  
-**Flow**:
+**Actor**: User who registered **Preconditions**: User has
+`PENDING_VERIFICATION` status **Flow**:
 
 1. User sees payment details and QR code on webpage
 2. User clicks "I've sent the payment" button on same page
@@ -104,9 +109,8 @@ reserved
 
 ### 4. Admin Payment Verification
 
-**Actor**: Event admin/manager  
-**Preconditions**: Admin has verification permissions  
-**Flow**:
+**Actor**: Event admin/manager **Preconditions**: Admin has verification
+permissions **Flow**:
 
 1. Admin sees list of pending payments
 2. Admin checks bank account for payments
@@ -125,14 +129,14 @@ reserved
 
 ### 5. Waiting List Management
 
-**Actor**: System + Users  
-**Preconditions**: Event at capacity, waiting list enabled  
-**Flow**:
+**Actor**: System + Users **Preconditions**: Event at capacity, waiting list
+enabled **Flow**:
 
 1. When registration is cancelled → Promote next in waiting list
 2. When payment is rejected → Move to waiting list
-3. When spot opens → Show payment details on webpage (no email)
-4. Promoted users get payment instructions on webpage
+3. On addition to waiting list → Send waiting list confirmation email
+4. When spot opens → Show payment details on webpage and send promotion email
+5. Promoted users get payment instructions on webpage
 
 **Business Rules**:
 
@@ -500,12 +504,13 @@ The schema supports payment tracking through:
    management
 3. **Guest Registration**: Supports non-authenticated user registrations
 4. **Waiting List Management**: Complete waiting list with promotion tracking
-5. **Audit Trail**: Registration history and audit logs for all changes
+5. (Future) Audit Trail: Registration history and audit logs exist in schema but
+   are out of scope to implement now
 6. **Flexible Payment Methods**: Supports QR codes, bank transfers, and cash
    payments
 7. **Capacity Tracking**: Proper capacity management with group size support
-8. **Admin Override**: Supports admin-created registrations and capacity
-   overrides
+8. Out-of-scope now: admin-created registrations and capacity overrides (not
+   implemented in current phase)
 9. **Payment Status Tracking**: Granular payment status management
 10. **Friend Registration**: Complete friend registration support with tracking
 
@@ -576,7 +581,7 @@ function hasCapacity(eventId: string) {
 | PAYMENT_SENT_AWAITING_VERIFICATION | Admin approves      | PAYMENT_VERIFIED                   | ✅ Yes     | ✅ Verification |
 | PAYMENT_SENT_AWAITING_VERIFICATION | Admin rejects       | REJECTED                           | ❌ No      | ✅ Rejection    |
 | PENDING_VERIFICATION               | Admin cash payment  | VERIFIED_CASH                      | ✅ Yes     | ✅ Verification |
-| WAITING_LIST                       | Promoted from list  | WAITING_LIST_PROMOTED              | ❌ No      | ❌ None         |
+| WAITING_LIST                       | Promoted from list  | WAITING_LIST_PROMOTED              | ❌ No      | ✅ Promotion    |
 
 ### Status Descriptions
 
@@ -650,9 +655,8 @@ async function promoteFromWaitingList(eventId: string) {
 
 #### 1. Payment Confirmation Email
 
-**Trigger**: User clicks "I've sent payment" button  
-**Template**: `payment-confirmation.html`  
-**Content**:
+**Trigger**: User clicks "I've sent payment" button **Template**:
+`payment-confirmation.html` **Content**:
 
 - Confirmation that payment claim was received
 - Event details and registration confirmation
@@ -661,8 +665,7 @@ async function promoteFromWaitingList(eventId: string) {
 
 #### 2. Payment Rejection Email
 
-**Trigger**: Admin rejects payment  
-**Template**: `payment-rejection.html`  
+**Trigger**: Admin rejects payment **Template**: `payment-rejection.html`
 **Content**:
 
 - Reason for rejection
@@ -671,12 +674,32 @@ async function promoteFromWaitingList(eventId: string) {
 
 #### 3. Payment Verification Email
 
-**Trigger**: Admin approves payment  
-**Template**: `payment-verified.html`  
+**Trigger**: Admin approves payment **Template**: `payment-verified.html`
 **Content**:
 
 - Confirmation that payment was verified
 - Event details and final confirmation
+
+#### 4. Waiting List Confirmation Email
+
+**Trigger**: User is added to waiting list **Template**:
+`waiting-list-confirmation.html` **Content**:
+
+- Current position on the waiting list
+- How promotions work and that capacity is limited
+- Link to the registration page for live status and payment when promoted
+- Contact information
+
+#### 5. Waiting List Promotion Email
+
+**Trigger**: User is promoted from waiting list **Template**:
+`waiting-list-promotion.html` **Content**:
+
+- Promotion notice and next steps
+- Payment details and QR (or a link back to the registration page to view QR)
+- Time sensitivity note (no hard expiry; capacity is limited and may fill)
+- Contact information
+
 - Next steps for attending event
 
 ### Webpage Notifications
@@ -721,18 +744,16 @@ async function promoteFromWaitingList(eventId: string) {
 
 **Features**:
 
-- Add users to registration list (bypass capacity)
 - Add users to waiting list
-- Move users between lists
-- Override payment requirements
 - Cancel registrations
+- Resend notification emails (claim, verification, rejection, waiting list,
+  promotion)
 
 **Actions**:
 
-- Manual registration creation
-- Payment status override
-- Capacity limit bypass
-- Bulk user operations
+- Create waiting list entry
+- Cancel or restore a registration (subject to capacity rules)
+- Bulk email resends
 
 ### 3. Event Capacity Management
 
@@ -761,6 +782,8 @@ async function promoteFromWaitingList(eventId: string) {
 - No auto-expiration of pending payments
 - No auto-rejection of unverified payments
 - Admin controls all timing
+- Disable pending payment expiry for REGISTRATION type (no auto-expire); expiry
+  for other types may still apply per configuration
 
 ### 2. Payment Method Flexibility
 
@@ -771,17 +794,16 @@ async function promoteFromWaitingList(eventId: string) {
 
 ### 3. Friend Registration Limits
 
-- Limit number of friends per user (e.g., max 3)
+- Limit number of friends per user (max 5, global)
 - Prevent abuse of friend registration
 - Track who registered whom
 - Apply same payment rules to friends
 
 ### 4. Capacity Override
 
-- Admins can add users over capacity
-- Special cases (VIP, speakers, etc.)
-- Requires admin approval and reason
-- Track override reasons
+- Not allowed in current phase (no admin overrides)
+- VIP/special cases must still respect capacity or use waiting list
+- This may be revisited in a future phase
 
 ### 5. Payment Claiming Flexibility
 
@@ -792,10 +814,19 @@ async function promoteFromWaitingList(eventId: string) {
 
 ### 6. Waiting List Simplicity
 
-- No email notifications for waiting list
-- Promotion happens silently on webpage
-- Users check webpage for status updates
+- Send email upon addition to waiting list (confirmation)
+- Promotion includes email notification
+- Users can also check webpage for live status
 - Position numbers update automatically
+
+### 7. Concurrency Policy
+
+- On simultaneous claims for the last available spot, the first successful
+  transaction reserves the spot; subsequent claims receive "Event full now" and
+  are moved to the waiting list
+- All capacity-affecting transitions are performed in a single database
+  transaction with row-level checks to avoid race conditions
+- Waiting list promotions are processed FIFO
 
 ---
 
@@ -852,6 +883,8 @@ async function promoteFromWaitingList(eventId: string) {
 - Status indicator components
 - Admin dashboard components
 - Real-time status updates
+- Align types with Prisma: UI `PaymentMethod` enum must include `QR_CODE`; add
+  adapters where UI types differ from DB
 
 ### Backend Requirements
 
@@ -860,20 +893,23 @@ async function promoteFromWaitingList(eventId: string) {
 - Email service integration
 - Admin verification API
 - Capacity calculation service
+- Enforce bank account requirement (`event.bankAccountId`) during registration
+  and when publishing events
 
 ### Database Requirements
 
 - Payment status tracking
 - Friend registration support
-- Audit trail for all changes
+- (Future) Audit trail for all changes (out of scope in current phase)
 - Performance indexes for queries
 - Data integrity constraints
+- Enforce uniqueness for guest registrations: `[eventId, guestEmail, guestName]`
 
 ### Security Requirements
 
 - Admin role verification
 - Payment data encryption
-- Audit logging
+- (Future) Audit logging (out of scope in current phase)
 - Input validation
 - CSRF protection
 

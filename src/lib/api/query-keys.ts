@@ -6,6 +6,7 @@ export const eventsKeys = {
   list: (params: unknown) => [...eventsKeys.lists(), params] as const,
   details: () => [...eventsKeys.all(), "detail"] as const,
   detail: (id: string) => [...eventsKeys.details(), id] as const,
+  participants: (id: string) => [...eventsKeys.detail(id), "participants"] as const,
 };
 
 export const usersKeys = {
@@ -28,4 +29,12 @@ export const rolesKeys = {
   all: () => ["roles"] as const,
   lists: () => [...rolesKeys.all(), "list"] as const,
   list: (params?: unknown) => [...rolesKeys.lists(), params ?? {}] as const,
+};
+
+export const registrationsKeys = {
+  all: () => ["registrations"] as const,
+  lists: () => [...registrationsKeys.all(), "list"] as const,
+  list: (params?: unknown) => [...registrationsKeys.lists(), params ?? {}] as const,
+  details: () => [...registrationsKeys.all(), "detail"] as const,
+  detail: (id: string) => [...registrationsKeys.details(), id] as const,
 };

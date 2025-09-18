@@ -8,7 +8,7 @@ import { Inter } from "next/font/google";
 import { routing, type Locale } from "@/i18n/routing";
 import { Navigation } from "@/components/layout/navigation";
 import { SessionProvider } from "@/components/auth";
-import { ReactQueryProvider } from "@/components/providers/react-query-provider";
+import { ReactQueryProvider } from "@/components/ui/providers/react-query-provider";
 import { getCurrentUser, getUserPermissions } from "@/lib/kinde-auth";
 
 const inter = Inter({

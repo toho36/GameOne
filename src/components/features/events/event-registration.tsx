@@ -5,12 +5,14 @@ import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { getJson, postJson } from "@/lib/api/client";
+import { Button } from "@/components/ui/button";
+import { postJson } from "@/lib/api/client";
 import { normalizeApiError } from "@/lib/api/errors";
 import { RegistrationForm } from "./registration-form";
-import { RegistrationStatus } from "./registration-status";
+import { RegistrationConfirmation } from "@/components/features/registration/components/registration-confirmation";
 import { WaitingListPosition } from "./waiting-list-position";
-import type { PublicEvent, RegistrationStatusResponse } from "@/types/features/event-registration";
+import { useSession } from "@/components/auth/session-provider";
+import type { PublicEvent } from "@/types/features/event-registration";
 
 interface EventRegistrationProps {
   event: PublicEvent;
@@ -18,9 +20,8 @@ interface EventRegistrationProps {
 
 export function EventRegistration({ event }: EventRegistrationProps) {
   const t = useTranslations("EventRegistration");
-  const [registrationStatus, setRegistrationStatus] = useState<RegistrationStatusResponse | null>(
-    null
-  );
+  const { isAuthenticated, isLoading } = useSession();
+  const [confirmedRegistrationId, setConfirmedRegistrationId] = useState<string | null>(null);
 
   const [, setIsLoading] = useState(false);
 
@@ -30,8 +31,8 @@ export function EventRegistration({ event }: EventRegistrationProps) {
   const hasAvailableSpots = event.availableSpots !== undefined && event.availableSpots > 0;
   const isFull = event.availableSpots !== undefined && event.availableSpots <= 0;
 
-  const handleRegistrationSuccess = (status: RegistrationStatusResponse) => {
-    setRegistrationStatus(status);
+  const handleRegistrationSuccess = (registrationId: string) => {
+    setConfirmedRegistrationId(registrationId);
     setError(null);
   };
 
@@ -39,26 +40,16 @@ export function EventRegistration({ event }: EventRegistrationProps) {
     setError(errorMessage);
   };
 
-  const handlePaymentClaimed = async () => {
-    // Refresh registration status after payment is claimed
-    try {
-      const status = await getJson<RegistrationStatusResponse>(
-        `/api/events/${event.id}/registration-status`
-      );
-      setRegistrationStatus(status);
-    } catch (e) {
-      setError(normalizeApiError(e));
-    }
-  };
+  // Payment claiming handled in RegistrationConfirmation via detail endpoint
 
-  if (registrationStatus) {
+  if (confirmedRegistrationId) {
     return (
       <Card className="border-2 border-green-200 bg-green-50">
         <CardHeader>
           <CardTitle className="text-green-800">{t("registrationSuccess.title")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          <RegistrationStatus status={registrationStatus} onPaymentClaimed={handlePaymentClaimed} />
+          <RegistrationConfirmation registrationId={confirmedRegistrationId} />
         </CardContent>
       </Card>
     );
@@ -104,23 +95,48 @@ export function EventRegistration({ event }: EventRegistrationProps) {
 
         {/* Registration Form or Status Messages */}
         {canRegister && hasAvailableSpots ? (
-          <RegistrationForm
-            event={event}
-            onSubmit={async (formData) => {
-              setIsLoading(true);
-              try {
-                const result = await postJson<RegistrationStatusResponse>(
-                  `/api/events/${event.id}/register`,
-                  formData as any
-                );
-                handleRegistrationSuccess(result);
-              } catch (error) {
-                handleRegistrationError(normalizeApiError(error));
-              } finally {
-                setIsLoading(false);
-              }
-            }}
-          />
+          isAuthenticated ? (
+            <div className="flex flex-col items-center gap-3">
+              <p className="text-sm text-gray-600">{t("authenticatedInfo")}</p>
+              <Button
+                disabled={isLoading}
+                onClick={async () => {
+                  setIsLoading(true);
+                  try {
+                    const result = await postJson<{ registrationId: string }>(
+                      `/api/events/${event.id}/register`,
+                      { numberOfGuests: 0 } as any
+                    );
+                    handleRegistrationSuccess(result.registrationId);
+                  } catch (error) {
+                    handleRegistrationError(normalizeApiError(error));
+                  } finally {
+                    setIsLoading(false);
+                  }
+                }}
+              >
+                {t("registerCta")}
+              </Button>
+            </div>
+          ) : (
+            <RegistrationForm
+              event={event}
+              onSubmit={async (formData) => {
+                setIsLoading(true);
+                try {
+                  const result = await postJson<{ registrationId: string }>(
+                    `/api/events/${event.id}/register`,
+                    formData as any
+                  );
+                  handleRegistrationSuccess(result.registrationId);
+                } catch (error) {
+                  handleRegistrationError(normalizeApiError(error));
+                } finally {
+                  setIsLoading(false);
+                }
+              }}
+            />
+          )
         ) : isFull ? (
           <div className="py-8 text-center">
             <div className="mb-2 text-2xl font-bold text-gray-900">{t("full.title")}</div>

@@ -291,13 +291,14 @@ class ProjectStructureValidator {
       if (!line || !line.startsWith("import")) continue;
 
       // Check for relative imports (should use @/ aliases instead)
-      // Exception: JSON imports in test files can use relative paths due to Vitest limitations
+      // Exception: JSON imports in test files and message loader files can use relative paths due to Vite limitations
       if (line.includes("../")) {
         const isJsonImport = line.includes(".json");
         const isTestFile =
           file.relativePath.includes("__tests__") || file.relativePath.includes(".test.");
+        const isMessageLoader = file.relativePath.includes("messages.ts");
 
-        if (!(isJsonImport && isTestFile)) {
+        if (!(isJsonImport && (isTestFile || isMessageLoader))) {
           this.errors.push(
             `Use @/ path alias instead of relative import in ${file.relativePath}:${i + 1}: ${line}`
           );

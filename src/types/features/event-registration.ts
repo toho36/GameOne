@@ -167,6 +167,7 @@ export interface PaymentInfo {
 
 export enum PaymentMethod {
   BANK_TRANSFER = "BANK_TRANSFER",
+  QR_CODE = "QR_CODE",
   CASH = "CASH",
   CARD = "CARD",
   OTHER = "OTHER",

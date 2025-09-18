@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { EventDetail } from "@/components/features/events/event-detail";
 import { EventRegistration } from "@/components/features/events/event-registration";
+import { RegisteredUsersList } from "@/components/features/events/registered-users-list";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { getPublicEventById } from "@/lib/api/events/public";
 
@@ -46,6 +47,9 @@ export default async function EventPage({ params }: EventPageProps) {
         <Suspense fallback={<LoadingSpinner />}>
           <EventDetail event={event} />
           <EventRegistration event={event} />
+          <div className="mt-6">
+            <RegisteredUsersList eventId={event.id} />
+          </div>
         </Suspense>
       </main>
     );
