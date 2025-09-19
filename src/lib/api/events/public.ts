@@ -1,6 +1,12 @@
 import { prisma } from "@/lib/prisma";
 import type { PublicEvent } from "@/types/features/event-registration";
 
+const capacityPaymentStatuses = [
+  "PAYMENT_SENT_AWAITING_VERIFICATION",
+  "PAYMENT_VERIFIED",
+  "VERIFIED_CASH",
+] as const;
+
 export async function getPublicEventById(id: string): Promise<PublicEvent | null> {
   try {
     const event = await prisma.event.findUnique({
@@ -17,23 +23,24 @@ export async function getPublicEventById(id: string): Promise<PublicEvent | null
             color: true,
           },
         },
-        registrations: {
-          where: { status: "CONFIRMED" },
-          select: { id: true },
-        },
-        _count: {
-          select: {
-            registrations: {
-              where: { status: "CONFIRMED" },
-            },
-          },
-        },
       },
     });
 
     if (!event) {
       return null;
     }
+
+    // Compute counts based on payment status taking capacity
+    const [confirmedParticipants, waitingListCount] = await Promise.all([
+      prisma.registration.count({
+        where: {
+          eventId: event.id,
+          paymentStatus: { in: capacityPaymentStatuses as any },
+          status: { notIn: ["CANCELLED", "REJECTED"] as any },
+        },
+      }),
+      prisma.waitingList.count({ where: { eventId: event.id } }),
+    ]);
 
     // Transform to public format
     const now = new Date();
@@ -51,7 +58,6 @@ export async function getPublicEventById(id: string): Promise<PublicEvent | null
       registrationOpen = true;
     }
 
-    const confirmedParticipants = event._count.registrations;
     const availableSpots = event.capacity
       ? Math.max(0, event.capacity - confirmedParticipants)
       : undefined;
@@ -86,7 +92,7 @@ export async function getPublicEventById(id: string): Promise<PublicEvent | null
       registrationOpen,
       availableSpots,
       confirmedParticipants,
-      waitingListCount: 0, // TODO: Implement waiting list count
+      waitingListCount,
       averageRating: undefined, // TODO: Implement rating system
       canRegister: true, // TODO: Implement permission checking
       canEdit: false, // Public users can't edit events
@@ -115,23 +121,23 @@ export async function getPublicEvent(slug: string): Promise<PublicEvent | null> 
             color: true,
           },
         },
-        registrations: {
-          where: { status: "CONFIRMED" },
-          select: { id: true },
-        },
-        _count: {
-          select: {
-            registrations: {
-              where: { status: "CONFIRMED" },
-            },
-          },
-        },
       },
     });
 
     if (!event) {
       return null;
     }
+
+    const [confirmedParticipants, waitingListCount] = await Promise.all([
+      prisma.registration.count({
+        where: {
+          eventId: event.id,
+          paymentStatus: { in: capacityPaymentStatuses as any },
+          status: { notIn: ["CANCELLED", "REJECTED"] as any },
+        },
+      }),
+      prisma.waitingList.count({ where: { eventId: event.id } }),
+    ]);
 
     // Transform to public format
     const now = new Date();
@@ -149,7 +155,6 @@ export async function getPublicEvent(slug: string): Promise<PublicEvent | null> 
       registrationOpen = true;
     }
 
-    const confirmedParticipants = event._count.registrations;
     const availableSpots = event.capacity
       ? Math.max(0, event.capacity - confirmedParticipants)
       : undefined;
@@ -184,7 +189,7 @@ export async function getPublicEvent(slug: string): Promise<PublicEvent | null> 
       registrationOpen,
       availableSpots,
       confirmedParticipants,
-      waitingListCount: 0, // TODO: Implement waiting list count
+      waitingListCount,
       averageRating: undefined, // TODO: Implement rating system
       canRegister: true, // TODO: Implement permission checking
       canEdit: false, // Public users can't edit events

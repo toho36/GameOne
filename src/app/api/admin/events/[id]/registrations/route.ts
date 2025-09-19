@@ -64,10 +64,10 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
       status: r.status,
       paymentStatus: r.paymentStatus,
       registeredAt: r.registeredAt,
-      emergencyContact: (() => {
+      contact: (() => {
         try {
           const notes = r.notes ? JSON.parse(r.notes) : {};
-          return notes.emergencyContact ?? null;
+          return notes.contact ?? null;
         } catch {
           return null;
         }

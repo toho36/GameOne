@@ -1,15 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { requirePermissions } from "@/lib/api/common/auth";
 import { sendPaymentRejected } from "@/lib/api/email/registration";
 
 const rejectSchema = z.object({
   reason: z.string().max(1000).optional(),
 });
 
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(
+  request: NextRequest,
+  context: { params: { id: string } } | { params: Promise<{ id: string }> }
+) {
   try {
-    const registrationId = params.id;
+    const auth = await requirePermissions(["registrations.review"]);
+    if (!auth.success) return auth.response;
+
+    const raw: any = (context as any).params;
+    const { id: registrationId } = raw && typeof raw.then === "function" ? await raw : raw;
+
     const json = await request.json().catch(() => ({}));
     const parse = rejectSchema.safeParse(json);
 
@@ -44,24 +53,40 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       );
     }
 
-    const updated = await prisma.registration.update({
-      where: { id: registrationId },
-      data: {
-        paymentStatus: "REJECTED",
-        paymentRejectedAt: new Date(),
-        paymentRejectionReason: parse.data.reason ?? null,
-      },
-    });
-
-    if (updated.paymentId) {
-      await prisma.payment.update({
-        where: { id: updated.paymentId },
+    const [updated] = await prisma.$transaction(async (tx) => {
+      const u = await tx.registration.update({
+        where: { id: registrationId },
         data: {
-          status: "FAILED",
-          notes: parse.data.reason ?? undefined,
+          paymentStatus: "REJECTED",
+          paymentRejectedAt: new Date(),
+          paymentRejectionReason: parse.data.reason ?? null,
         },
       });
-    }
+
+      if (u.paymentId) {
+        await tx.payment.update({
+          where: { id: u.paymentId },
+          data: {
+            status: "FAILED",
+            notes: parse.data.reason ?? undefined,
+          },
+        });
+      }
+
+      await tx.registrationHistory.create({
+        data: {
+          userId: u.userId ?? "",
+          eventId: u.eventId,
+          action: "ADMIN_REJECTED",
+          previousStatus: "PAYMENT_SENT_AWAITING_VERIFICATION",
+          newStatus: u.paymentStatus,
+          reason: parse.data.reason ?? null,
+          performedById: auth.data.user.id,
+        },
+      });
+
+      return [u] as const;
+    });
 
     await sendPaymentRejected(updated.userId ?? "", updated.eventId, updated.id, parse.data.reason);
 

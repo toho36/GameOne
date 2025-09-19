@@ -42,7 +42,7 @@ describe("EventRegistration UI", () => {
     }));
 
     render(<EventRegistration event={baseEvent} />);
-    // Guest form renders emergency contact fields with placeholders
+    // Guest form renders contact fields with placeholders
     expect(screen.getByPlaceholderText(/namePlaceholder/i)).toBeInTheDocument();
   });
 });

@@ -6,7 +6,7 @@ export interface AdminRegistrationRow {
   status: string;
   paymentStatus: string;
   registeredAt: string | Date;
-  emergencyContact?: { name?: string; phone?: string; email?: string } | null;
+  contact?: { name?: string; phone?: string; email?: string } | string | null;
 }
 
 export interface AdminRegistrationsResponse {

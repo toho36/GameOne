@@ -454,7 +454,8 @@
       "open": "Open",
       "closed": "Closed",
       "waiting": "waiting",
-      "onlineEvent": "Online Event"
+      "onlineEvent": "Online Event",
+      "manageParticipants": "Manage Participants"
     },
     "errors": {
       "loadFailed": "Failed to load events",
@@ -550,7 +551,7 @@
       "label": "Special Requirements",
       "placeholder": "Any special requirements or accommodations needed"
     },
-    "emergencyContact": {
+    "contact": {
       "label": "Emergency Contact",
       "name": "Name",
       "namePlaceholder": "Enter full name",
@@ -590,7 +591,7 @@
       "label": "Special Requirements",
       "placeholder": "Any special requirements or accommodations needed"
     },
-    "emergencyContact": {
+    "contact": {
       "label": "Emergency Contact",
       "name": "Name",
       "namePlaceholder": "Enter full name",
@@ -712,7 +713,7 @@
       "noGuestsDescription": "You haven't added any guests yet. Add guests to register them for the event.",
       "addFirst": "Add your first guest"
     },
-    "emergencyContact": {
+    "contact": {
       "title": "Emergency Contact",
       "name": "Full Name",
       "relationship": "Relationship",
@@ -914,7 +915,7 @@
     "status": "Status",
     "paymentStatus": "Payment",
     "registeredAt": "Registered",
-    "emergencyContact": "Emergency contact",
+    "contact": "Contact",
     "actions": "Actions",
     "approve": "Approve",
     "decline": "Decline",
@@ -924,7 +925,11 @@
     "error": "Failed to load registrations",
     "noData": "No registrations",
     "prev": "Prev",
-    "next": "Next"
+    "next": "Next",
+    "actionSuccessTitle": "Action completed",
+    "actionSuccessDesc": "Registration updated successfully.",
+    "actionErrorTitle": "Action failed",
+    "actionErrorDesc": "We couldn't complete the action. Please try again."
   },
   "RegistrationConfirmation": {
     "unregister": "Unregister",
@@ -940,6 +945,8 @@
     "error": "Failed to load participants.",
     "retry": "Retry",
     "count": "{count} confirmed participant{count, plural, one {} other {s}}",
-    "namesHidden": "Participant names are visible only to event organizers."
+    "namesHidden": "Participant names are visible only to event organizers.",
+    "confirmedSection": "Confirmed Participants",
+    "waitingSection": "Waiting List"
   }
 }

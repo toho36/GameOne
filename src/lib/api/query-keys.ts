@@ -7,6 +7,7 @@ export const eventsKeys = {
   details: () => [...eventsKeys.all(), "detail"] as const,
   detail: (id: string) => [...eventsKeys.details(), id] as const,
   participants: (id: string) => [...eventsKeys.detail(id), "participants"] as const,
+  myRegistration: (id: string) => [...eventsKeys.detail(id), "my-registration"] as const,
 };
 
 export const usersKeys = {

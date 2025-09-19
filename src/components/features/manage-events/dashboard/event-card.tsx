@@ -14,6 +14,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
+
 import { EventCardProps } from "@/types/components/event-dashboard.types";
 
 export function EventCard({ event, onEdit, onDelete, onToggleStatus }: EventCardProps) {
@@ -173,6 +175,16 @@ export function EventCard({ event, onEdit, onDelete, onToggleStatus }: EventCard
               Publish
             </>
           )}
+        </Button>
+
+        <Button variant="outline" size="sm" asChild>
+          <Link
+            href={`/admin/events/${event.id}/registrations`}
+            className="flex items-center gap-2"
+          >
+            <UsersIcon className="h-4 w-4" />
+            {t("card.manageParticipants")}
+          </Link>
         </Button>
 
         {canDelete && (

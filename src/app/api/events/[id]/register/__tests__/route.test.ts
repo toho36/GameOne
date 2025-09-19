@@ -10,8 +10,9 @@ vi.mock("@/lib/api/common/auth", () => ({ getAuthenticatedUser: vi.fn() }));
 vi.mock("@/lib/prisma", () => ({
   prisma: {
     event: { findUnique: vi.fn() },
-    pendingPayment: { create: vi.fn() },
-    registration: { create: vi.fn() },
+    pendingPayment: { create: vi.fn(), delete: vi.fn() },
+    registration: { create: vi.fn(), findFirst: vi.fn(), delete: vi.fn() },
+    $transaction: vi.fn(async (fn: any) => fn((await import("@/lib/prisma")).prisma)),
   },
 }));
 
@@ -60,11 +61,12 @@ describe("POST /api/events/[id]/register", () => {
     (prisma.event.findUnique as any).mockResolvedValue(baseEvent);
     (hasCapacity as any).mockResolvedValue(true);
     (prisma.pendingPayment.create as any).mockResolvedValue({ id: "pp1" });
+    (prisma.registration.findFirst as any).mockResolvedValue(null);
     (prisma.registration.create as any).mockResolvedValue({ id: "r1" });
     (addToWaitingList as any).mockResolvedValue({ id: "w1", position: 1 });
   });
 
-  it("derives emergency contact and userId for authenticated users (paid event)", async () => {
+  it("derives contact info and userId for authenticated users (paid event)", async () => {
     const req = makeRequest({ numberOfGuests: 0 });
     const res = await POST(req as any, { params: { id: baseEvent.id } });
     expect(res.status).toBe(201);
@@ -76,7 +78,7 @@ describe("POST /api/events/[id]/register", () => {
     const regArgs = (prisma.registration.create as any).mock.calls[0][0].data;
     const notes = JSON.parse(regArgs.notes);
     expect(regArgs.userId).toBe(authUser.id);
-    expect(notes.emergencyContact).toMatchObject({
+    expect(notes.contact).toMatchObject({
       name: authUser.name,
       phone: authUser.phoneNumber,
       email: authUser.email,
@@ -94,7 +96,7 @@ describe("POST /api/events/[id]/register", () => {
     const notes = JSON.parse(regArgs.notes);
     expect(regArgs.requiresPayment).toBe(false);
     expect(regArgs.paymentStatus).toBe("PAYMENT_VERIFIED");
-    expect(notes.emergencyContact.name).toBe(authUser.name);
+    expect((notes.contact as any).name).toBe(authUser.name);
   });
 
   it("adds to waiting list when full and sets userId", async () => {

@@ -19,12 +19,15 @@ const createRegistrationSchema = z.object({
       })
     )
     .default([]),
-  emergencyContact: z
-    .object({
-      name: z.string().min(1),
-      phone: z.string().min(3),
-      email: z.string().email().optional(),
-    })
+  contact: z
+    .union([
+      z.string().min(1),
+      z.object({
+        name: z.string().min(1),
+        phone: z.string().min(3),
+        email: z.string().email().optional(),
+      }),
+    ])
     .optional(),
 });
 
@@ -53,9 +56,9 @@ export async function POST(request: NextRequest, context: ParamsArg) {
       return auth.response;
     }
 
-    // Derive emergency contact from authenticated user if not provided in payload
+    // Derive contact from authenticated user if not provided in payload
     const userProfile = auth.data.user as any;
-    const derivedEmergencyContact = body.emergencyContact ?? {
+    const derivedContact = body.contact ?? {
       name:
         userProfile?.name ||
         [userProfile?.firstName, userProfile?.lastName].filter(Boolean).join(" ") ||
@@ -152,10 +155,35 @@ export async function POST(request: NextRequest, context: ParamsArg) {
       );
     }
 
-    // If event requires payment, create or reuse pending payment and link; otherwise auto-verify (free events)
+    // Ensure fresh registration on re-register: delete any previous CANCELLED registration and its pending payment
+    const existing = await prisma.registration.findFirst({
+      where: { eventId, userId },
+      include: { pendingPayment: true },
+    });
+    if (existing) {
+      if (existing.status !== "CANCELLED") {
+        return NextResponse.json(
+          {
+            success: false,
+            error: {
+              code: "ALREADY_REGISTERED",
+              message: "You are already registered for this event",
+            },
+          },
+          { status: 409 }
+        );
+      }
+      await prisma.$transaction(async (tx) => {
+        await tx.registration.delete({ where: { id: existing.id } });
+        if (existing.pendingPaymentId) {
+          await tx.pendingPayment.delete({ where: { id: existing.pendingPaymentId } });
+        }
+      });
+    }
+
+    // If event requires payment, create a brand-new pending payment and registration
     let registration;
     if (event.requiresPayment && event.price) {
-      // Create pending payment; if unique constraint fails, reuse existing
       let pending;
       try {
         pending = await prisma.pendingPayment.create({
@@ -172,18 +200,23 @@ export async function POST(request: NextRequest, context: ParamsArg) {
           },
         });
       } catch (e: any) {
-        // Unique constraint on (userId, eventId, type)
         if (typeof e?.message === "string" && e.message.includes("Unique constraint failed")) {
-          pending = await prisma.pendingPayment.findFirst({
-            where: { userId, eventId: event.id, type: "REGISTRATION" },
-          });
-          if (!pending) throw new Error("PENDING_PAYMENT_NOT_FOUND");
-        } else {
-          throw e;
+          // This should be rare after cleanup; surface a clear conflict
+          return NextResponse.json(
+            {
+              success: false,
+              error: {
+                code: "DUPLICATE_PENDING_PAYMENT",
+                message: "A previous pending payment still exists.",
+              },
+            },
+            { status: 409 }
+          );
         }
+        throw e;
       }
 
-      // Create registration; if exists, reuse and ensure it links to pending payment
+      // Create fresh registration linked to the new pending payment
       try {
         registration = await prisma.registration.create({
           data: {
@@ -195,7 +228,7 @@ export async function POST(request: NextRequest, context: ParamsArg) {
             pendingPaymentId: pending.id,
             requiresPayment: true,
             notes: JSON.stringify({
-              emergencyContact: derivedEmergencyContact,
+              contact: derivedContact,
               guestDetails: body.guestDetails,
               registrationDate: new Date().toISOString(),
             }),
@@ -203,20 +236,18 @@ export async function POST(request: NextRequest, context: ParamsArg) {
         });
       } catch (e: any) {
         if (typeof e?.message === "string" && e.message.includes("Unique constraint failed")) {
-          registration = await prisma.registration.findFirst({ where: { eventId, userId } });
-          if (!registration) throw e;
-          if (!registration.pendingPaymentId) {
-            registration = await prisma.registration.update({
-              where: { id: registration.id },
-              data: {
-                pendingPaymentId: pending.id,
-                paymentStatus: registration.paymentStatus ?? "PENDING_VERIFICATION",
+          return NextResponse.json(
+            {
+              success: false,
+              error: {
+                code: "ALREADY_REGISTERED",
+                message: "You are already registered for this event",
               },
-            });
-          }
-        } else {
-          throw e;
+            },
+            { status: 409 }
+          );
         }
+        throw e;
       }
 
       return NextResponse.json(
@@ -233,7 +264,7 @@ export async function POST(request: NextRequest, context: ParamsArg) {
       );
     }
 
-    // Free event: immediately take a spot by marking payment verified (no PendingPayment)
+    // Free event: create a fresh registration (no PendingPayment)
     try {
       registration = await prisma.registration.create({
         data: {
@@ -246,7 +277,7 @@ export async function POST(request: NextRequest, context: ParamsArg) {
           paymentMethod: "OTHER",
           paymentVerifiedAt: new Date(),
           notes: JSON.stringify({
-            emergencyContact: derivedEmergencyContact,
+            contact: derivedContact,
             guestDetails: body.guestDetails,
             registrationDate: new Date().toISOString(),
             freeEvent: true,
@@ -255,11 +286,18 @@ export async function POST(request: NextRequest, context: ParamsArg) {
       });
     } catch (e: any) {
       if (typeof e?.message === "string" && e.message.includes("Unique constraint failed")) {
-        registration = await prisma.registration.findFirst({ where: { eventId, userId } });
-        if (!registration) throw e;
-      } else {
-        throw e;
+        return NextResponse.json(
+          {
+            success: false,
+            error: {
+              code: "ALREADY_REGISTERED",
+              message: "You are already registered for this event",
+            },
+          },
+          { status: 409 }
+        );
       }
+      throw e;
     }
 
     return NextResponse.json(

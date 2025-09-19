@@ -2,7 +2,15 @@ export interface RegisteredUsersListProps {
   eventId: string;
 }
 
+export interface ParticipantItem {
+  id: string;
+  name: string;
+  registrationStatus?: string;
+  paymentStatus?: string;
+}
+
 export interface ParticipantsApiResponse {
-  count: number;
-  participants?: Array<{ id: string; name: string }>;
+  counts: { confirmed: number; waiting: number };
+  confirmed?: ParticipantItem[];
+  waiting?: ParticipantItem[];
 }

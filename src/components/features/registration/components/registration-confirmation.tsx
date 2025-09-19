@@ -41,7 +41,10 @@ export function RegistrationConfirmation({ registrationId }: RegistrationConfirm
   if (isLoading) return <div>Loading...</div>;
   if (isError || !data) return <div>Failed to load registration.</div>;
 
-  const showPayment = data.paymentStatus === "PENDING_VERIFICATION";
+  const showPaymentInfo =
+    data.paymentStatus === "PENDING_VERIFICATION" ||
+    data.paymentStatus === "PAYMENT_SENT_AWAITING_VERIFICATION";
+  const canClaimPayment = data.paymentStatus === "PENDING_VERIFICATION";
 
   return (
     <div className="space-y-6">
@@ -51,14 +54,14 @@ export function RegistrationConfirmation({ registrationId }: RegistrationConfirm
         paymentStatus={data.paymentStatus}
       />
 
-      {showPayment && (
+      {showPaymentInfo && (
         <div className="space-y-4">
           <PaymentInstructions
             registrationId={data.id}
             event={data.event}
             qrCodeUrl={data.qrCodeUrl}
           />
-          <PaymentClaimButton registrationId={data.id} />
+          {canClaimPayment && <PaymentClaimButton registrationId={data.id} />}
         </div>
       )}
 

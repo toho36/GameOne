@@ -3,7 +3,7 @@ import { postJson } from "@/lib/api/client";
 
 interface RegisterPayload {
   numberOfGuests?: number;
-  emergencyContact?: string;
+  contact?: string;
   guestDetails?: unknown;
 }
 

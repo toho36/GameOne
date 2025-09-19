@@ -35,36 +35,90 @@ export async function addToWaitingList(params: CreateWaitingListParams) {
   });
 }
 
-import { hasCapacity } from "@/lib/api/events/capacity";
-
 export async function promoteNextWaitingListEntry(eventId: string) {
-  const event = await prisma.event.findUnique({ where: { id: eventId } });
-  if (!event) return null;
-  if (!(await hasCapacity(eventId, event.capacity))) return null;
+  // Wrap entire flow in a transaction to avoid double-promotion
+  const result = await prisma.$transaction(async (tx) => {
+    const event = await tx.event.findUnique({ where: { id: eventId } });
+    if (!event) return null;
 
-  const entry = await prisma.waitingList.findFirst({
-    where: { eventId },
-    orderBy: { position: "asc" },
+    // Re-check capacity within the transaction
+    const taken = await tx.registration.count({
+      where: {
+        eventId,
+        paymentStatus: {
+          in: ["PAYMENT_SENT_AWAITING_VERIFICATION", "PAYMENT_VERIFIED", "VERIFIED_CASH"],
+        } as any,
+      },
+    });
+    if (taken >= event.capacity) return null;
+
+    const entry = await tx.waitingList.findFirst({
+      where: { eventId },
+      orderBy: { position: "asc" },
+    });
+    if (!entry) return null;
+
+    let pendingPaymentId: string | undefined = undefined;
+    if (event.requiresPayment && event.price) {
+      const pp = await tx.pendingPayment.create({
+        data: {
+          userId: entry.userId ?? "", // For guest entries there might not be a userId
+          eventId,
+          amount: event.price,
+          currency: event.currency,
+          type: "WAITING_LIST_PROMOTION",
+          status: "PENDING",
+          paymentMethod: "BANK_TRANSFER",
+          bankAccountId: event.bankAccountId ?? undefined,
+          description: `Waiting list promotion for ${event.title}`,
+        },
+      });
+      pendingPaymentId = pp.id;
+    }
+
+    const registration = await tx.registration.create({
+      data: {
+        eventId,
+        userId: entry.userId ?? null,
+        status: "PENDING",
+        groupSize: entry.groupSize ?? 1,
+        paymentStatus: event.requiresPayment ? "PENDING_VERIFICATION" : "PAYMENT_VERIFIED",
+        paymentVerifiedAt: event.requiresPayment ? undefined : new Date(),
+        requiresPayment: !!event.requiresPayment,
+        pendingPaymentId,
+        registrationSource: "WAITING_LIST_PROMOTION",
+        promotedFromWaitingList: true,
+        promotedAt: new Date(),
+      },
+    });
+
+    await tx.waitingList.delete({ where: { id: entry.id } });
+
+    await tx.registrationHistory.create({
+      data: {
+        userId: registration.userId ?? "",
+        eventId,
+        action: "PROMOTED_FROM_WAITING_LIST",
+        newStatus: registration.paymentStatus,
+      },
+    });
+
+    return { registration, entry } as const;
   });
-  if (!entry) return null;
 
-  // Create a registration for the waiting list entry
-  const registration = await prisma.registration.create({
-    data: {
-      eventId,
-      userId: entry.userId ?? null,
-      status: "PENDING",
-      groupSize: entry.groupSize ?? 1,
-      paymentStatus: event.requiresPayment ? "PENDING_VERIFICATION" : "PAYMENT_VERIFIED",
-      paymentVerifiedAt: event.requiresPayment ? undefined : new Date(),
-      requiresPayment: !!event.requiresPayment,
-      registrationSource: "WAITING_LIST_PROMOTION",
-      promotedFromWaitingList: true,
-      promotedAt: new Date(),
-    },
-  });
+  // Optional: send email outside of transaction
+  try {
+    if (result?.registration?.requiresPayment) {
+      const { sendPaymentClaimReceived } = await import("@/lib/api/email/registration");
+      await sendPaymentClaimReceived(
+        result.registration.userId ?? "",
+        eventId,
+        result.registration.id
+      );
+    }
+  } catch {
+    // ignore email errors
+  }
 
-  await prisma.waitingList.delete({ where: { id: entry.id } });
-
-  return { registration, entry };
+  return result;
 }

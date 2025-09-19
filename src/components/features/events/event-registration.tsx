@@ -12,7 +12,9 @@ import { RegistrationForm } from "./registration-form";
 import { RegistrationConfirmation } from "@/components/features/registration/components/registration-confirmation";
 import { WaitingListPosition } from "./waiting-list-position";
 import { useSession } from "@/components/auth/session-provider";
+import { useMyRegistration } from "./hooks/use-my-registration";
 import type { PublicEvent } from "@/types/features/event-registration";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 interface EventRegistrationProps {
   event: PublicEvent;
@@ -22,8 +24,8 @@ export function EventRegistration({ event }: EventRegistrationProps) {
   const t = useTranslations("EventRegistration");
   const { isAuthenticated, isLoading } = useSession();
   const [confirmedRegistrationId, setConfirmedRegistrationId] = useState<string | null>(null);
-
   const [, setIsLoading] = useState(false);
+  const [rqClient] = useState(() => new QueryClient());
 
   const [error, setError] = useState<string | null>(null);
 
@@ -42,59 +44,19 @@ export function EventRegistration({ event }: EventRegistrationProps) {
 
   // Payment claiming handled in RegistrationConfirmation via detail endpoint
 
-  if (confirmedRegistrationId) {
+  function RegistrationSection() {
+    const myReg = useMyRegistration(event.id, isAuthenticated);
+
     return (
-      <Card className="border-2 border-green-200 bg-green-50">
-        <CardHeader>
-          <CardTitle className="text-green-800">{t("registrationSuccess.title")}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <RegistrationConfirmation registrationId={confirmedRegistrationId} />
-        </CardContent>
-      </Card>
-    );
-  }
-
-  return (
-    <Card className="border-2">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          {t("title")}
-          {!canRegister && (
-            <Badge variant="secondary">{isFull ? t("status.full") : t("status.closed")}</Badge>
-          )}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Registration Status Summary */}
-        <div className="grid grid-cols-1 gap-4 rounded-lg bg-gray-50 p-4 md:grid-cols-3">
-          <div className="text-center">
-            <div className="text-2xl font-bold text-gray-900">{event.confirmedParticipants}</div>
-            <div className="text-sm text-gray-600">{t("summary.confirmed")}</div>
-          </div>
-
-          <div className="text-center">
-            <div className="text-2xl font-bold text-gray-900">{event.waitingListCount}</div>
-            <div className="text-sm text-gray-600">{t("summary.waitingList")}</div>
-          </div>
-
-          <div className="text-center">
-            <div className="text-2xl font-bold text-gray-900">
-              {event.availableSpots !== undefined ? event.availableSpots : "∞"}
-            </div>
-            <div className="text-sm text-gray-600">{t("summary.availableSpots")}</div>
-          </div>
-        </div>
-
-        {/* Error Display */}
-        {error && (
-          <Alert variant="error">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
-
+      <>
         {/* Registration Form or Status Messages */}
-        {canRegister && hasAvailableSpots ? (
+        {isAuthenticated && myReg.isLoading ? (
+          <div className="py-8 text-center text-sm text-gray-600">Loading your registration…</div>
+        ) : isAuthenticated && myReg.data?.hasRegistration && myReg.data.registrationId ? (
+          <div className="rounded-lg border-2 border-green-200 bg-green-50 p-4">
+            <RegistrationConfirmation registrationId={myReg.data.registrationId} />
+          </div>
+        ) : canRegister && hasAvailableSpots ? (
           isAuthenticated ? (
             <div className="flex flex-col items-center gap-3">
               <p className="text-sm text-gray-600">{t("authenticatedInfo")}</p>
@@ -158,32 +120,92 @@ export function EventRegistration({ event }: EventRegistrationProps) {
             <p className="text-gray-600">{t("unavailable.description")}</p>
           </div>
         )}
+      </>
+    );
+  }
 
-        {/* Event Information */}
-        <div className="border-t pt-6">
-          <h3 className="mb-3 font-semibold text-gray-900">{t("eventInfo.title")}</h3>
-          <div className="grid grid-cols-1 gap-4 text-sm text-gray-600 md:grid-cols-2">
-            <div>
-              <span className="font-medium">{t("eventInfo.price")}:</span>
-              <span className="ml-2">
-                {event.price ? `${event.price} ${event.currency}` : t("eventInfo.free")}
-              </span>
+  if (confirmedRegistrationId) {
+    return (
+      <QueryClientProvider client={rqClient}>
+        <Card className="border-2 border-green-200 bg-green-50">
+          <CardHeader>
+            <CardTitle className="text-green-800">{t("registrationSuccess.title")}</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <RegistrationConfirmation registrationId={confirmedRegistrationId} />
+          </CardContent>
+        </Card>
+      </QueryClientProvider>
+    );
+  }
+
+  return (
+    <QueryClientProvider client={rqClient}>
+      <Card className="border-2">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            {t("title")}
+            {!canRegister && (
+              <Badge variant="secondary">{isFull ? t("status.full") : t("status.closed")}</Badge>
+            )}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Registration Status Summary */}
+          <div className="grid grid-cols-1 gap-4 rounded-lg bg-gray-50 p-4 md:grid-cols-3">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-gray-900">{event.confirmedParticipants}</div>
+              <div className="text-sm text-gray-600">{t("summary.confirmed")}</div>
             </div>
-            <div>
-              <span className="font-medium">{t("eventInfo.approval")}:</span>
-              <span className="ml-2">
-                {event.requiresApproval
-                  ? t("eventInfo.approvalRequired")
-                  : t("eventInfo.approvalNotRequired")}
-              </span>
+
+            <div className="text-center">
+              <div className="text-2xl font-bold text-gray-900">{event.waitingListCount}</div>
+              <div className="text-sm text-gray-600">{t("summary.waitingList")}</div>
             </div>
-            <div>
-              <span className="font-medium">{t("eventInfo.cancellation")}:</span>
-              <span className="ml-2">{t("eventInfo.cancellationNotAllowed")}</span>
+
+            <div className="text-center">
+              <div className="text-2xl font-bold text-gray-900">
+                {event.availableSpots !== undefined ? event.availableSpots : "∞"}
+              </div>
+              <div className="text-sm text-gray-600">{t("summary.availableSpots")}</div>
             </div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+
+          {/* Error Display */}
+          {error && (
+            <Alert variant="error">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
+          <RegistrationSection />
+
+          {/* Event Information */}
+          <div className="border-t pt-6">
+            <h3 className="mb-3 font-semibold text-gray-900">{t("eventInfo.title")}</h3>
+            <div className="grid grid-cols-1 gap-4 text-sm text-gray-600 md:grid-cols-2">
+              <div>
+                <span className="font-medium">{t("eventInfo.price")}:</span>
+                <span className="ml-2">
+                  {event.price ? `${event.price} ${event.currency}` : t("eventInfo.free")}
+                </span>
+              </div>
+              <div>
+                <span className="font-medium">{t("eventInfo.approval")}:</span>
+                <span className="ml-2">
+                  {event.requiresApproval
+                    ? t("eventInfo.approvalRequired")
+                    : t("eventInfo.approvalNotRequired")}
+                </span>
+              </div>
+              <div>
+                <span className="font-medium">{t("eventInfo.cancellation")}:</span>
+                <span className="ml-2">{t("eventInfo.cancellationNotAllowed")}</span>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </QueryClientProvider>
   );
 }

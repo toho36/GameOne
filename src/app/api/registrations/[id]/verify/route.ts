@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { requirePermissions } from "@/lib/api/common/auth";
 import { sendPaymentVerified } from "@/lib/api/email/registration";
 
 const verifySchema = z.object({
@@ -8,9 +9,17 @@ const verifySchema = z.object({
   notes: z.string().max(1000).optional(),
 });
 
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(
+  request: NextRequest,
+  context: { params: { id: string } } | { params: Promise<{ id: string }> }
+) {
   try {
-    const registrationId = params.id;
+    const auth = await requirePermissions(["registrations.review"]);
+    if (!auth.success) return auth.response;
+
+    const raw: any = (context as any).params;
+    const { id: registrationId } = raw && typeof raw.then === "function" ? await raw : raw;
+
     const json = await request.json().catch(() => ({}));
     const parse = verifySchema.safeParse(json);
 
@@ -48,27 +57,42 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     const newStatus = parse.data.method === "CASH" ? "VERIFIED_CASH" : "PAYMENT_VERIFIED";
 
     // Update registration and linked payment (if exists)
-    const updated = await prisma.registration.update({
-      where: { id: registrationId },
-      data: {
-        paymentStatus: newStatus,
-        paymentVerifiedAt: new Date(),
-        paymentMethod: parse.data.method,
-        paymentRejectionReason: null,
-      },
-    });
-
-    if (updated.paymentId) {
-      await prisma.payment.update({
-        where: { id: updated.paymentId },
+    const [updated] = await prisma.$transaction(async (tx) => {
+      const u = await tx.registration.update({
+        where: { id: registrationId },
         data: {
-          status: "COMPLETED",
-          verifiedAt: new Date(),
-          method: parse.data.method,
-          verificationNotes: parse.data.notes ?? undefined,
+          paymentStatus: newStatus,
+          paymentVerifiedAt: new Date(),
+          paymentMethod: parse.data.method,
+          paymentRejectionReason: null,
         },
       });
-    }
+
+      if (u.paymentId) {
+        await tx.payment.update({
+          where: { id: u.paymentId },
+          data: {
+            status: "COMPLETED",
+            verifiedAt: new Date(),
+            method: parse.data.method,
+            verificationNotes: parse.data.notes ?? undefined,
+          },
+        });
+      }
+
+      await tx.registrationHistory.create({
+        data: {
+          userId: u.userId ?? "",
+          eventId: u.eventId,
+          action: "PAYMENT_COMPLETED",
+          previousStatus: "PAYMENT_SENT_AWAITING_VERIFICATION",
+          newStatus: u.paymentStatus,
+          performedById: auth.data.user.id,
+        },
+      });
+
+      return [u] as const;
+    });
 
     await sendPaymentVerified(updated.userId ?? "", updated.eventId, updated.id);
 

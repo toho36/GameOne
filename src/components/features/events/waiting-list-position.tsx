@@ -23,9 +23,8 @@ export function WaitingListPosition({ eventId }: WaitingListPositionProps) {
 
   const [formData, setFormData] = useState({
     specialRequirements: "",
-    emergencyContact: {
+    contact: {
       name: "",
-      relationship: "",
       phone: "",
       email: "",
     },
@@ -36,11 +35,11 @@ export function WaitingListPosition({ eventId }: WaitingListPositionProps) {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleEmergencyContactChange = (field: string, value: string) => {
+  const handleContactChange = (field: string, value: string) => {
     setFormData((prev) => ({
       ...prev,
-      emergencyContact: {
-        ...prev.emergencyContact,
+      contact: {
+        ...prev.contact,
         [field]: value,
       },
     }));
@@ -54,13 +53,13 @@ export function WaitingListPosition({ eventId }: WaitingListPositionProps) {
       return;
     }
 
-    if (!formData.emergencyContact.name.trim()) {
-      setError(t("errors.emergencyContactNameRequired"));
+    if (!formData.contact.name.trim()) {
+      setError(t("errors.contactNameRequired"));
       return;
     }
 
-    if (!formData.emergencyContact.phone.trim()) {
-      setError(t("errors.emergencyContactPhoneRequired"));
+    if (!formData.contact.phone.trim()) {
+      setError(t("errors.contactPhoneRequired"));
       return;
     }
 
@@ -71,7 +70,7 @@ export function WaitingListPosition({ eventId }: WaitingListPositionProps) {
       await postJson(`/api/events/${eventId}/waiting-list`, {
         eventId,
         specialRequirements: formData.specialRequirements,
-        emergencyContact: formData.emergencyContact,
+        contact: formData.contact,
         acceptedTerms: formData.acceptedTerms,
       });
 
@@ -135,21 +134,19 @@ export function WaitingListPosition({ eventId }: WaitingListPositionProps) {
             />
           </div>
 
-          {/* Emergency Contact */}
+          {/* Contact */}
           <div className="space-y-4">
-            <label className="block text-sm font-medium text-gray-700">
-              {t("emergencyContact.label")}
-            </label>
+            <label className="block text-sm font-medium text-gray-700">{t("contact.label")}</label>
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                  {t("emergencyContact.name")} *
+                  {t("contact.name")} *
                 </label>
                 <Input
-                  value={formData.emergencyContact.name}
-                  onChange={(e) => handleEmergencyContactChange("name", e.target.value)}
-                  placeholder={t("emergencyContact.namePlaceholder")}
+                  value={formData.contact.name}
+                  onChange={(e) => handleContactChange("name", e.target.value)}
+                  placeholder={t("contact.namePlaceholder")}
                   className="mt-1"
                   required
                 />
@@ -157,26 +154,13 @@ export function WaitingListPosition({ eventId }: WaitingListPositionProps) {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                  {t("emergencyContact.relationship")} *
-                </label>
-                <Input
-                  value={formData.emergencyContact.relationship}
-                  onChange={(e) => handleEmergencyContactChange("relationship", e.target.value)}
-                  placeholder={t("emergencyContact.relationshipPlaceholder")}
-                  className="mt-1"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  {t("emergencyContact.phone")} *
+                  {t("contact.phone")} *
                 </label>
                 <Input
                   type="tel"
-                  value={formData.emergencyContact.phone}
-                  onChange={(e) => handleEmergencyContactChange("phone", e.target.value)}
-                  placeholder={t("emergencyContact.phonePlaceholder")}
+                  value={formData.contact.phone}
+                  onChange={(e) => handleContactChange("phone", e.target.value)}
+                  placeholder={t("contact.phonePlaceholder")}
                   className="mt-1"
                   required
                 />
@@ -184,13 +168,13 @@ export function WaitingListPosition({ eventId }: WaitingListPositionProps) {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                  {t("emergencyContact.email")}
+                  {t("contact.email")}
                 </label>
                 <Input
                   type="email"
-                  value={formData.emergencyContact.email}
-                  onChange={(e) => handleEmergencyContactChange("email", e.target.value)}
-                  placeholder={t("emergencyContact.emailPlaceholder")}
+                  value={formData.contact.email}
+                  onChange={(e) => handleContactChange("email", e.target.value)}
+                  placeholder={t("contact.emailPlaceholder")}
                   className="mt-1"
                 />
               </div>

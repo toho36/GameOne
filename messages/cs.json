@@ -463,7 +463,8 @@
       "open": "Otevřená",
       "closed": "Zavřená",
       "waiting": "čekající",
-      "onlineEvent": "Online událost"
+      "onlineEvent": "Online událost",
+      "manageParticipants": "Spravovat účastníky"
     },
     "errors": {
       "loadFailed": "Nepodařilo se načíst události",
@@ -559,7 +560,7 @@
       "label": "Speciální požadavky",
       "placeholder": "Jakékoliv speciální požadavky nebo ubytování"
     },
-    "emergencyContact": {
+    "contact": {
       "label": "Kontakt pro případ nouze",
       "name": "Jméno",
       "namePlaceholder": "Zadat celé jméno",
@@ -599,7 +600,7 @@
       "label": "Speciální požadavky",
       "placeholder": "Jakékoliv speciální požadavky nebo ubytování"
     },
-    "emergencyContact": {
+    "contact": {
       "label": "Kontakt pro případ nouze",
       "name": "Jméno",
       "namePlaceholder": "Zadat celé jméno",
@@ -721,7 +722,7 @@
       "noGuestsDescription": "Zatím jste nepřidali žádné hosty. Přidejte hosty pro jejich registraci na událost.",
       "addFirst": "Přidejte svého prvního hosta"
     },
-    "emergencyContact": {
+    "contact": {
       "title": "Kontakt pro případ nouze",
       "name": "Celé jméno",
       "relationship": "Vztah",
@@ -922,7 +923,7 @@
     "status": "Stav",
     "paymentStatus": "Platba",
     "registeredAt": "Registrováno",
-    "emergencyContact": "Kontakt pro případ nouze",
+    "contact": "Kontakt",
     "actions": "Akce",
     "approve": "Schválit",
     "decline": "Zamítnout",
@@ -932,7 +933,11 @@
     "error": "Nepodařilo se načíst registrace",
     "noData": "Žádné registrace",
     "prev": "Předchozí",
-    "next": "Další"
+    "next": "Další",
+    "actionSuccessTitle": "Akce dokončena",
+    "actionSuccessDesc": "Registrace byla úspěšně aktualizována.",
+    "actionErrorTitle": "Akce selhala",
+    "actionErrorDesc": "Akci se nepodařilo dokončit. Zkuste to prosím znovu."
   },
   "RegistrationConfirmation": {
     "unregister": "Zrušit registraci",
@@ -948,6 +953,8 @@
     "error": "Nepodařilo se načíst účastníky.",
     "retry": "Zkusit znovu",
     "count": "{count} potvrzený účastník{count, plural, one {} other {ů}}",
-    "namesHidden": "Jména účastníků jsou viditelná pouze pro organizátory."
+    "namesHidden": "Jména účastníků jsou viditelná pouze pro organizátory.",
+    "confirmedSection": "Potvrzení účastníci",
+    "waitingSection": "Čekací listina"
   }
 }

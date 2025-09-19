@@ -6,7 +6,7 @@ import type { RegistrationFormProps } from "./registration-form.types";
 
 export function RegistrationForm({ eventId, onSuccess }: RegistrationFormProps) {
   const [guests, setGuests] = useState(0);
-  const [emergencyContact, setEmergencyContact] = useState("");
+  const [contact, setContact] = useState("");
   const [guestDetails, setGuestDetails] = useState<string>("");
   const register = useRegister(eventId);
 
@@ -17,7 +17,7 @@ export function RegistrationForm({ eventId, onSuccess }: RegistrationFormProps) 
         register.mutate(
           {
             numberOfGuests: guests,
-            emergencyContact,
+            contact,
             guestDetails: guestDetails ? JSON.parse(guestDetails) : undefined,
           },
           {
@@ -39,10 +39,10 @@ export function RegistrationForm({ eventId, onSuccess }: RegistrationFormProps) 
         />
       </div>
       <div>
-        <label className="block text-sm font-medium">Emergency contact</label>
+        <label className="block text-sm font-medium">Contact</label>
         <input
-          value={emergencyContact}
-          onChange={(e) => setEmergencyContact(e.target.value)}
+          value={contact}
+          onChange={(e) => setContact(e.target.value)}
           className="w-full rounded border p-2"
         />
       </div>
