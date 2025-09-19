@@ -146,6 +146,7 @@ vi.mock("@/components/auth/session-provider", () => ({
     register: vi.fn(),
     logout: vi.fn(),
   }),
+  useAuthorization: () => ({ roles: [], permissions: [], isAuthenticated: false }),
   SessionProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
 

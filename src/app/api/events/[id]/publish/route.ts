@@ -24,9 +24,13 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     const body = await request.json();
     const { action } = body; // 'publish' or 'unpublish'
 
-    // Get user from database
+    // Get user from database with roles
     const dbUser = await prisma.user.findUnique({
       where: { kindeId: user.id },
+      include: {
+        primaryRole: true,
+        userRoles: { where: { isActive: true }, include: { role: true } },
+      },
     });
 
     if (!dbUser) {
@@ -42,9 +46,37 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "Event not found" }, { status: 404 });
     }
 
-    // Check if user is creator or manager
-    if (existingEvent.creatorId !== dbUser.id && existingEvent.managerId !== dbUser.id) {
-      return NextResponse.json({ error: "Permission denied" }, { status: 403 });
+    // Check if user has elevated role or is creator/manager
+    const roleNames: string[] = [
+      ...(dbUser?.primaryRole?.name ? [dbUser.primaryRole.name] : []),
+      ...((dbUser?.userRoles ?? []).map((ur: any) => ur.role?.name).filter(Boolean) as string[]),
+    ];
+    const isAdmin = roleNames.includes("ADMIN");
+    const isModerator = roleNames.includes("MODERATOR");
+    const isEventManager = roleNames.includes("EVENT_MANAGER");
+
+    // Role-based publish permissions:
+    // - ADMIN and MODERATOR: can publish/unpublish ANY event
+    // - EVENT_MANAGER: can only publish/unpublish events they created
+    // - Regular users: can only publish/unpublish events they created
+    if (isAdmin || isModerator) {
+      // Admin and Moderator can publish/unpublish any event - no additional checks
+    } else if (isEventManager) {
+      // Event Manager can only publish/unpublish events they created
+      if (existingEvent.creatorId !== dbUser.id) {
+        return NextResponse.json(
+          { error: "Event Managers can only publish/unpublish events they created" },
+          { status: 403 }
+        );
+      }
+    } else {
+      // Regular users can only publish/unpublish events they created
+      if (existingEvent.creatorId !== dbUser.id) {
+        return NextResponse.json(
+          { error: "You can only publish/unpublish events you created" },
+          { status: 403 }
+        );
+      }
     }
 
     // Validate action

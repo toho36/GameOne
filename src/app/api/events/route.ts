@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     const authResult = await requirePermissions(["events.view"]);
     if (!authResult.success) return authResult.response;
 
-    const result = await eventsService.getEvents(request, authResult.data.user.id);
+    const result = await eventsService.getEvents(request, authResult.data.user);
     return ok(result);
   } catch (err) {
     logger.error("Events fetch error:", err);

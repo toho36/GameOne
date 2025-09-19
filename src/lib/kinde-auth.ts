@@ -109,41 +109,102 @@ export async function hasRole(role: string): Promise<boolean> {
 }
 
 /**
- * Get user permissions
+ * Get user permissions from database
  */
 export async function getUserPermissions(): Promise<string[]> {
   try {
-    const { getPermissions } = await getKindeServerSession();
-    const permissions = await getPermissions();
-
-    if (!permissions) {
+    const user = await getCurrentUser();
+    if (!user) {
       return [];
     }
 
-    // Convert permissions object to array of permission names
-    return Object.keys(permissions);
+    // Import Prisma client dynamically to avoid issues
+    const { PrismaClient } = await import("@prisma/client");
+    const prisma = new PrismaClient();
+
+    // Get user with roles from database
+    const dbUser = await prisma.user.findUnique({
+      where: { kindeId: user.id },
+      include: {
+        primaryRole: true,
+        userRoles: {
+          include: {
+            role: true,
+          },
+        },
+      },
+    });
+
+    await prisma.$disconnect();
+
+    if (!dbUser) {
+      return [];
+    }
+
+    // Get all permissions from all roles
+    const allPermissions = [
+      ...(dbUser.primaryRole
+        ? (() => {
+            const rolePermissions = dbUser.primaryRole.permissions as any;
+            return Array.isArray(rolePermissions) ? rolePermissions : [];
+          })()
+        : []),
+      ...dbUser.userRoles.flatMap((ur) => {
+        const rolePermissions = ur.role.permissions as any;
+        return Array.isArray(rolePermissions) ? rolePermissions : [];
+      }),
+    ];
+
+    // Remove duplicates
+    return [...new Set(allPermissions)];
   } catch (error) {
-    logger.error("Error getting permissions:", error);
+    logger.error("Error getting database permissions:", error);
     return [];
   }
 }
 
 /**
- * Get user roles
+ * Get user roles from database
  */
 export async function getUserRoles(): Promise<string[]> {
   try {
-    const { getRoles } = await getKindeServerSession();
-    const roles = await getRoles();
-
-    if (!roles) {
+    const user = await getCurrentUser();
+    if (!user) {
       return [];
     }
 
-    // Extract role names from the roles array
-    return roles.map((role) => role.name);
+    // Import Prisma client dynamically to avoid issues
+    const { PrismaClient } = await import("@prisma/client");
+    const prisma = new PrismaClient();
+
+    // Get user with roles from database
+    const dbUser = await prisma.user.findUnique({
+      where: { kindeId: user.id },
+      include: {
+        primaryRole: true,
+        userRoles: {
+          include: {
+            role: true,
+          },
+        },
+      },
+    });
+
+    await prisma.$disconnect();
+
+    if (!dbUser) {
+      return [];
+    }
+
+    // Get all roles (primary role + additional roles)
+    const allRoles = [
+      ...(dbUser.primaryRole ? [dbUser.primaryRole.name] : []),
+      ...dbUser.userRoles.map((ur) => ur.role.name),
+    ];
+
+    return allRoles;
   } catch (error) {
-    logger.error("Error getting roles:", error);
+    logger.error("Error getting database roles:", error);
     return [];
   }
 }

@@ -55,6 +55,7 @@
   },
   "Navigation": {
     "home": "Home",
+    "discover": "Discover",
     "browseEvents": "Browse Events",
     "dashboard": "Dashboard",
     "manageEvents": "Manage Events",

@@ -70,6 +70,9 @@ export interface EventListProps {
   onEdit: (_eventId: string) => void;
   onDelete: (_eventId: string) => void;
   onToggleStatus: (_eventId: string, _currentStatus: string) => void;
+  isAdmin?: boolean;
+  selectedEvents?: string[];
+  onSelectionChange?: (selectedEvents: string[]) => void;
 }
 
 export interface EventCardProps {
@@ -77,6 +80,9 @@ export interface EventCardProps {
   onEdit: (_eventId: string) => void;
   onDelete: (_eventId: string) => void;
   onToggleStatus: (_eventId: string, _currentStatus: string) => void;
+  isAdmin?: boolean;
+  isSelected?: boolean;
+  onSelectionChange?: (eventId: string, selected: boolean) => void;
 }
 
 export interface EventFiltersProps {

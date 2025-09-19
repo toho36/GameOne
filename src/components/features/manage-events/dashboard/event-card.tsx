@@ -9,6 +9,8 @@ import {
   UsersIcon,
   CurrencyDollarIcon,
   GlobeAltIcon,
+  UserIcon,
+  ShieldCheckIcon,
 } from "@heroicons/react/24/outline";
 
 import { Button } from "@/components/ui/button";
@@ -18,7 +20,15 @@ import { Link } from "@/i18n/navigation";
 
 import { EventCardProps } from "@/types/components/event-dashboard.types";
 
-export function EventCard({ event, onEdit, onDelete, onToggleStatus }: EventCardProps) {
+export function EventCard({
+  event,
+  onEdit,
+  onDelete,
+  onToggleStatus,
+  isAdmin = false,
+  isSelected = false,
+  onSelectionChange,
+}: EventCardProps) {
   const t = useTranslations("Events");
   const statusColors = {
     DRAFT: "bg-yellow-100 text-yellow-800",
@@ -61,12 +71,30 @@ export function EventCard({ event, onEdit, onDelete, onToggleStatus }: EventCard
 
   const canDelete = event.registrationCount === 0 && event.waitingListCount === 0;
 
+  const handleSelectionToggle = () => {
+    if (onSelectionChange) {
+      onSelectionChange(event.id, !isSelected);
+    }
+  };
+
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md">
+    <div
+      className={`rounded-lg border p-6 shadow-sm transition-all hover:shadow-md ${
+        isSelected ? "border-blue-500 bg-blue-50" : "border-gray-200 bg-white"
+      }`}
+    >
       {/* Header */}
       <div className="mb-4 flex items-start justify-between">
         <div className="min-w-0 flex-1">
           <div className="mb-2 flex items-center gap-3">
+            {isAdmin && onSelectionChange && (
+              <input
+                type="checkbox"
+                checked={isSelected}
+                onChange={handleSelectionToggle}
+                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+            )}
             <h3 className="truncate text-lg font-semibold text-gray-900">{event.title}</h3>
             <Badge className={statusColors[event.status as keyof typeof statusColors]}>
               {event.status}
@@ -145,6 +173,20 @@ export function EventCard({ event, onEdit, onDelete, onToggleStatus }: EventCard
 
       {/* Location */}
       <div className="mb-4">{getLocationDisplay()}</div>
+
+      {/* Creator Info for Admins */}
+      {isAdmin && event.creatorName && (
+        <div className="mb-4 flex items-center gap-2 text-sm text-gray-600">
+          <UserIcon className="h-4 w-4" />
+          <span>
+            Created by: <span className="font-medium">{event.creatorName}</span>
+          </span>
+          <Badge variant="outline" className="text-xs">
+            <ShieldCheckIcon className="mr-1 h-3 w-3" />
+            Admin Edit
+          </Badge>
+        </div>
+      )}
 
       {/* Actions */}
       <div className="flex flex-wrap gap-2">

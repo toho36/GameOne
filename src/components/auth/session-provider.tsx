@@ -10,6 +10,7 @@ export interface SessionData {
   isLoading: boolean;
   error: string | null;
   permissions: string[];
+  roles: string[];
   organization: {
     orgCode: string;
     orgName: string;
@@ -29,17 +30,14 @@ interface SessionProviderProps {
   initialSession?: Partial<SessionData>; // Initial server-side session data
 }
 
-export function SessionProvider({
-  children,
-  refreshInterval = 5 * 60 * 1000, // Default: 5 minutes
-  initialSession,
-}: SessionProviderProps) {
+export function SessionProvider({ children, initialSession }: SessionProviderProps) {
   const [sessionData, setSessionData] = useState<SessionData>({
     user: initialSession?.user ?? null,
     isAuthenticated: initialSession?.isAuthenticated ?? false,
     isLoading: initialSession?.isLoading ?? true,
     error: initialSession?.error ?? null,
     permissions: initialSession?.permissions ?? [],
+    roles: (initialSession as any)?.roles ?? [],
     organization: initialSession?.organization ?? null,
   });
 
@@ -58,6 +56,7 @@ export function SessionProvider({
       ]);
 
       let permissions: string[] = [];
+      const roles: string[] = Array.isArray(userData?.roles) ? userData.roles : [];
       let organization: { orgCode: string; orgName: string } | null = null;
 
       if (permissionsRes.status === "fulfilled") {
@@ -76,6 +75,7 @@ export function SessionProvider({
         isLoading: false,
         error: null,
         permissions,
+        roles,
         organization,
       });
     } catch (error: any) {
@@ -89,6 +89,7 @@ export function SessionProvider({
           isLoading: false,
           error: null,
           permissions: [],
+          roles: [],
           organization: null,
         });
         return;
@@ -99,13 +100,15 @@ export function SessionProvider({
         isLoading: false,
         error: error instanceof Error ? error.message : "Failed to check authentication status",
         permissions: [],
+        roles: [],
         organization: null,
       });
     }
   };
 
   const refresh = async (): Promise<void> => {
-    await fetchSession();
+    // For server-side authentication, refresh the page to get updated session data
+    window.location.reload();
   };
 
   const clearError = (): void => {
@@ -114,24 +117,29 @@ export function SessionProvider({
 
   // Initial session fetch (only if no initial data provided)
   useEffect(() => {
+    // Only fetch if we don't have initial session data or if it's still loading
     if (!initialSession || initialSession.isLoading !== false) {
       fetchSession();
+    } else {
+      // Use the initial session data directly
+      setSessionData(initialSession as SessionData);
     }
   }, [initialSession]);
 
   // Auto-refresh session at intervals (optional)
-  useEffect(() => {
-    if (!refreshInterval || refreshInterval <= 0) return;
+  // Note: Disabled for server-side authentication as it requires page refresh
+  // useEffect(() => {
+  //   if (!refreshInterval || refreshInterval <= 0) return;
 
-    const intervalId = setInterval(() => {
-      // Only refresh if user is authenticated and not currently loading
-      if (sessionData.isAuthenticated && !sessionData.isLoading) {
-        fetchSession();
-      }
-    }, refreshInterval);
+  //   const intervalId = setInterval(() => {
+  //     // Only refresh if user is authenticated and not currently loading
+  //     if (sessionData.isAuthenticated && !sessionData.isLoading) {
+  //       fetchSession();
+  //     }
+  //   }, refreshInterval);
 
-    return () => clearInterval(intervalId);
-  }, [refreshInterval, sessionData.isAuthenticated, sessionData.isLoading]);
+  //   return () => clearInterval(intervalId);
+  // }, [refreshInterval, sessionData.isAuthenticated, sessionData.isLoading]);
 
   // Listen for auth state changes from other tabs/windows
   useEffect(() => {
@@ -146,10 +154,12 @@ export function SessionProvider({
   }, []);
 
   // Listen for visibility changes to refresh session when tab becomes active
+  // Note: For server-side authentication, we refresh the page instead of making API calls
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible" && sessionData.isAuthenticated) {
-        fetchSession();
+        // For server-side authentication, refresh the page to get updated session data
+        window.location.reload();
       }
     };
 
@@ -207,12 +217,20 @@ export function useAuthorization() {
     return permissions.every((permission) => session.permissions.includes(permission));
   };
 
+  const hasRole = (role: string): boolean => session.roles.includes(role);
+  const hasAnyRole = (roles: string[]): boolean => roles.some((r) => session.roles.includes(r));
+  const hasAllRoles = (roles: string[]): boolean => roles.every((r) => session.roles.includes(r));
+
   return {
     permissions: session.permissions,
+    roles: session.roles,
     organization: session.organization,
     hasPermission,
     hasAnyPermission,
     hasAllPermissions,
+    hasRole,
+    hasAnyRole,
+    hasAllRoles,
     isAuthenticated: session.isAuthenticated,
   };
 }

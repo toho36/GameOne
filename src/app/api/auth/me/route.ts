@@ -19,6 +19,7 @@ export async function GET() {
     let dbUser = await prisma.user.findUnique({
       where: { kindeId: user.id },
       include: {
+        primaryRole: true,
         userRoles: {
           include: {
             role: true,
@@ -53,8 +54,10 @@ export async function GET() {
             lastName: user.family_name,
             status: "ACTIVE",
             preferredLocale: "en",
+            primaryRoleId: defaultRole.id,
           },
           include: {
+            primaryRole: true,
             userRoles: {
               include: {
                 role: true,
@@ -89,6 +92,26 @@ export async function GET() {
       return NextResponse.json({ error: "Failed to create or retrieve user" }, { status: 500 });
     }
 
+    // Get all roles (primary role + additional roles)
+    const allRoles = [
+      ...(dbUser.primaryRole ? [dbUser.primaryRole.name] : []),
+      ...dbUser.userRoles.map((ur) => ur.role.name),
+    ];
+
+    // Get all permissions from all roles
+    const allPermissions = [
+      ...(dbUser.primaryRole
+        ? (() => {
+            const rolePermissions = dbUser.primaryRole.permissions as any;
+            return Array.isArray(rolePermissions) ? rolePermissions : [];
+          })()
+        : []),
+      ...dbUser.userRoles.flatMap((ur) => {
+        const rolePermissions = ur.role.permissions as any;
+        return Array.isArray(rolePermissions) ? rolePermissions : [];
+      }),
+    ];
+
     // Return user information with database data
     return NextResponse.json({
       id: dbUser.id,
@@ -98,11 +121,8 @@ export async function GET() {
       given_name: dbUser.firstName,
       family_name: dbUser.lastName,
       status: dbUser.status,
-      roles: dbUser.userRoles.map((ur) => ur.role.name),
-      permissions: dbUser.userRoles.flatMap((ur) => {
-        const rolePermissions = ur.role.permissions as any;
-        return Array.isArray(rolePermissions) ? rolePermissions : [];
-      }),
+      roles: allRoles,
+      permissions: allPermissions,
       createdAt: dbUser.createdAt,
       lastLoginAt: dbUser.lastLoginAt,
     });

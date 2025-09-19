@@ -22,14 +22,28 @@ export default async function EditEventPage({ params }: EditEventPageProps) {
     redirect("/api/auth/login");
   }
 
-  // Get user from database
+  // Get user from database with roles
   const dbUser = await prisma.user.findUnique({
     where: { kindeId: user.id },
+    include: {
+      primaryRole: true,
+      userRoles: {
+        where: { isActive: true },
+        include: { role: true },
+      },
+    },
   });
 
   if (!dbUser) {
     redirect("/api/auth/login");
   }
+
+  // Check if user is admin or moderator
+  const roleNames = [
+    ...(dbUser.primaryRole?.name ? [dbUser.primaryRole.name] : []),
+    ...(dbUser.userRoles?.map((ur) => ur.role?.name).filter(Boolean) || []),
+  ];
+  const isAdmin = roleNames.includes("ADMIN") || roleNames.includes("MODERATOR");
 
   // Get event and check permissions
   const event = await prisma.event.findUnique({
@@ -46,7 +60,8 @@ export default async function EditEventPage({ params }: EditEventPageProps) {
   }
 
   // Check if user has permission to edit
-  if (event.creatorId !== dbUser.id && event.managerId !== dbUser.id) {
+  // Admins and moderators can edit any event, others can only edit their own
+  if (!isAdmin && event.creatorId !== dbUser.id && event.managerId !== dbUser.id) {
     redirect("/manage-events");
   }
 
@@ -74,8 +89,19 @@ export default async function EditEventPage({ params }: EditEventPageProps) {
   return (
     <div className="container mx-auto max-w-4xl px-4 py-8">
       <div className="mb-8">
-        <h1 className="mb-2 text-3xl font-bold text-gray-900">{t("form.editPageTitle")}</h1>
-        <p className="text-gray-600">{t("form.editPageDescription")}</p>
+        <div className="flex items-center gap-3">
+          <h1 className="text-3xl font-bold text-gray-900">{t("form.editPageTitle")}</h1>
+          {isAdmin && (
+            <span className="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-800">
+              Admin Edit
+            </span>
+          )}
+        </div>
+        <p className="text-gray-600">
+          {isAdmin
+            ? "You are editing this event as an administrator. You have full access to modify any event in the system."
+            : t("form.editPageDescription")}
+        </p>
       </div>
 
       <div className="rounded-lg border border-gray-200 bg-white shadow-sm">
