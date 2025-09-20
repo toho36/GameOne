@@ -167,6 +167,7 @@ export interface PaymentInfo {
 
 export enum PaymentMethod {
   BANK_TRANSFER = "BANK_TRANSFER",
+  QR_CODE = "QR_CODE",
   CASH = "CASH",
   CARD = "CARD",
   OTHER = "OTHER",
@@ -186,10 +187,10 @@ export interface RegistrationFormData {
   eventId: string;
   numberOfGuests: number;
   guestDetails: GuestInfo[];
-  emergencyContact?: EmergencyContact;
+  contact?: ContactInfo | string;
 }
 
-export interface EmergencyContact {
+export interface ContactInfo {
   name: string;
   phone: string;
   email?: string;
@@ -209,7 +210,7 @@ export interface RegistrationWizardState {
     };
     additional: {
       dietaryRestrictions?: string;
-      emergencyContact?: EmergencyContact;
+      contact?: ContactInfo | string;
     };
   };
   validation: {
@@ -236,7 +237,7 @@ export interface CreateRegistrationRequest {
   eventId: string;
   numberOfGuests: number;
   guestDetails: GuestInfo[];
-  emergencyContact?: EmergencyContact;
+  contact?: ContactInfo | string;
 }
 
 export interface ClaimPaymentRequest {

@@ -55,6 +55,7 @@
   },
   "Navigation": {
     "home": "Home",
+    "discover": "Discover",
     "browseEvents": "Browse Events",
     "dashboard": "Dashboard",
     "manageEvents": "Manage Events",
@@ -454,7 +455,8 @@
       "open": "Open",
       "closed": "Closed",
       "waiting": "waiting",
-      "onlineEvent": "Online Event"
+      "onlineEvent": "Online Event",
+      "manageParticipants": "Manage Participants"
     },
     "errors": {
       "loadFailed": "Failed to load events",
@@ -550,7 +552,7 @@
       "label": "Special Requirements",
       "placeholder": "Any special requirements or accommodations needed"
     },
-    "emergencyContact": {
+    "contact": {
       "label": "Emergency Contact",
       "name": "Name",
       "namePlaceholder": "Enter full name",
@@ -590,7 +592,7 @@
       "label": "Special Requirements",
       "placeholder": "Any special requirements or accommodations needed"
     },
-    "emergencyContact": {
+    "contact": {
       "label": "Emergency Contact",
       "name": "Name",
       "namePlaceholder": "Enter full name",
@@ -649,7 +651,9 @@
       "approvalNotRequired": "No",
       "cancellation": "Cancellation Policy",
       "cancellationNotAllowed": "Cancellations are not allowed for this event"
-    }
+    },
+    "authenticatedInfo": "You're signed in. We'll use your profile details for registration.",
+    "registerCta": "Register"
   },
   "PaymentClaiming": {
     "title": "Payment Claiming",
@@ -710,7 +714,7 @@
       "noGuestsDescription": "You haven't added any guests yet. Add guests to register them for the event.",
       "addFirst": "Add your first guest"
     },
-    "emergencyContact": {
+    "contact": {
       "title": "Emergency Contact",
       "name": "Full Name",
       "relationship": "Relationship",
@@ -856,5 +860,94 @@
       "endDateInvalid": "Invalid end date format",
       "endDateAfterStart": "End date must be after start date"
     }
+  },
+  "RegistrationEmails": {
+    "claim": {
+      "subject": "Payment claim received — {title}",
+      "title": "Payment claim received",
+      "amount": "Amount: {amount} {currency}",
+      "eventDate": "Event date: {date}",
+      "nextSteps": "You'll receive an email once an admin verifies your payment.",
+      "qrHint": "If you haven't sent the payment yet, you can use this QR code:"
+    },
+    "verified": {
+      "subject": "Payment verified — {title}",
+      "title": "Payment verified",
+      "body": "Your payment was verified. You're all set! See you on {date}."
+    },
+    "rejected": {
+      "subject": "Payment issue — {title}",
+      "title": "Payment not verified",
+      "body": "We couldn't verify your payment. Please review your transfer details and try again.",
+      "reason": "Reason: {reason}",
+      "qrHint": "You can use this QR code:"
+    }
+  },
+  "RegistrationUI": {
+    "paymentInstructions": {
+      "title": "Payment instructions",
+      "description": "Please send a bank transfer and then click \"I've sent payment\".",
+      "amount": "Amount: {amount} {currency}",
+      "reference": "Reference: Registration {id}",
+      "qrAlt": "Payment QR code"
+    },
+    "claimButton": {
+      "sending": "Sending...",
+      "sent": "I've sent payment"
+    },
+    "admin": {
+      "loading": "Loading...",
+      "error": "Failed to load claims.",
+      "empty": "No pending payment claims.",
+      "verify": "Verify",
+      "verifying": "Verifying...",
+      "reject": "Reject",
+      "rejecting": "Rejecting..."
+    }
+  },
+  "AdminRegistrations": {
+    "title": "Event Registrations",
+    "statusFilter": "Status filter",
+    "paymentFilter": "Payment filter",
+    "allStatuses": "All statuses",
+    "allPayments": "All payment statuses",
+    "participant": "Participant",
+    "email": "Email",
+    "status": "Status",
+    "paymentStatus": "Payment",
+    "registeredAt": "Registered",
+    "contact": "Contact",
+    "actions": "Actions",
+    "approve": "Approve",
+    "decline": "Decline",
+    "verifyPayment": "Verify payment",
+    "rejectPayment": "Reject payment",
+    "loading": "Loading...",
+    "error": "Failed to load registrations",
+    "noData": "No registrations",
+    "prev": "Prev",
+    "next": "Next",
+    "actionSuccessTitle": "Action completed",
+    "actionSuccessDesc": "Registration updated successfully.",
+    "actionErrorTitle": "Action failed",
+    "actionErrorDesc": "We couldn't complete the action. Please try again."
+  },
+  "RegistrationConfirmation": {
+    "unregister": "Unregister",
+    "confirmTitle": "Cancel registration?",
+    "confirmMessage": "Are you sure you want to cancel your registration? This action cannot be undone.",
+    "cancel": "Keep registration",
+    "confirm": "Yes, cancel it",
+    "success": "Registration cancelled.",
+    "redirect": "Redirecting to the event page..."
+  },
+  "RegisteredUsers": {
+    "loading": "Loading participants...",
+    "error": "Failed to load participants.",
+    "retry": "Retry",
+    "count": "{count} confirmed participant{count, plural, one {} other {s}}",
+    "namesHidden": "Participant names are visible only to event organizers.",
+    "confirmedSection": "Confirmed Participants",
+    "waitingSection": "Waiting List"
   }
 }

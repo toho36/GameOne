@@ -4,33 +4,15 @@ import { useState, useEffect, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { EventList } from "@/components/features/events/event-list";
-import { EventFilters } from "@/components/features/events/event-filters";
-import { Link } from "@/i18n/navigation";
-import type {
-  PublicEvent,
-  EventCategory,
-  EventFilters as EventFiltersType,
-  PaginationInfo,
-} from "@/types/features/event-registration";
+import type { PublicEvent, PaginationInfo } from "@/types/features/event-registration";
 import { getJson } from "@/lib/api/client";
 
 export default function EventsPage() {
   const t = useTranslations("Events");
   const router = useRouter();
   const [events, setEvents] = useState<PublicEvent[]>([]);
-  const [categories, setCategories] = useState<EventCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filters, setFilters] = useState<EventFiltersType>({
-    categoryId: undefined,
-    startDate: undefined,
-    endDate: undefined,
-    location: "",
-    tags: [],
-    priceMin: undefined,
-    priceMax: undefined,
-    isPrivate: undefined,
-  });
   const [pagination, setPagination] = useState<PaginationInfo>({
     page: 1,
     limit: 12,
@@ -42,31 +24,15 @@ export default function EventsPage() {
 
   // Fetch events
   const fetchEvents = useCallback(
-    async (page: number = 1, newFilters?: EventFiltersType) => {
+    async (page: number = 1) => {
       try {
         setLoading(true);
         setError(null);
 
-        const currentFilters = newFilters || filters;
         const params = new URLSearchParams({
           page: page.toString(),
           limit: pagination.limit.toString(),
         });
-
-        // Add filters to params
-        if (currentFilters.categoryId) params.append("categoryId", currentFilters.categoryId);
-        if (currentFilters.location) params.append("location", currentFilters.location);
-        if (currentFilters.startDate)
-          params.append("startDate", currentFilters.startDate.toISOString());
-        if (currentFilters.endDate) params.append("endDate", currentFilters.endDate.toISOString());
-        if (currentFilters.priceMin !== undefined)
-          params.append("priceMin", currentFilters.priceMin.toString());
-        if (currentFilters.priceMax !== undefined)
-          params.append("priceMax", currentFilters.priceMax.toString());
-        if (currentFilters.isPrivate !== undefined)
-          params.append("isPrivate", currentFilters.isPrivate.toString());
-        if (currentFilters.tags && currentFilters.tags.length > 0)
-          params.append("tags", currentFilters.tags.join(","));
 
         const payload = await getJson<any>(`/api/events/public?${params}`);
         const nextEvents: PublicEvent[] = Array.isArray(payload)
@@ -93,50 +59,8 @@ export default function EventsPage() {
         setLoading(false);
       }
     },
-    [filters, pagination.limit]
+    [pagination.limit]
   );
-
-  // Fetch categories
-  const fetchCategories = async () => {
-    try {
-      const payload = await getJson<any>("/api/events/categories");
-      const next = Array.isArray(payload)
-        ? payload
-        : Array.isArray(payload?.data)
-          ? payload.data
-          : [];
-      setCategories(next);
-    } catch {
-      // Silently fail for categories, not critical
-    }
-  };
-
-  // Handle filter changes
-  const handleFiltersChange = useCallback(
-    (newFilters: EventFiltersType) => {
-      setFilters(newFilters);
-      setPagination((prev) => ({ ...prev, page: 1 }));
-      fetchEvents(1, newFilters);
-    },
-    [fetchEvents]
-  );
-
-  // Handle clear all filters
-  const handleClearFilters = useCallback(() => {
-    const clearedFilters: EventFiltersType = {
-      categoryId: undefined,
-      startDate: undefined,
-      endDate: undefined,
-      location: "",
-      tags: [],
-      priceMin: undefined,
-      priceMax: undefined,
-      isPrivate: undefined,
-    };
-    setFilters(clearedFilters);
-    setPagination((prev) => ({ ...prev, page: 1 }));
-    fetchEvents(1, clearedFilters);
-  }, [fetchEvents]);
 
   // Handle pagination
   const handlePageChange = useCallback(
@@ -166,39 +90,16 @@ export default function EventsPage() {
   // Initial data fetch
   useEffect(() => {
     fetchEvents();
-    fetchCategories();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <main className="container mx-auto px-4 py-8">
-      {/* Breadcrumb Navigation */}
-      <nav className="mb-6" aria-label="Breadcrumb">
-        <ol className="flex items-center space-x-2 text-sm text-gray-500">
-          <li>
-            <Link href="/" className="hover:text-gray-700 hover:underline">
-              {t("breadcrumb.home")}
-            </Link>
-          </li>
-          <li className="flex items-center">
-            <span className="mx-2">/</span>
-            <span className="font-medium text-gray-900">{t("breadcrumb.events")}</span>
-          </li>
-        </ol>
-      </nav>
-
       <div className="mb-8">
         <h1 className="mb-2 text-3xl font-bold text-gray-900">{t("title")}</h1>
         <p className="text-lg text-gray-600">{t("description")}</p>
       </div>
 
       <div className="space-y-6">
-        {/* Filters */}
-        <EventFilters
-          onFiltersChange={handleFiltersChange}
-          categories={categories}
-          onClearFilters={handleClearFilters}
-        />
-
         {/* Event List */}
         <EventList
           events={events}

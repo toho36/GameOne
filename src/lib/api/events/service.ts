@@ -24,7 +24,7 @@ export class EventsService {
   /**
    * Get events with filtering and pagination for a specific user
    */
-  async getEvents(request: NextRequest, userId: string) {
+  async getEvents(request: NextRequest, user: any) {
     const { searchParams } = new URL(request.url);
 
     // Parse query parameters
@@ -40,10 +40,30 @@ export class EventsService {
     const sortBy = searchParams.get("sortBy") || "startDate";
     const sortOrder = searchParams.get("sortOrder") || "asc";
 
-    // Build where clause - only show user's own events
-    const where: any = {
-      creatorId: userId, // Only show events created by this user
-    };
+    // Build where clause based on role
+    const roleNames: string[] = [
+      ...(user?.primaryRole?.name ? [user.primaryRole.name] : []),
+      ...((user?.userRoles ?? []).map((ur: any) => ur.role?.name).filter(Boolean) as string[]),
+    ];
+    const isAdmin = roleNames.includes("ADMIN");
+    const isModerator = roleNames.includes("MODERATOR");
+    const isEventManager = roleNames.includes("EVENT_MANAGER");
+
+    const where: any = {};
+
+    // Role-based event filtering:
+    // - ADMIN and MODERATOR: can see ALL events
+    // - EVENT_MANAGER: can only see events they created
+    // - Regular users: can only see events they created
+    if (isAdmin || isModerator) {
+      // Admin and Moderator can see all events - no additional filtering
+    } else if (isEventManager) {
+      // Event Manager can only see events they created
+      where.creatorId = user.id;
+    } else {
+      // Regular users can only see events they created
+      where.creatorId = user.id;
+    }
 
     if (status) where.status = status;
     if (type) where.type = type;

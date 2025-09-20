@@ -11,7 +11,7 @@ import { AlertCircle, Plus, X, User } from "lucide-react";
 import type {
   CreateRegistrationRequest,
   GuestInfo,
-  EmergencyContact,
+  ContactInfo,
 } from "@/types/features/event-registration";
 
 interface FriendRegistrationFormProps {
@@ -34,7 +34,7 @@ export function FriendRegistrationForm({ event, onSubmit, onCancel }: FriendRegi
     eventId: event.id,
     numberOfGuests: 1,
     guestDetails: [],
-    emergencyContact: {
+    contact: {
       name: "",
       phone: "",
       email: "",
@@ -82,11 +82,11 @@ export function FriendRegistrationForm({ event, onSubmit, onCancel }: FriendRegi
     }));
   };
 
-  const handleEmergencyContactChange = (field: keyof EmergencyContact, value: string) => {
+  const handleContactChange = (field: keyof ContactInfo, value: string) => {
     setFormData((prev) => ({
       ...prev,
-      emergencyContact: {
-        ...prev.emergencyContact!,
+      contact: {
+        ...(prev.contact as ContactInfo),
         [field]: value,
       },
     }));
@@ -210,38 +210,38 @@ export function FriendRegistrationForm({ event, onSubmit, onCancel }: FriendRegi
             )}
           </div>
 
-          {/* Emergency Contact */}
+          {/* Contact */}
           <div className="space-y-4">
-            <Label className="text-base font-medium">{t("emergencyContact.title")}</Label>
+            <Label className="text-base font-medium">{t("contact.title")}</Label>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
-                <Label htmlFor="emergency-name">{t("emergencyContact.name")} *</Label>
+                <Label htmlFor="contact-name">{t("contact.name")} *</Label>
                 <Input
-                  id="emergency-name"
-                  value={formData.emergencyContact?.name || ""}
-                  onChange={(e) => handleEmergencyContactChange("name", e.target.value)}
+                  id="contact-name"
+                  value={(formData.contact as ContactInfo | undefined)?.name || ""}
+                  onChange={(e) => handleContactChange("name", e.target.value)}
                   required
                 />
               </div>
 
               <div>
-                <Label htmlFor="emergency-phone">{t("emergencyContact.phone")} *</Label>
+                <Label htmlFor="contact-phone">{t("contact.phone")} *</Label>
                 <Input
-                  id="emergency-phone"
+                  id="contact-phone"
                   type="tel"
-                  value={formData.emergencyContact?.phone || ""}
-                  onChange={(e) => handleEmergencyContactChange("phone", e.target.value)}
+                  value={(formData.contact as ContactInfo | undefined)?.phone || ""}
+                  onChange={(e) => handleContactChange("phone", e.target.value)}
                   required
                 />
               </div>
 
               <div>
-                <Label htmlFor="emergency-email">{t("emergencyContact.email")}</Label>
+                <Label htmlFor="contact-email">{t("contact.email")}</Label>
                 <Input
-                  id="emergency-email"
+                  id="contact-email"
                   type="email"
-                  value={formData.emergencyContact?.email || ""}
-                  onChange={(e) => handleEmergencyContactChange("email", e.target.value)}
+                  value={(formData.contact as ContactInfo | undefined)?.email || ""}
+                  onChange={(e) => handleContactChange("email", e.target.value)}
                 />
               </div>
             </div>

@@ -1,17 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "@/i18n/navigation";
-import { PlusIcon } from "@heroicons/react/24/outline";
+import { PlusIcon, ShieldCheckIcon } from "@heroicons/react/24/outline";
 import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { logger } from "@/lib/logger";
-import { postJson } from "@/lib/api/client";
+import { postJson, getJson } from "@/lib/api/client";
 import { normalizeApiError } from "@/lib/api/errors";
 import { EventList } from "./event-list";
 import { EventFilters as EventFiltersComponent } from "./event-filters";
 import { EventStats } from "./event-stats";
+import { AdminBulkActions } from "./admin-bulk-actions";
+import { AdminFilters, AdminFilterOptions } from "./admin-filters";
 import { useEvents } from "./hooks/use-events";
 import { useDeleteEvent } from "./hooks/use-event-mutations";
 import { EventDashboardProps, EventFilters } from "@/types/components/event-dashboard.types";
@@ -20,6 +23,42 @@ export function EventDashboard({ className }: EventDashboardProps) {
   const router = useRouter();
   const t = useTranslations("Events");
   const [filters, setFilters] = useState<EventFilters>({});
+  const [selectedEvents, setSelectedEvents] = useState<string[]>([]);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [availableCreators, setAvailableCreators] = useState<{ id: string; name: string }[]>([]);
+
+  // Check if user is admin and load creators
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      try {
+        const response = await getJson<{ user: any }>("/api/auth/me");
+        const user = response.user;
+        if (user) {
+          const roles = [
+            ...(user.primaryRole ? [user.primaryRole.name] : []),
+            ...(user.userRoles?.map((ur: any) => ur.role?.name).filter(Boolean) || []),
+          ];
+          setIsAdmin(roles.includes("ADMIN") || roles.includes("MODERATOR"));
+
+          // Load available creators for admin filters
+          if (roles.includes("ADMIN") || roles.includes("MODERATOR")) {
+            try {
+              const creatorsResponse = await getJson<{ creators: { id: string; name: string }[] }>(
+                "/api/events/creators"
+              );
+              setAvailableCreators(creatorsResponse.creators || []);
+            } catch (error) {
+              logger.error("Failed to load creators", error);
+            }
+          }
+        }
+      } catch (error) {
+        logger.error("Failed to check admin status", error);
+      }
+    };
+
+    checkAdminStatus();
+  }, []);
 
   const {
     events,
@@ -72,6 +111,16 @@ export function EventDashboard({ className }: EventDashboardProps) {
   const handleFiltersChange = (newFilters: EventFilters) => {
     setFilters(newFilters);
     updateFilters(newFilters);
+  };
+
+  const handleAdminFiltersChange = (newFilters: AdminFilterOptions) => {
+    // Apply admin filters to the main filters
+    const combinedFilters = { ...filters, ...newFilters };
+    setFilters(combinedFilters);
+  };
+
+  const handleClearSelection = () => {
+    setSelectedEvents([]);
   };
 
   const handleClearFilters = () => {
@@ -183,12 +232,52 @@ export function EventDashboard({ className }: EventDashboardProps) {
     <div className={`space-y-6 ${className || ""}`}>
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-semibold text-gray-900">{t("title")}</h2>
+        <div className="flex items-center gap-3">
+          <h2 className="text-2xl font-semibold text-gray-900">{t("title")}</h2>
+          {isAdmin && (
+            <Badge variant="secondary" className="flex items-center gap-1">
+              <ShieldCheckIcon className="h-4 w-4" />
+              Admin Access
+            </Badge>
+          )}
+        </div>
         <Button onClick={handleCreateEvent} className="flex items-center gap-2">
           <PlusIcon className="h-5 w-5" />
           {t("createEvent")}
         </Button>
       </div>
+
+      {/* Admin Notice */}
+      {isAdmin && (
+        <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
+          <div className="flex items-start space-x-3">
+            <ShieldCheckIcon className="mt-0.5 h-5 w-5 text-blue-600" />
+            <div>
+              <h3 className="text-sm font-medium text-blue-800">Administrator Access</h3>
+              <p className="mt-1 text-sm text-blue-700">
+                As an administrator, you can view and edit all events in the system, regardless of
+                who created them. You have full management capabilities including publishing,
+                unpublishing, and deleting any event.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Admin Filters */}
+      <AdminFilters
+        onFiltersChange={handleAdminFiltersChange}
+        isAdmin={isAdmin}
+        availableCreators={availableCreators}
+      />
+
+      {/* Admin Bulk Actions */}
+      <AdminBulkActions
+        selectedEvents={selectedEvents}
+        onClearSelection={handleClearSelection}
+        onRefresh={refetch}
+        isAdmin={isAdmin}
+      />
 
       {/* Stats */}
       <EventStats
@@ -212,6 +301,9 @@ export function EventDashboard({ className }: EventDashboardProps) {
         onEdit={handleEditEvent}
         onDelete={handleDeleteEvent}
         onToggleStatus={handleToggleStatus}
+        isAdmin={isAdmin}
+        selectedEvents={selectedEvents}
+        onSelectionChange={setSelectedEvents}
       />
 
       {/* Pagination */}

@@ -55,6 +55,7 @@
   },
   "Navigation": {
     "home": "Domů",
+    "discover": "Objevovat",
     "browseEvents": "Procházet události",
     "dashboard": "Nástěnka",
     "manageEvents": "Spravovat události",
@@ -463,7 +464,8 @@
       "open": "Otevřená",
       "closed": "Zavřená",
       "waiting": "čekající",
-      "onlineEvent": "Online událost"
+      "onlineEvent": "Online událost",
+      "manageParticipants": "Spravovat účastníky"
     },
     "errors": {
       "loadFailed": "Nepodařilo se načíst události",
@@ -559,7 +561,7 @@
       "label": "Speciální požadavky",
       "placeholder": "Jakékoliv speciální požadavky nebo ubytování"
     },
-    "emergencyContact": {
+    "contact": {
       "label": "Kontakt pro případ nouze",
       "name": "Jméno",
       "namePlaceholder": "Zadat celé jméno",
@@ -599,7 +601,7 @@
       "label": "Speciální požadavky",
       "placeholder": "Jakékoliv speciální požadavky nebo ubytování"
     },
-    "emergencyContact": {
+    "contact": {
       "label": "Kontakt pro případ nouze",
       "name": "Jméno",
       "namePlaceholder": "Zadat celé jméno",
@@ -658,7 +660,9 @@
       "approvalNotRequired": "Ne",
       "cancellation": "Politika zrušení",
       "cancellationNotAllowed": "Zrušení této události není povoleno"
-    }
+    },
+    "authenticatedInfo": "Jste přihlášeni. Pro registraci použijeme údaje z vašeho profilu.",
+    "registerCta": "Registrovat"
   },
   "PaymentClaiming": {
     "title": "Nárok na platbu",
@@ -719,7 +723,7 @@
       "noGuestsDescription": "Zatím jste nepřidali žádné hosty. Přidejte hosty pro jejich registraci na událost.",
       "addFirst": "Přidejte svého prvního hosta"
     },
-    "emergencyContact": {
+    "contact": {
       "title": "Kontakt pro případ nouze",
       "name": "Celé jméno",
       "relationship": "Vztah",
@@ -864,5 +868,94 @@
       "endDateInvalid": "Neplatný formát data konce",
       "endDateAfterStart": "Datum konce musí být po datu začátku"
     }
+  },
+  "RegistrationEmails": {
+    "claim": {
+      "subject": "Potvrzení o nahlášení platby — {title}",
+      "title": "Platba byla nahlášena",
+      "amount": "Částka: {amount} {currency}",
+      "eventDate": "Datum události: {date}",
+      "nextSteps": "Jakmile administrátor ověří platbu, pošleme vám e‑mail.",
+      "qrHint": "Pokud jste ještě platbu neodeslali, můžete využít tento QR kód:"
+    },
+    "verified": {
+      "subject": "Platba ověřena — {title}",
+      "title": "Platba ověřena",
+      "body": "Vaše platba byla ověřena. Vše je připraveno! Těšíme se na vás {date}."
+    },
+    "rejected": {
+      "subject": "Problém s platbou — {title}",
+      "title": "Platbu se nepodařilo ověřit",
+      "body": "Platbu jsme nemohli ověřit. Zkontrolujte prosím údaje o převodu a zkuste to znovu.",
+      "reason": "Důvod: {reason}",
+      "qrHint": "Můžete využít tento QR kód:"
+    }
+  },
+  "RegistrationUI": {
+    "paymentInstructions": {
+      "title": "Platební pokyny",
+      "description": "Odešlete prosím bankovní převod a poté stiskněte „Platbu jsem odeslal(a)“.",
+      "amount": "Částka: {amount} {currency}",
+      "reference": "Variabilní symbol: Registrace {id}",
+      "qrAlt": "QR kód platby"
+    },
+    "claimButton": {
+      "sending": "Odesílání...",
+      "sent": "Platbu jsem odeslal(a)"
+    },
+    "admin": {
+      "loading": "Načítání...",
+      "error": "Nepodařilo se načíst nároky na platby.",
+      "empty": "Žádné nevyřízené nároky na platby.",
+      "verify": "Ověřit",
+      "verifying": "Ověřování...",
+      "reject": "Zamítnout",
+      "rejecting": "Zamítání..."
+    }
+  },
+  "AdminRegistrations": {
+    "title": "Registrace na událost",
+    "statusFilter": "Filtr stavu",
+    "paymentFilter": "Filtr plateb",
+    "allStatuses": "Všechny stavy",
+    "allPayments": "Všechny platby",
+    "participant": "Účastník",
+    "email": "Email",
+    "status": "Stav",
+    "paymentStatus": "Platba",
+    "registeredAt": "Registrováno",
+    "contact": "Kontakt",
+    "actions": "Akce",
+    "approve": "Schválit",
+    "decline": "Zamítnout",
+    "verifyPayment": "Ověřit platbu",
+    "rejectPayment": "Zamítnout platbu",
+    "loading": "Načítání...",
+    "error": "Nepodařilo se načíst registrace",
+    "noData": "Žádné registrace",
+    "prev": "Předchozí",
+    "next": "Další",
+    "actionSuccessTitle": "Akce dokončena",
+    "actionSuccessDesc": "Registrace byla úspěšně aktualizována.",
+    "actionErrorTitle": "Akce selhala",
+    "actionErrorDesc": "Akci se nepodařilo dokončit. Zkuste to prosím znovu."
+  },
+  "RegistrationConfirmation": {
+    "unregister": "Zrušit registraci",
+    "confirmTitle": "Zrušit registraci?",
+    "confirmMessage": "Opravdu chcete zrušit svou registraci? Tuto akci nelze vrátit zpět.",
+    "cancel": "Ponechat registraci",
+    "confirm": "Ano, zrušit",
+    "success": "Registrace byla zrušena.",
+    "redirect": "Přesměrování na stránku události..."
+  },
+  "RegisteredUsers": {
+    "loading": "Načítání účastníků...",
+    "error": "Nepodařilo se načíst účastníky.",
+    "retry": "Zkusit znovu",
+    "count": "{count} potvrzený účastník{count, plural, one {} other {ů}}",
+    "namesHidden": "Jména účastníků jsou viditelná pouze pro organizátory.",
+    "confirmedSection": "Potvrzení účastníci",
+    "waitingSection": "Čekací listina"
   }
 }

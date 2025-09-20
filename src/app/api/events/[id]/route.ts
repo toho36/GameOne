@@ -22,6 +22,10 @@ async function createUserWithDefaults(kindeUser: any) {
       status: "ACTIVE", // Set to ACTIVE by default
       primaryRoleId: defaultRole?.id, // Assign default USER role
     },
+    include: {
+      primaryRole: true,
+      userRoles: { where: { isActive: true }, include: { role: true } },
+    },
   });
 }
 
@@ -99,11 +103,19 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     // Get user from database, create if doesn't exist
     let dbUser = await prisma.user.findUnique({
       where: { kindeId: user.id },
+      include: {
+        primaryRole: true,
+        userRoles: { where: { isActive: true }, include: { role: true } },
+      },
     });
 
     if (!dbUser) {
       // Create user if they don't exist in database with defaults
       dbUser = await createUserWithDefaults(user);
+    }
+
+    if (!dbUser) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Check if event exists and user has permission
@@ -115,9 +127,37 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "Event not found" }, { status: 404 });
     }
 
-    // Check if user is creator or manager
-    if (existingEvent.creatorId !== dbUser.id && existingEvent.managerId !== dbUser.id) {
-      return NextResponse.json({ error: "Permission denied" }, { status: 403 });
+    // Check if user has elevated role or is creator/manager
+    const roleNames: string[] = [
+      ...(dbUser?.primaryRole?.name ? [dbUser.primaryRole.name] : []),
+      ...((dbUser?.userRoles ?? []).map((ur: any) => ur.role?.name).filter(Boolean) as string[]),
+    ];
+    const isAdmin = roleNames.includes("ADMIN");
+    const isModerator = roleNames.includes("MODERATOR");
+    const isEventManager = roleNames.includes("EVENT_MANAGER");
+
+    // Role-based edit permissions:
+    // - ADMIN and MODERATOR: can edit ANY event
+    // - EVENT_MANAGER: can only edit events they created
+    // - Regular users: can only edit events they created
+    if (isAdmin || isModerator) {
+      // Admin and Moderator can edit any event - no additional checks
+    } else if (isEventManager) {
+      // Event Manager can only edit events they created
+      if (existingEvent.creatorId !== dbUser.id) {
+        return NextResponse.json(
+          { error: "Event Managers can only edit events they created" },
+          { status: 403 }
+        );
+      }
+    } else {
+      // Regular users can only edit events they created
+      if (existingEvent.creatorId !== dbUser.id) {
+        return NextResponse.json(
+          { error: "You can only edit events you created" },
+          { status: 403 }
+        );
+      }
     }
 
     // Validate request body
@@ -199,11 +239,19 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams) {
     // Get user from database, create if doesn't exist
     let dbUser = await prisma.user.findUnique({
       where: { kindeId: user.id },
+      include: {
+        primaryRole: true,
+        userRoles: { where: { isActive: true }, include: { role: true } },
+      },
     });
 
     if (!dbUser) {
       // Create user if they don't exist in database with defaults
       dbUser = await createUserWithDefaults(user);
+    }
+
+    if (!dbUser) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Check if event exists and user has permission
@@ -223,9 +271,37 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "Event not found" }, { status: 404 });
     }
 
-    // Check if user is creator
-    if (existingEvent.creatorId !== dbUser.id) {
-      return NextResponse.json({ error: "Only event creator can delete events" }, { status: 403 });
+    // Check if user has elevated role or is creator
+    const roleNamesDel: string[] = [
+      ...(dbUser?.primaryRole?.name ? [dbUser.primaryRole.name] : []),
+      ...((dbUser?.userRoles ?? []).map((ur: any) => ur.role?.name).filter(Boolean) as string[]),
+    ];
+    const isAdminDel = roleNamesDel.includes("ADMIN");
+    const isModeratorDel = roleNamesDel.includes("MODERATOR");
+    const isEventManagerDel = roleNamesDel.includes("EVENT_MANAGER");
+
+    // Role-based delete permissions:
+    // - ADMIN and MODERATOR: can delete ANY event
+    // - EVENT_MANAGER: can only delete events they created
+    // - Regular users: can only delete events they created
+    if (isAdminDel || isModeratorDel) {
+      // Admin and Moderator can delete any event - no additional checks
+    } else if (isEventManagerDel) {
+      // Event Manager can only delete events they created
+      if (existingEvent.creatorId !== dbUser.id) {
+        return NextResponse.json(
+          { error: "Event Managers can only delete events they created" },
+          { status: 403 }
+        );
+      }
+    } else {
+      // Regular users can only delete events they created
+      if (existingEvent.creatorId !== dbUser.id) {
+        return NextResponse.json(
+          { error: "You can only delete events you created" },
+          { status: 403 }
+        );
+      }
     }
 
     // Check if event has registrations

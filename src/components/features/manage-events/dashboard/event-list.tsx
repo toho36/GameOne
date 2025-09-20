@@ -1,7 +1,16 @@
 import { EventCard } from "./event-card";
 import { EventListProps } from "@/types/components/event-dashboard.types";
 
-export function EventList({ events, isLoading, onEdit, onDelete, onToggleStatus }: EventListProps) {
+export function EventList({
+  events,
+  isLoading,
+  onEdit,
+  onDelete,
+  onToggleStatus,
+  isAdmin = false,
+  selectedEvents = [],
+  onSelectionChange,
+}: EventListProps) {
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -60,6 +69,16 @@ export function EventList({ events, isLoading, onEdit, onDelete, onToggleStatus 
     );
   }
 
+  const handleSelectionChange = (eventId: string, selected: boolean) => {
+    if (!onSelectionChange) return;
+
+    if (selected) {
+      onSelectionChange([...selectedEvents, eventId]);
+    } else {
+      onSelectionChange(selectedEvents.filter((id) => id !== eventId));
+    }
+  };
+
   return (
     <div className="space-y-4">
       {events.map((event) => (
@@ -69,6 +88,9 @@ export function EventList({ events, isLoading, onEdit, onDelete, onToggleStatus 
           onEdit={onEdit}
           onDelete={onDelete}
           onToggleStatus={onToggleStatus}
+          isAdmin={isAdmin}
+          isSelected={selectedEvents.includes(event.id)}
+          onSelectionChange={handleSelectionChange}
         />
       ))}
     </div>

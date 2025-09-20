@@ -19,6 +19,7 @@ export default async function UsersPage() {
     where: { kindeId: user.id },
     include: {
       primaryRole: true,
+      userRoles: { where: { isActive: true }, include: { role: true } },
     },
   });
 
@@ -26,11 +27,14 @@ export default async function UsersPage() {
     redirect("/api/auth/login");
   }
 
-  // Check if user has permission to manage users
-  // For now, let's allow users with ADMIN role or users.manage permission
-  const hasUserManagementPermission = await checkUserManagementPermission(dbUser.id);
+  // Admin-only access
+  const roleNames: string[] = [
+    ...(dbUser?.primaryRole?.name ? [dbUser.primaryRole.name] : []),
+    ...((dbUser?.userRoles ?? []).map((ur: any) => ur.role?.name).filter(Boolean) as string[]),
+  ];
+  const isAdmin = roleNames.includes("ADMIN");
 
-  if (!hasUserManagementPermission) {
+  if (!isAdmin) {
     redirect("/dashboard?error=insufficient_permissions");
   }
 
@@ -44,52 +48,4 @@ export default async function UsersPage() {
       <UserManagement />
     </div>
   );
-}
-
-// Helper function to check user management permissions
-async function checkUserManagementPermission(userId: string): Promise<boolean> {
-  const userWithRoles = await prisma.user.findUnique({
-    where: { id: userId },
-    include: {
-      primaryRole: true,
-      userRoles: {
-        where: { isActive: true },
-        include: { role: true },
-      },
-    },
-  });
-
-  if (!userWithRoles) return false;
-
-  // Allow ADMIN outright
-  const primaryRole = userWithRoles.primaryRole;
-  if (primaryRole?.name === "ADMIN") return true;
-
-  // Helper that checks a permissions array with our standardized convention
-  const allowsUserManagement = (perms: string[] | null | undefined) => {
-    if (!perms) return false;
-    try {
-      const list: string[] = Array.isArray(perms) ? perms : JSON.parse(perms as any);
-      const normalized = list.map((p) => p.trim());
-      return (
-        normalized.includes("users.moderate") ||
-        normalized.includes("users.*") ||
-        normalized.includes("*") ||
-        normalized.includes("admin.full_access")
-      );
-    } catch {
-      return false;
-    }
-  };
-
-  // Check primary role
-  if (allowsUserManagement(primaryRole?.permissions as any)) return true;
-
-  // Check additional active roles
-  for (const userRole of userWithRoles.userRoles) {
-    if (userRole.role.name === "ADMIN") return true;
-    if (allowsUserManagement(userRole.role.permissions as any)) return true;
-  }
-
-  return false;
 }

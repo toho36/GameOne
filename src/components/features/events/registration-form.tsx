@@ -8,10 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { User } from "lucide-react";
-import type {
-  CreateRegistrationRequest,
-  EmergencyContact,
-} from "@/types/features/event-registration";
+import type { CreateRegistrationRequest, ContactInfo } from "@/types/features/event-registration";
 
 interface RegistrationFormProps {
   event: {
@@ -31,7 +28,7 @@ export function RegistrationForm({ event, onSubmit }: RegistrationFormProps) {
     eventId: event.id,
     numberOfGuests: 1,
     guestDetails: [],
-    emergencyContact: {
+    contact: {
       name: "",
       phone: "",
       email: "",
@@ -41,11 +38,11 @@ export function RegistrationForm({ event, onSubmit }: RegistrationFormProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleEmergencyContactChange = (field: keyof EmergencyContact, value: string) => {
+  const handleContactChange = (field: keyof ContactInfo, value: string) => {
     setFormData((prev) => ({
       ...prev,
-      emergencyContact: {
-        ...prev.emergencyContact!,
+      contact: {
+        ...(prev.contact as ContactInfo),
         [field]: value,
       },
     }));
@@ -98,47 +95,41 @@ export function RegistrationForm({ event, onSubmit }: RegistrationFormProps) {
         </CardContent>
       </Card>
 
-      {/* Emergency Contact */}
+      {/* Contact */}
       <div className="space-y-4">
-        <Label className="text-sm font-medium text-gray-700">{t("emergencyContact.label")}</Label>
+        <Label className="text-sm font-medium text-gray-700">{t("contact.label")}</Label>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
-            <Label className="text-sm font-medium text-gray-700">
-              {t("emergencyContact.name")} *
-            </Label>
+            <Label className="text-sm font-medium text-gray-700">{t("contact.name")} *</Label>
             <Input
-              value={formData.emergencyContact?.name || ""}
-              onChange={(e) => handleEmergencyContactChange("name", e.target.value)}
-              placeholder={t("emergencyContact.namePlaceholder")}
+              value={(formData.contact as ContactInfo | undefined)?.name || ""}
+              onChange={(e) => handleContactChange("name", e.target.value)}
+              placeholder={t("contact.namePlaceholder")}
               className="mt-1"
               required
             />
           </div>
 
           <div>
-            <Label className="text-sm font-medium text-gray-700">
-              {t("emergencyContact.phone")} *
-            </Label>
+            <Label className="text-sm font-medium text-gray-700">{t("contact.phone")} *</Label>
             <Input
               type="tel"
-              value={formData.emergencyContact?.phone || ""}
-              onChange={(e) => handleEmergencyContactChange("phone", e.target.value)}
-              placeholder={t("emergencyContact.phonePlaceholder")}
+              value={(formData.contact as ContactInfo | undefined)?.phone || ""}
+              onChange={(e) => handleContactChange("phone", e.target.value)}
+              placeholder={t("contact.phonePlaceholder")}
               className="mt-1"
               required
             />
           </div>
 
           <div>
-            <Label className="text-sm font-medium text-gray-700">
-              {t("emergencyContact.email")}
-            </Label>
+            <Label className="text-sm font-medium text-gray-700">{t("contact.email")}</Label>
             <Input
               type="email"
-              value={formData.emergencyContact?.email || ""}
-              onChange={(e) => handleEmergencyContactChange("email", e.target.value)}
-              placeholder={t("emergencyContact.emailPlaceholder")}
+              value={(formData.contact as ContactInfo | undefined)?.email || ""}
+              onChange={(e) => handleContactChange("email", e.target.value)}
+              placeholder={t("contact.emailPlaceholder")}
               className="mt-1"
             />
           </div>

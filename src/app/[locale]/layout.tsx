@@ -8,8 +8,9 @@ import { Inter } from "next/font/google";
 import { routing, type Locale } from "@/i18n/routing";
 import { Navigation } from "@/components/layout/navigation";
 import { SessionProvider } from "@/components/auth";
-import { ReactQueryProvider } from "@/components/providers/react-query-provider";
-import { getCurrentUser, getUserPermissions } from "@/lib/kinde-auth";
+import { ReactQueryProvider } from "@/components/ui/providers/react-query-provider";
+import { BottomNav } from "@/components/layout/bottom-nav";
+import { getCurrentUser, getUserPermissions, getUserRoles } from "@/lib/kinde-auth";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -41,6 +42,9 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
   // Get server-side session data to prevent hydration mismatches
   const serverUser = await getCurrentUser();
   const serverPermissions = serverUser ? await getUserPermissions() : [];
+  const serverRoles = serverUser ? await getUserRoles() : [];
+
+  // Debug logging removed for production
 
   const initialSession = {
     user: serverUser,
@@ -48,6 +52,7 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
     isLoading: false,
     error: null,
     permissions: serverPermissions,
+    roles: serverRoles,
     organization: null, // This could be fetched server-side too if needed
   };
 
@@ -57,7 +62,10 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
         <NextIntlClientProvider messages={messages}>
           <SessionProvider initialSession={initialSession}>
             <Navigation currentLocale={locale as Locale} />
-            <ReactQueryProvider>{children}</ReactQueryProvider>
+            <ReactQueryProvider>
+              {children}
+              <BottomNav />
+            </ReactQueryProvider>
           </SessionProvider>
         </NextIntlClientProvider>
       </body>

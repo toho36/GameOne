@@ -130,7 +130,8 @@ export function checkUserPermissions(
   ];
 
   const hasPermission = roles.some((role: any) => {
-    if (role.name === "ADMIN") return true;
+    // Admin and Moderator have full permissions
+    if (role.name === "ADMIN" || role.name === "MODERATOR") return true;
 
     try {
       const permissions: string[] = Array.isArray(role.permissions)
