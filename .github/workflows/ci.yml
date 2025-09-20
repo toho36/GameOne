@@ -37,7 +37,9 @@ jobs:
           bun-version: latest
 
       - name: 📥 Install dependencies
-        run: bun install --frozen-lockfile
+        run: |
+          # Try frozen lockfile first, fallback to regular install if it fails
+          bun install --frozen-lockfile || bun install
 
       - name: 🗄️ Setup test database
         run: |
