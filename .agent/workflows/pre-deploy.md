@@ -19,6 +19,10 @@ This runs:
 
 1. Format check (Prettier)
 2. Type safety (ESLint + TypeScript)
+3. Unit tests (Vitest)
+
+**Note:** This matches the same checks that run in GitHub Actions CI, ensuring
+that if `pre-deploy` passes locally, your code should pass CI as well.
 
 ## Manual Steps
 

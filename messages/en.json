@@ -898,11 +898,15 @@
       "description": "Please send a bank transfer and then click \"I've sent payment\".",
       "amount": "Amount: {amount} {currency}",
       "reference": "Reference: Registration {id}",
-      "qrAlt": "Payment QR code"
+      "qrAlt": "Payment QR code",
+      "qrAltWithDetails": "Payment QR Code for {amount} {currency} - {title} (Ref: {id})",
+      "scanOrPay": "Scan QR code or use details above to pay"
     },
     "claimButton": {
       "sending": "Sending...",
-      "sent": "I've sent payment"
+      "sent": "I've sent payment",
+      "claiming": "Sending...",
+      "claimPayment": "I've sent payment"
     },
     "admin": {
       "loading": "Loading...",
@@ -948,7 +952,8 @@
     "cancel": "Keep registration",
     "confirm": "Yes, cancel it",
     "success": "Registration cancelled.",
-    "redirect": "Redirecting to the event page..."
+    "redirect": "Redirecting to the event page...",
+    "returnNow": "Return to event now"
   },
   "RegisteredUsers": {
     "loading": "Loading participants...",

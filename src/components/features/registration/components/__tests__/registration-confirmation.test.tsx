@@ -4,9 +4,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import en from "../../../../../../messages/en.json";
 import React from "react";
 
-const current = { value: { data: undefined, isLoading: false, isError: false } } as {
-  value: any;
-};
+const { current } = vi.hoisted(() => ({
+  current: { value: { data: undefined, isLoading: false, isError: false } } as { value: any },
+}));
+
 vi.mock("next-intl", () => ({
   useTranslations: (ns?: string) => {
     return (key: string, values?: Record<string, any>) => {
@@ -18,7 +19,6 @@ vi.mock("next-intl", () => ({
     };
   },
 }));
-
 
 vi.mock("@/components/features/registration/hooks/use-registration-status", () => ({
   useRegistrationStatus: () => current.value,
@@ -75,7 +75,7 @@ describe("RegistrationConfirmation", () => {
     });
     renderWithProviders(<RegistrationConfirmation registrationId="r1" />);
     expect(screen.getByText(/Payment instructions/i)).toBeInTheDocument();
-    expect(screen.getByRole("img", { name: /Payment QR code/i })).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: /Payment QR Code for 100 CZK/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /I've sent payment/i })).toBeInTheDocument();
   });
 
