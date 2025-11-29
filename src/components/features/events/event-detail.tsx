@@ -37,7 +37,7 @@ export function EventDetail({ event }: EventDetailProps) {
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-sm font-medium text-gray-600">
-              <Calendar className="h-4 w-4" />
+              <Calendar className="h-4 w-4" aria-hidden="true" />
               Date & Time
             </CardTitle>
           </CardHeader>
@@ -56,7 +56,7 @@ export function EventDetail({ event }: EventDetailProps) {
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-sm font-medium text-gray-600">
-                <MapPin className="h-4 w-4" />
+                <MapPin className="h-4 w-4" aria-hidden="true" />
                 Location
               </CardTitle>
             </CardHeader>
@@ -70,7 +70,7 @@ export function EventDetail({ event }: EventDetailProps) {
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-sm font-medium text-gray-600">
-              <Users className="h-4 w-4" />
+              <Users className="h-4 w-4" aria-hidden="true" />
               Capacity
             </CardTitle>
           </CardHeader>
@@ -82,7 +82,16 @@ export function EventDetail({ event }: EventDetailProps) {
               </p>
               {event.availableSpots !== undefined && (
                 <p className={`text-sm ${hasAvailableSpots ? "text-green-600" : "text-red-600"}`}>
-                  {hasAvailableSpots ? `${event.availableSpots} spots left` : "Full"}
+                  <span className="sr-only">Status: </span>
+                  {hasAvailableSpots ? (
+                    <>
+                      <span aria-hidden="true">✓</span> {event.availableSpots} spots left
+                    </>
+                  ) : (
+                    <>
+                      <span aria-hidden="true">✗</span> Full
+                    </>
+                  )}
                 </p>
               )}
             </div>

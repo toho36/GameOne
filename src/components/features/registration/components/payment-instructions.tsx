@@ -26,10 +26,23 @@ export function PaymentInstructions({
       </div>
       <div className="flex items-center gap-4">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={qrUrl} alt={t("qrAlt")} className="h-40 w-40 rounded border" />
+        <img
+          src={qrUrl}
+          alt={t("qrAltWithDetails", {
+            amount: event.price ?? 0,
+            currency: event.currency ?? "CZK",
+            title: event.title,
+            id: registrationId,
+          })}
+          className="h-40 w-40 rounded border"
+        />
         <div className="text-sm">
           <div>{t("amount", { amount: event.price ?? 0, currency: event.currency ?? "CZK" })}</div>
           <div>{t("reference", { id: registrationId })}</div>
+          {/* Add visible account details if available in event object, otherwise just show reference */}
+          <div className="mt-2 text-xs text-gray-500">
+            <p>{t("scanOrPay")}</p>
+          </div>
         </div>
       </div>
     </div>

@@ -526,9 +526,11 @@
     }
   },
   "EventList": {
+    "loading": "Loading events...",
     "error": {
       "title": "Error loading events",
-      "retry": "Try again"
+      "retry": "Try again",
+      "reloading": "Reloading..."
     },
     "empty": {
       "title": "No events found",
@@ -582,6 +584,7 @@
     }
   },
   "RegistrationForm": {
+    "required": "Required",
     "summary": {
       "title": "Registration Summary",
       "free": "Free",
@@ -618,7 +621,10 @@
   "EventRegistration": {
     "title": "Event Registration",
     "registrationSuccess": {
-      "title": "Registration Successful!"
+      "title": "Registration Successful!",
+      "success": "Registration successful!",
+      "redirect": "Redirecting to event page...",
+      "returnNow": "Return to event now"
     },
     "status": {
       "full": "Event Full",
@@ -672,6 +678,8 @@
     },
     "qrCode": "QR Code",
     "qrCodeAlt": "Payment QR Code",
+    "qrAltWithDetails": "Payment QR Code for {amount} {currency} - {title} (Ref: {id})",
+    "scanOrPay": "Scan QR code or use details above to pay",
     "downloadQR": "Download QR Code",
     "instructions": {
       "description": "Please follow these steps to complete your payment:"
@@ -683,7 +691,8 @@
       "notes": "Additional Notes",
       "notesPlaceholder": "Any additional information about your payment",
       "claiming": "Claiming...",
-      "submit": "Claim Payment"
+      "submit": "Claim Payment",
+      "claimPayment": "Claim Payment"
     },
     "additional": {
       "info": "Additional Information:",

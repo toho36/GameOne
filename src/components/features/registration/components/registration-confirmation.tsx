@@ -102,17 +102,30 @@ export function RegistrationConfirmation({ registrationId }: RegistrationConfirm
       </Dialog>
 
       {cancelled && (
-        <Alert variant="success" className="mt-2">
-          <AlertDescription>
-            {t("success")} {t("redirect")}
-          </AlertDescription>
-        </Alert>
+        <div role="alert">
+          <Alert variant="success" className="mt-2">
+            <AlertDescription>
+              {t("success")} {t("redirect")}
+              <div className="mt-2">
+                <Button
+                  variant="link"
+                  className="h-auto p-0 text-inherit underline"
+                  onClick={() => router.push(`/events/${data.event.id}`)}
+                >
+                  {t("returnNow")}
+                </Button>
+              </div>
+            </AlertDescription>
+          </Alert>
+        </div>
       )}
 
       {error && (
-        <Alert variant="error" className="mt-2">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
+        <div role="alert">
+          <Alert variant="error" className="mt-2">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        </div>
       )}
     </div>
   );

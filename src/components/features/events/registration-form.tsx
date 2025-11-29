@@ -63,18 +63,20 @@ export function RegistrationForm({ event, onSubmit }: RegistrationFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6" noValidate>
       {error && (
-        <Alert variant="error">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
+        <div role="alert">
+          <Alert variant="error">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        </div>
       )}
 
       {/* Registration Summary */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <User className="h-5 w-5" />
+            <User className="h-5 w-5" aria-hidden="true" />
             {t("summary.title")}
           </CardTitle>
         </CardHeader>
@@ -101,31 +103,44 @@ export function RegistrationForm({ event, onSubmit }: RegistrationFormProps) {
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
-            <Label className="text-sm font-medium text-gray-700">{t("contact.name")} *</Label>
+            <Label htmlFor="contact-name" className="text-sm font-medium text-gray-700">
+              {t("contact.name")} <span aria-hidden="true">*</span>
+              <span className="sr-only">{t("required")}</span>
+            </Label>
             <Input
+              id="contact-name"
               value={(formData.contact as ContactInfo | undefined)?.name || ""}
               onChange={(e) => handleContactChange("name", e.target.value)}
               placeholder={t("contact.namePlaceholder")}
               className="mt-1"
               required
+              aria-required="true"
             />
           </div>
 
           <div>
-            <Label className="text-sm font-medium text-gray-700">{t("contact.phone")} *</Label>
+            <Label htmlFor="contact-phone" className="text-sm font-medium text-gray-700">
+              {t("contact.phone")} <span aria-hidden="true">*</span>
+              <span className="sr-only">{t("required")}</span>
+            </Label>
             <Input
+              id="contact-phone"
               type="tel"
               value={(formData.contact as ContactInfo | undefined)?.phone || ""}
               onChange={(e) => handleContactChange("phone", e.target.value)}
               placeholder={t("contact.phonePlaceholder")}
               className="mt-1"
               required
+              aria-required="true"
             />
           </div>
 
           <div>
-            <Label className="text-sm font-medium text-gray-700">{t("contact.email")}</Label>
+            <Label htmlFor="contact-email" className="text-sm font-medium text-gray-700">
+              {t("contact.email")}
+            </Label>
             <Input
+              id="contact-email"
               type="email"
               value={(formData.contact as ContactInfo | undefined)?.email || ""}
               onChange={(e) => handleContactChange("email", e.target.value)}
@@ -137,7 +152,7 @@ export function RegistrationForm({ event, onSubmit }: RegistrationFormProps) {
       </div>
 
       {/* Submit Button */}
-      <Button type="submit" className="w-full" disabled={loading}>
+      <Button type="submit" className="w-full" disabled={loading} aria-busy={loading}>
         {loading ? t("submit.loading") : t("submit.register")}
       </Button>
     </form>
