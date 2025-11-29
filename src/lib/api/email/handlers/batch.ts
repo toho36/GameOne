@@ -5,7 +5,7 @@
 import { z } from "zod";
 import { NextResponse } from "next/server";
 import { sendBatchEmails } from "@/lib/email";
-import type { BatchEmailConfig } from "@/types/email";
+import type { BatchEmailConfig } from "@/types/global/email.types";
 import { batchEmailSchema } from "@/lib/api/email/types";
 
 /**

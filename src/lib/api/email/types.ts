@@ -3,7 +3,7 @@
  */
 
 import { z } from "zod";
-import { EmailTemplateType, EmailPriority } from "@/types/email";
+import { EmailTemplateType, EmailPriority } from "@/types/global/email.types";
 
 /**
  * Validation schema for email address

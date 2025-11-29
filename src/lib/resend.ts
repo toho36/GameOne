@@ -6,7 +6,7 @@
  */
 
 import { Resend } from "resend";
-import type { EmailServiceConfig } from "@/types/email";
+import type { EmailServiceConfig } from "@/types/global/email.types";
 
 /**
  * Validates the Resend API key format

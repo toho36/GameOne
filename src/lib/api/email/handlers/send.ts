@@ -5,7 +5,7 @@
 import { z } from "zod";
 import { NextResponse } from "next/server";
 import { sendEmail, createEmailFromTemplate, validateEmailConfig } from "@/lib/email";
-import type { EmailConfig } from "@/types/email";
+import type { EmailConfig } from "@/types/global/email.types";
 import { sendEmailSchema, sendTemplateEmailSchema } from "@/lib/api/email/types";
 
 /**
