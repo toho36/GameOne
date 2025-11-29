@@ -20,7 +20,7 @@ import {
   type TemplateEmailConfig,
   type BatchEmailConfig,
   type BatchEmailResult,
-} from "@/types/email";
+} from "@/types/global/email.types";
 
 /**
  * Validates an email address format

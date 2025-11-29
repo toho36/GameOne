@@ -134,19 +134,20 @@ class ProjectStructureValidator {
 
       const pathParts = file.relativePath.split("/");
 
-      if (pathParts.includes("ui")) {
-        // UI components are good
-      } else if (pathParts.includes("features")) {
-        // Feature components are good
-      } else if (pathParts.includes("layout")) {
-        // Layout components are good
-      } else if (pathParts.includes("auth")) {
-        // Auth components are acceptable (feature-specific organization)
+      if (
+        pathParts.includes("ui") ||
+        pathParts.includes("features") ||
+        pathParts.includes("layout") ||
+        pathParts.includes("auth") ||
+        pathParts.includes("providers") ||
+        pathParts.includes("shared")
+      ) {
+        // Organized correctly
       } else {
         // All other components should be in organized subdirectories
         this.warnings.push(
           `Component not in organized subdirectory: ${file.relativePath}. ` +
-            "Should be in ui/, features/, layout/, or a feature-specific directory like auth/"
+            "Should be in ui/, features/, layout/, auth/, providers/, or shared/"
         );
       }
     }
@@ -192,12 +193,22 @@ class ProjectStructureValidator {
         if (file.isDirectory) continue;
 
         const pathParts = file.relativePath.split("/");
-        const hasSubdirectory = pathParts.length > 2; // src/types/{subdirectory}/file.ts
 
-        if (!hasSubdirectory) {
+        if (
+          pathParts.includes("api") ||
+          pathParts.includes("features") ||
+          pathParts.includes("ui") ||
+          pathParts.includes("global") ||
+          pathParts.includes("auth") ||
+          pathParts.includes("components") ||
+          pathParts.includes("event") ||
+          pathParts.includes("bank-account")
+        ) {
+          // Organized correctly
+        } else {
           this.warnings.push(
             `Type file not in organized subdirectory: ${file.relativePath}. ` +
-              "Consider organizing in api/, features/, ui/, or global/"
+              "Consider organizing in api/, features/, ui/, global/, or domain-specific folders"
           );
         }
       }
@@ -428,6 +439,4 @@ async function main() {
 }
 
 // Check if this script is being run directly
-if (import.meta.url === `file://${process.argv[1]}`) {
-  main().catch(console.error);
-}
+main().catch(console.error);
