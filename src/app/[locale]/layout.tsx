@@ -1,4 +1,5 @@
 import React from "react";
+import NextTopLoader from "nextjs-toploader";
 import "@/styles/globals.css";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
@@ -59,6 +60,7 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
   return (
     <html lang={locale}>
       <body className={`${inter.className} antialiased`} suppressHydrationWarning>
+        <NextTopLoader color="#2563eb" showSpinner={false} />
         <NextIntlClientProvider messages={messages}>
           <SessionProvider initialSession={initialSession}>
             <Navigation currentLocale={locale as Locale} />

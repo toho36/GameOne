@@ -200,19 +200,32 @@ export function EventCard({ event, variant = "default", onClick }: EventCardProp
     <Card
       className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
         onClick ? "hover:scale-[1.02]" : ""
-      }`}
+      } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary`}
       onClick={handleCardClick}
+      onKeyDown={(e) => {
+        if (onClick && (e.key === "Enter" || e.key === " ")) {
+          e.preventDefault();
+          onClick();
+        }
+      }}
+      tabIndex={onClick ? 0 : undefined}
+      role={onClick ? "button" : undefined}
+      aria-label={onClick ? `View details for ${event.title}` : undefined}
     >
       <CardHeader className="pb-3">
         <div className="mb-2 flex items-start justify-between">
           <div className="min-w-0 flex-1">
-            <CardTitle className="mb-1 line-clamp-2 font-semibold text-gray-900">
+            <CardTitle
+              className="mb-1 line-clamp-2 font-semibold text-gray-900"
+              title={event.title}
+            >
               {event.title}
             </CardTitle>
             <div className="flex items-center gap-2 text-sm text-gray-600">
-              <Calendar className="h-4 w-4" />
+              <Calendar className="h-4 w-4" aria-hidden="true" />
               <span>{formatDate(event.startDate)}</span>
-              <span>•</span>
+              <span aria-hidden="true">•</span>
+              <span className="sr-only">at</span>
               <span>{formatTime(event.startDate)}</span>
             </div>
           </div>
@@ -225,19 +238,23 @@ export function EventCard({ event, variant = "default", onClick }: EventCardProp
 
       <CardContent className="pt-0">
         {event.shortDescription && (
-          <p className="mb-3 line-clamp-2 text-gray-700">{event.shortDescription}</p>
+          <p className="mb-3 line-clamp-2 text-gray-700" title={event.shortDescription}>
+            {event.shortDescription}
+          </p>
         )}
 
         <div className="mb-3 space-y-2">
           {event.venue && (
             <div className="flex items-center gap-2 text-sm text-gray-600">
-              <MapPin className="h-4 w-4" />
-              <span className="truncate">{event.venue}</span>
+              <MapPin className="h-4 w-4" aria-hidden="true" />
+              <span className="truncate" title={event.venue}>
+                {event.venue}
+              </span>
             </div>
           )}
 
           <div className="flex items-center gap-2 text-sm text-gray-600">
-            <Users className="h-4 w-4" />
+            <Users className="h-4 w-4" aria-hidden="true" />
             <span>
               {event.availableSpots !== undefined
                 ? `${event.availableSpots} spots left`
@@ -269,7 +286,11 @@ export function EventCard({ event, variant = "default", onClick }: EventCardProp
           </div>
 
           {onClick && (
-            <Button className="hover:text-primary-dark inline-flex items-center gap-1 text-xs font-medium text-primary transition-colors">
+            <Button
+              className="hover:text-primary-dark inline-flex items-center gap-1 text-xs font-medium text-primary transition-colors"
+              tabIndex={-1} // Prevent double tab stop since card is clickable
+              aria-hidden="true" // Hidden because card itself is the button
+            >
               <span>Details</span>
             </Button>
           )}

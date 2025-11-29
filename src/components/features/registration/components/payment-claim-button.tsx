@@ -16,7 +16,7 @@ export function PaymentClaimButton({ registrationId, onClaimed }: PaymentClaimBu
       disabled={claim.isPending}
       aria-busy={claim.isPending}
     >
-      {claim.isPending ? t("sending") : t("sent")}
+      {claim.isPending ? t("claiming") : t("claimPayment")}
     </button>
   );
 }

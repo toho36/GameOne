@@ -31,7 +31,11 @@ export function EventList({
 
   if (loading && events.length === 0) {
     return (
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div
+        className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
+        role="status"
+        aria-label={t("loading")}
+      >
         {Array.from({ length: 6 }).map((_, index) => (
           <div key={index} className="animate-pulse">
             <div className="mb-4 h-48 rounded-lg bg-gray-200"></div>
@@ -48,9 +52,15 @@ export function EventList({
 
   if (error) {
     return (
-      <div className="py-12 text-center">
+      <div className="py-12 text-center" role="alert">
         <div className="mb-4 text-red-600">
-          <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg
+            className="mx-auto h-12 w-12"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            aria-hidden="true"
+          >
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -64,8 +74,9 @@ export function EventList({
         <button
           onClick={() => window.location.reload()}
           className="hover:bg-primary-dark inline-flex items-center rounded-md border border-transparent bg-primary px-4 py-2 text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+          aria-busy={loading}
         >
-          {t("error.retry")}
+          {loading ? t("error.reloading") : t("error.retry")}
         </button>
       </div>
     );

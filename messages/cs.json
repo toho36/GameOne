@@ -535,9 +535,11 @@
     }
   },
   "EventList": {
+    "loading": "Načítání událostí...",
     "error": {
       "title": "Chyba při načítání událostí",
-      "retry": "Zkusit znovu"
+      "retry": "Zkusit znovu",
+      "reloading": "Opětovné načítání..."
     },
     "empty": {
       "title": "Nebyly nalezeny žádné události",
@@ -591,6 +593,7 @@
     }
   },
   "RegistrationForm": {
+    "required": "Povinné",
     "summary": {
       "title": "Shrnutí registrace",
       "free": "Zdarma",
@@ -627,7 +630,10 @@
   "EventRegistration": {
     "title": "Registrace na událost",
     "registrationSuccess": {
-      "title": "Registrace úspěšná!"
+      "title": "Registrace úspěšná!",
+      "success": "Registrace úspěšná!",
+      "redirect": "Přesměrování na stránku události...",
+      "returnNow": "Návrat na událost"
     },
     "status": {
       "full": "Událost plná",
@@ -681,6 +687,8 @@
     },
     "qrCode": "QR kód",
     "qrCodeAlt": "QR kód platby",
+    "qrAltWithDetails": "QR kód platby pro {amount} {currency} - {title} (Ref: {id})",
+    "scanOrPay": "Naskenujte QR kód nebo použijte údaje výše k platbě",
     "downloadQR": "Stáhnout QR kód",
     "instructions": {
       "description": "Prosím dodržujte tyto kroky pro dokončení platby:"
@@ -692,7 +700,8 @@
       "notes": "Dodatečné poznámky",
       "notesPlaceholder": "Jakékoliv dodatečné informace o vaší platbě",
       "claiming": "Uplatňování...",
-      "submit": "Uplatnit platbu"
+      "submit": "Uplatnit platbu",
+      "claimPayment": "Uplatnit platbu"
     },
     "additional": {
       "info": "Dodatečné informace:",
@@ -896,12 +905,16 @@
       "title": "Platební pokyny",
       "description": "Odešlete prosím bankovní převod a poté stiskněte „Platbu jsem odeslal(a)“.",
       "amount": "Částka: {amount} {currency}",
-      "reference": "Variabilní symbol: Registrace {id}",
-      "qrAlt": "QR kód platby"
+      "reference": "Reference: Registrace {id}",
+      "qrAlt": "QR kód platby",
+      "qrAltWithDetails": "QR kód platby pro {amount} {currency} - {title} (Ref: {id})",
+      "scanOrPay": "Naskenujte QR kód nebo použijte údaje výše k platbě"
     },
     "claimButton": {
       "sending": "Odesílání...",
-      "sent": "Platbu jsem odeslal(a)"
+      "sent": "Platbu jsem odeslal(a)",
+      "claiming": "Odesílání...",
+      "claimPayment": "Platbu jsem odeslal(a)"
     },
     "admin": {
       "loading": "Načítání...",
@@ -947,7 +960,8 @@
     "cancel": "Ponechat registraci",
     "confirm": "Ano, zrušit",
     "success": "Registrace byla zrušena.",
-    "redirect": "Přesměrování na stránku události..."
+    "redirect": "Přesměrování na stránku události...",
+    "returnNow": "Návrat na událost"
   },
   "RegisteredUsers": {
     "loading": "Načítání účastníků...",

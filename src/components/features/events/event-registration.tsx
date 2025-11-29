@@ -51,9 +51,15 @@ export function EventRegistration({ event }: EventRegistrationProps) {
       <>
         {/* Registration Form or Status Messages */}
         {isAuthenticated && myReg.isLoading ? (
-          <div className="py-8 text-center text-sm text-gray-600">Loading your registration…</div>
+          <div className="py-8 text-center text-sm text-gray-600" role="status" aria-live="polite">
+            Loading your registration…
+          </div>
         ) : isAuthenticated && myReg.data?.hasRegistration && myReg.data.registrationId ? (
-          <div className="rounded-lg border-2 border-green-200 bg-green-50 p-4">
+          <div
+            className="rounded-lg border-2 border-green-200 bg-green-50 p-4"
+            role="status"
+            aria-live="polite"
+          >
             <RegistrationConfirmation registrationId={myReg.data.registrationId} />
           </div>
         ) : canRegister && hasAvailableSpots ? (
@@ -62,6 +68,7 @@ export function EventRegistration({ event }: EventRegistrationProps) {
               <p className="text-sm text-gray-600">{t("authenticatedInfo")}</p>
               <Button
                 disabled={isLoading}
+                aria-busy={isLoading}
                 onClick={async () => {
                   setIsLoading(true);
                   try {
@@ -127,7 +134,7 @@ export function EventRegistration({ event }: EventRegistrationProps) {
   if (confirmedRegistrationId) {
     return (
       <QueryClientProvider client={rqClient}>
-        <Card className="border-2 border-green-200 bg-green-50">
+        <Card className="border-2 border-green-200 bg-green-50" role="status" aria-live="polite">
           <CardHeader>
             <CardTitle className="text-green-800">{t("registrationSuccess.title")}</CardTitle>
           </CardHeader>
@@ -153,21 +160,40 @@ export function EventRegistration({ event }: EventRegistrationProps) {
         <CardContent className="space-y-6">
           {/* Registration Status Summary */}
           <div className="grid grid-cols-1 gap-4 rounded-lg bg-gray-50 p-4 md:grid-cols-3">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-gray-900">{event.confirmedParticipants}</div>
-              <div className="text-sm text-gray-600">{t("summary.confirmed")}</div>
+            <div
+              className="text-center"
+              aria-label={`${event.confirmedParticipants} ${t("summary.confirmed")}`}
+            >
+              <div className="text-2xl font-bold text-gray-900" aria-hidden="true">
+                {event.confirmedParticipants}
+              </div>
+              <div className="text-sm text-gray-600" aria-hidden="true">
+                {t("summary.confirmed")}
+              </div>
             </div>
 
-            <div className="text-center">
-              <div className="text-2xl font-bold text-gray-900">{event.waitingListCount}</div>
-              <div className="text-sm text-gray-600">{t("summary.waitingList")}</div>
+            <div
+              className="text-center"
+              aria-label={`${event.waitingListCount} ${t("summary.waitingList")}`}
+            >
+              <div className="text-2xl font-bold text-gray-900" aria-hidden="true">
+                {event.waitingListCount}
+              </div>
+              <div className="text-sm text-gray-600" aria-hidden="true">
+                {t("summary.waitingList")}
+              </div>
             </div>
 
-            <div className="text-center">
-              <div className="text-2xl font-bold text-gray-900">
+            <div
+              className="text-center"
+              aria-label={`${event.availableSpots !== undefined ? event.availableSpots : "Unlimited"} ${t("summary.availableSpots")}`}
+            >
+              <div className="text-2xl font-bold text-gray-900" aria-hidden="true">
                 {event.availableSpots !== undefined ? event.availableSpots : "∞"}
               </div>
-              <div className="text-sm text-gray-600">{t("summary.availableSpots")}</div>
+              <div className="text-sm text-gray-600" aria-hidden="true">
+                {t("summary.availableSpots")}
+              </div>
             </div>
           </div>
 
