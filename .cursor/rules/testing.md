@@ -7,7 +7,10 @@ alwaysApply: false
 
 ## Overview
 
-This document defines comprehensive testing strategies, quality assurance patterns, and validation processes for the GameOne event management system. These rules ensure high code quality, reliability, and maintainability through systematic testing approaches.
+This document defines comprehensive testing strategies, quality assurance
+patterns, and validation processes for the GameOne event management system.
+These rules ensure high code quality, reliability, and maintainability through
+systematic testing approaches.
 
 ## Testing Strategy
 
@@ -41,78 +44,73 @@ This document defines comprehensive testing strategies, quality assurance patter
 ### Vitest Configuration (`vitest.config.ts`)
 
 ```typescript
-import { defineConfig } from 'vitest/config';
-import path from 'path';
+import { defineConfig } from "vitest/config";
+import path from "path";
 
 export default defineConfig({
   test: {
     // Environment setup
-    environment: 'node',
-    setupFiles: ['./src/lib/testing/setup.ts'],
-    globalSetup: ['./src/lib/testing/global-setup.ts'],
+    environment: "node",
+    setupFiles: ["./src/lib/testing/setup.ts"],
+    globalSetup: ["./src/lib/testing/global-setup.ts"],
 
     // Coverage configuration
     coverage: {
-      provider: 'v8',
-      reporter: ['text', 'json', 'html', 'lcov'],
+      provider: "v8",
+      reporter: ["text", "json", "html", "lcov"],
       exclude: [
-        'node_modules/',
-        'src/lib/testing/',
-        '**/*.d.ts',
-        '**/*.config.*',
-        '**/migrations/',
-        '**/__tests__/**',
-        '**/*.test.*',
-        '**/*.spec.*'
+        "node_modules/",
+        "src/lib/testing/",
+        "**/*.d.ts",
+        "**/*.config.*",
+        "**/migrations/",
+        "**/__tests__/**",
+        "**/*.test.*",
+        "**/*.spec.*",
       ],
       thresholds: {
         global: {
           branches: 80,
           functions: 90,
           lines: 85,
-          statements: 85
+          statements: 85,
         },
-        'src/lib/': {
+        "src/lib/": {
           branches: 90,
           functions: 95,
           lines: 90,
-          statements: 90
-        }
-      }
+          statements: 90,
+        },
+      },
     },
 
     // Test execution
     testTimeout: 10000,
     hookTimeout: 10000,
-    pool: 'threads',
+    pool: "threads",
     poolOptions: {
       threads: {
         singleThread: false,
         maxThreads: 4,
-        minThreads: 1
-      }
+        minThreads: 1,
+      },
     },
 
     // File patterns
     include: [
-      'src/**/*.{test,spec}.{js,ts,jsx,tsx}',
-      '__tests__/**/*.{js,ts,jsx,tsx}'
+      "src/**/*.{test,spec}.{js,ts,jsx,tsx}",
+      "__tests__/**/*.{js,ts,jsx,tsx}",
     ],
-    exclude: [
-      'node_modules',
-      'dist',
-      '.next',
-      'e2e'
-    ]
+    exclude: ["node_modules", "dist", ".next", "e2e"],
   },
 
   // Path resolution
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
-      '@/tests': path.resolve(__dirname, './src/lib/testing')
-    }
-  }
+      "@": path.resolve(__dirname, "./src"),
+      "@/tests": path.resolve(__dirname, "./src/lib/testing"),
+    },
+  },
 });
 ```
 
@@ -120,11 +118,15 @@ export default defineConfig({
 
 ```typescript
 // src/lib/testing/setup.ts
-import { beforeAll, beforeEach, afterAll, afterEach, vi } from 'vitest';
-import { setupTestDatabase, cleanTestDatabase, teardownTestDatabase } from './database';
-import { mockAuth } from './mocks/auth';
-import { mockPayments } from './mocks/payments';
-import { mockNotifications } from './mocks/notifications';
+import { beforeAll, beforeEach, afterAll, afterEach, vi } from "vitest";
+import {
+  setupTestDatabase,
+  cleanTestDatabase,
+  teardownTestDatabase,
+} from "./database";
+import { mockAuth } from "./mocks/auth";
+import { mockPayments } from "./mocks/payments";
+import { mockNotifications } from "./mocks/notifications";
 
 // Global test setup
 beforeAll(async () => {
@@ -137,9 +139,9 @@ beforeAll(async () => {
   mockNotifications();
 
   // Mock environment variables
-  process.env.NODE_ENV = 'test';
-  process.env.ENABLE_ANALYTICS = 'false';
-  process.env.ENABLE_PUSH_NOTIFICATIONS = 'false';
+  process.env.NODE_ENV = "test";
+  process.env.ENABLE_ANALYTICS = "false";
+  process.env.ENABLE_PUSH_NOTIFICATIONS = "false";
 });
 
 beforeEach(async () => {
@@ -150,9 +152,9 @@ beforeEach(async () => {
   vi.clearAllMocks();
 
   // Mock console methods to avoid noise in test output
-  vi.spyOn(console, 'log').mockImplementation(() => {});
-  vi.spyOn(console, 'info').mockImplementation(() => {});
-  vi.spyOn(console, 'warn').mockImplementation(() => {});
+  vi.spyOn(console, "log").mockImplementation(() => {});
+  vi.spyOn(console, "info").mockImplementation(() => {});
+  vi.spyOn(console, "warn").mockImplementation(() => {});
 });
 
 afterEach(() => {
@@ -184,12 +186,12 @@ globalThis.testUtils = {
   createMockEvent: async () => {
     const user = await globalThis.testUtils.createMockUser();
     const category = await testPrisma.eventCategory.create({
-      data: createMockEventCategoryData()
+      data: createMockEventCategoryData(),
     });
 
     const eventData = createMockEventData({
       createdById: user.id,
-      categoryId: category.id
+      categoryId: category.id,
     });
 
     return await testPrisma.event.create({ data: eventData });
@@ -201,7 +203,7 @@ globalThis.testUtils = {
 
     const registrationData = createMockRegistrationData({
       userId: user.id,
-      eventId: event.id
+      eventId: event.id,
     });
 
     return await testPrisma.registration.create({ data: registrationData });
@@ -209,7 +211,7 @@ globalThis.testUtils = {
 
   loginAs: (user: User) => {
     return generateTestToken(user);
-  }
+  },
 };
 ```
 
@@ -219,17 +221,17 @@ globalThis.testUtils = {
 
 ```typescript
 // src/lib/services/__tests__/event-service.test.ts
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { EventService } from '../event-service';
-import { eventRepository } from '@/lib/repositories/event-repository';
-import { notificationService } from '../notification-service';
-import { createMockEvent, createMockUser } from '@/lib/testing/mocks';
+import { describe, it, expect, beforeEach, vi } from "vitest";
+import { EventService } from "../event-service";
+import { eventRepository } from "@/lib/repositories/event-repository";
+import { notificationService } from "../notification-service";
+import { createMockEvent, createMockUser } from "@/lib/testing/mocks";
 
 // Mock dependencies
-vi.mock('@/lib/repositories/event-repository');
-vi.mock('../notification-service');
+vi.mock("@/lib/repositories/event-repository");
+vi.mock("../notification-service");
 
-describe('EventService', () => {
+describe("EventService", () => {
   let eventService: EventService;
   let mockEventRepository: typeof eventRepository;
   let mockNotificationService: typeof notificationService;
@@ -240,12 +242,12 @@ describe('EventService', () => {
     mockNotificationService = vi.mocked(notificationService);
   });
 
-  describe('createEvent', () => {
-    it('should create event successfully', async () => {
+  describe("createEvent", () => {
+    it("should create event successfully", async () => {
       // Arrange
       const user = createMockUser();
       const eventData = createMockEvent();
-      const expectedEvent = { ...eventData, id: 'event-123' };
+      const expectedEvent = { ...eventData, id: "event-123" };
 
       mockEventRepository.create.mockResolvedValue(expectedEvent);
       mockNotificationService.sendEventCreatedNotification.mockResolvedValue();
@@ -256,64 +258,67 @@ describe('EventService', () => {
       // Assert
       expect(result).toEqual(expectedEvent);
       expect(mockEventRepository.create).toHaveBeenCalledWith(eventData);
-      expect(mockNotificationService.sendEventCreatedNotification).toHaveBeenCalledWith(
-        expectedEvent,
-        user
-      );
+      expect(
+        mockNotificationService.sendEventCreatedNotification
+      ).toHaveBeenCalledWith(expectedEvent, user);
     });
 
-    it('should handle validation errors', async () => {
+    it("should handle validation errors", async () => {
       // Arrange
       const user = createMockUser();
-      const invalidEventData = { ...createMockEvent(), title: '' };
+      const invalidEventData = { ...createMockEvent(), title: "" };
 
       // Act & Assert
       await expect(
         eventService.createEvent(invalidEventData, user)
-      ).rejects.toThrow('Title is required');
+      ).rejects.toThrow("Title is required");
 
       expect(mockEventRepository.create).not.toHaveBeenCalled();
     });
 
-    it('should handle repository errors', async () => {
+    it("should handle repository errors", async () => {
       // Arrange
       const user = createMockUser();
       const eventData = createMockEvent();
 
       mockEventRepository.create.mockRejectedValue(
-        new Error('Database connection failed')
+        new Error("Database connection failed")
       );
 
       // Act & Assert
-      await expect(
-        eventService.createEvent(eventData, user)
-      ).rejects.toThrow('Database connection failed');
+      await expect(eventService.createEvent(eventData, user)).rejects.toThrow(
+        "Database connection failed"
+      );
 
-      expect(mockNotificationService.sendEventCreatedNotification).not.toHaveBeenCalled();
+      expect(
+        mockNotificationService.sendEventCreatedNotification
+      ).not.toHaveBeenCalled();
     });
   });
 
-  describe('registerForEvent', () => {
-    it('should register user successfully', async () => {
+  describe("registerForEvent", () => {
+    it("should register user successfully", async () => {
       // Arrange
       const user = createMockUser();
       const event = createMockEvent({ maxParticipants: 100 });
       const registrationData = {
         numberOfGuests: 2,
-        specialRequirements: 'Vegetarian meal'
+        specialRequirements: "Vegetarian meal",
       };
 
       mockEventRepository.findById.mockResolvedValue(event);
       mockEventRepository.getAvailableSpots.mockResolvedValue(50);
 
       const expectedRegistration = {
-        id: 'reg-123',
+        id: "reg-123",
         userId: user.id,
         eventId: event.id,
-        ...registrationData
+        ...registrationData,
       };
 
-      vi.mocked(registrationRepository.create).mockResolvedValue(expectedRegistration);
+      vi.mocked(registrationRepository.create).mockResolvedValue(
+        expectedRegistration
+      );
 
       // Act
       const result = await eventService.registerForEvent(
@@ -324,10 +329,12 @@ describe('EventService', () => {
 
       // Assert
       expect(result).toEqual(expectedRegistration);
-      expect(mockEventRepository.getAvailableSpots).toHaveBeenCalledWith(event.id);
+      expect(mockEventRepository.getAvailableSpots).toHaveBeenCalledWith(
+        event.id
+      );
     });
 
-    it('should reject registration when event is full', async () => {
+    it("should reject registration when event is full", async () => {
       // Arrange
       const user = createMockUser();
       const event = createMockEvent({ maxParticipants: 10 });
@@ -338,53 +345,60 @@ describe('EventService', () => {
       // Act & Assert
       await expect(
         eventService.registerForEvent(event.id, user, { numberOfGuests: 1 })
-      ).rejects.toThrow('Event is full');
+      ).rejects.toThrow("Event is full");
     });
   });
 
-  describe('cancelRegistration', () => {
-    it('should cancel registration successfully', async () => {
+  describe("cancelRegistration", () => {
+    it("should cancel registration successfully", async () => {
       // Arrange
       const user = createMockUser();
       const registration = createMockRegistration({
         userId: user.id,
-        status: 'CONFIRMED'
+        status: "CONFIRMED",
       });
 
-      vi.mocked(registrationRepository.findById).mockResolvedValue(registration);
+      vi.mocked(registrationRepository.findById).mockResolvedValue(
+        registration
+      );
       vi.mocked(registrationRepository.update).mockResolvedValue({
         ...registration,
-        status: 'CANCELLED'
+        status: "CANCELLED",
       });
 
       // Act
-      const result = await eventService.cancelRegistration(registration.id, user);
+      const result = await eventService.cancelRegistration(
+        registration.id,
+        user
+      );
 
       // Assert
-      expect(result.status).toBe('CANCELLED');
+      expect(result.status).toBe("CANCELLED");
       expect(vi.mocked(registrationRepository.update)).toHaveBeenCalledWith(
         registration.id,
-        { status: 'CANCELLED', cancelledAt: expect.any(Date) }
+        { status: "CANCELLED", cancelledAt: expect.any(Date) }
       );
     });
 
-    it('should enforce cancellation deadline', async () => {
+    it("should enforce cancellation deadline", async () => {
       // Arrange
       const user = createMockUser();
       const pastEvent = createMockEvent({
-        startDate: new Date('2023-01-01')
+        startDate: new Date("2023-01-01"),
       });
       const registration = createMockRegistration({
         userId: user.id,
-        event: pastEvent
+        event: pastEvent,
       });
 
-      vi.mocked(registrationRepository.findById).mockResolvedValue(registration);
+      vi.mocked(registrationRepository.findById).mockResolvedValue(
+        registration
+      );
 
       // Act & Assert
       await expect(
         eventService.cancelRegistration(registration.id, user)
-      ).rejects.toThrow('Cancellation deadline has passed');
+      ).rejects.toThrow("Cancellation deadline has passed");
     });
   });
 });
@@ -394,29 +408,33 @@ describe('EventService', () => {
 
 ```typescript
 // src/lib/repositories/__tests__/event-repository.test.ts
-import { describe, it, expect, beforeEach } from 'vitest';
-import { eventRepository } from '../event-repository';
-import { setupTestDatabase, cleanTestDatabase } from '@/lib/testing/database';
-import { createMockEventData, createMockUserData, createMockEventCategoryData } from '@/lib/testing/mocks';
+import { describe, it, expect, beforeEach } from "vitest";
+import { eventRepository } from "../event-repository";
+import { setupTestDatabase, cleanTestDatabase } from "@/lib/testing/database";
+import {
+  createMockEventData,
+  createMockUserData,
+  createMockEventCategoryData,
+} from "@/lib/testing/mocks";
 
-describe('EventRepository', () => {
+describe("EventRepository", () => {
   beforeEach(async () => {
     await cleanTestDatabase();
   });
 
-  describe('create', () => {
-    it('should create event with all required fields', async () => {
+  describe("create", () => {
+    it("should create event with all required fields", async () => {
       // Arrange
       const user = await testPrisma.user.create({
-        data: createMockUserData()
+        data: createMockUserData(),
       });
       const category = await testPrisma.eventCategory.create({
-        data: createMockEventCategoryData()
+        data: createMockEventCategoryData(),
       });
 
       const eventData = createMockEventData({
         categoryId: category.id,
-        createdById: user.id
+        createdById: user.id,
       });
 
       // Act
@@ -432,28 +450,28 @@ describe('EventRepository', () => {
       expect(event.updatedAt).toBeInstanceOf(Date);
     });
 
-    it('should set default values correctly', async () => {
+    it("should set default values correctly", async () => {
       // Arrange
       const user = await testUtils.createMockUser();
       const category = await testPrisma.eventCategory.create({
-        data: createMockEventCategoryData()
+        data: createMockEventCategoryData(),
       });
 
       const minimalEventData = {
-        title: 'Test Event',
-        description: 'Test Description',
+        title: "Test Event",
+        description: "Test Description",
         startDate: new Date(),
         endDate: new Date(),
         categoryId: category.id,
-        createdById: user.id
+        createdById: user.id,
       };
 
       // Act
       const event = await eventRepository.create(minimalEventData);
 
       // Assert
-      expect(event.status).toBe('DRAFT');
-      expect(event.currency).toBe('EUR');
+      expect(event.status).toBe("DRAFT");
+      expect(event.currency).toBe("EUR");
       expect(event.isPrivate).toBe(false);
       expect(event.requiresApproval).toBe(false);
       expect(event.allowGuests).toBe(false);
@@ -461,34 +479,34 @@ describe('EventRepository', () => {
     });
   });
 
-  describe('findWithFilters', () => {
-    it('should filter events by status', async () => {
+  describe("findWithFilters", () => {
+    it("should filter events by status", async () => {
       // Arrange
       const user = await testUtils.createMockUser();
       const category = await testPrisma.eventCategory.create({
-        data: createMockEventCategoryData()
+        data: createMockEventCategoryData(),
       });
 
       const publishedEvent = await eventRepository.create({
         ...createMockEventData(),
-        status: 'PUBLISHED',
+        status: "PUBLISHED",
         categoryId: category.id,
-        createdById: user.id
+        createdById: user.id,
       });
 
       const draftEvent = await eventRepository.create({
         ...createMockEventData(),
-        status: 'DRAFT',
+        status: "DRAFT",
         categoryId: category.id,
-        createdById: user.id
+        createdById: user.id,
       });
 
       // Act
       const publishedEvents = await eventRepository.findWithFilters({
-        status: 'PUBLISHED'
+        status: "PUBLISHED",
       });
       const draftEvents = await eventRepository.findWithFilters({
-        status: 'DRAFT'
+        status: "DRAFT",
       });
 
       // Assert
@@ -498,33 +516,33 @@ describe('EventRepository', () => {
       expect(draftEvents[0].id).toBe(draftEvent.id);
     });
 
-    it('should filter events by date range', async () => {
+    it("should filter events by date range", async () => {
       // Arrange
       const user = await testUtils.createMockUser();
       const category = await testPrisma.eventCategory.create({
-        data: createMockEventCategoryData()
+        data: createMockEventCategoryData(),
       });
 
       const futureEvent = await eventRepository.create({
         ...createMockEventData(),
-        startDate: new Date('2025-06-01'),
-        endDate: new Date('2025-06-02'),
+        startDate: new Date("2025-06-01"),
+        endDate: new Date("2025-06-02"),
         categoryId: category.id,
-        createdById: user.id
+        createdById: user.id,
       });
 
       const pastEvent = await eventRepository.create({
         ...createMockEventData(),
-        startDate: new Date('2023-01-01'),
-        endDate: new Date('2023-01-02'),
+        startDate: new Date("2023-01-01"),
+        endDate: new Date("2023-01-02"),
         categoryId: category.id,
-        createdById: user.id
+        createdById: user.id,
       });
 
       // Act
       const eventsInRange = await eventRepository.findWithFilters({
-        startDate: new Date('2025-01-01'),
-        endDate: new Date('2025-12-31')
+        startDate: new Date("2025-01-01"),
+        endDate: new Date("2025-12-31"),
       });
 
       // Assert
@@ -533,13 +551,13 @@ describe('EventRepository', () => {
     });
   });
 
-  describe('getAvailableSpots', () => {
-    it('should calculate available spots correctly', async () => {
+  describe("getAvailableSpots", () => {
+    it("should calculate available spots correctly", async () => {
       // Arrange
       const event = await testUtils.createMockEvent();
       await testPrisma.event.update({
         where: { id: event.id },
-        data: { maxParticipants: 10 }
+        data: { maxParticipants: 10 },
       });
 
       // Create confirmed registrations
@@ -551,16 +569,16 @@ describe('EventRepository', () => {
           {
             eventId: event.id,
             userId: user1.id,
-            status: 'CONFIRMED',
-            numberOfGuests: 0
+            status: "CONFIRMED",
+            numberOfGuests: 0,
           },
           {
             eventId: event.id,
             userId: user2.id,
-            status: 'CONFIRMED',
-            numberOfGuests: 2
-          }
-        ]
+            status: "CONFIRMED",
+            numberOfGuests: 2,
+          },
+        ],
       });
 
       // Act
@@ -570,12 +588,12 @@ describe('EventRepository', () => {
       expect(availableSpots).toBe(8); // 10 - 2 registrations
     });
 
-    it('should return null for unlimited events', async () => {
+    it("should return null for unlimited events", async () => {
       // Arrange
       const event = await testUtils.createMockEvent();
       await testPrisma.event.update({
         where: { id: event.id },
-        data: { maxParticipants: null }
+        data: { maxParticipants: null },
       });
 
       // Act
@@ -594,22 +612,22 @@ describe('EventRepository', () => {
 
 ```typescript
 // src/app/api/events/__tests__/route.test.ts
-import { describe, it, expect, beforeEach } from 'vitest';
-import { GET, POST } from '../route';
-import { createMockRequest } from '@/lib/testing/utils';
+import { describe, it, expect, beforeEach } from "vitest";
+import { GET, POST } from "../route";
+import { createMockRequest } from "@/lib/testing/utils";
 
-describe('/api/events', () => {
-  describe('GET', () => {
-    it('should return paginated events', async () => {
+describe("/api/events", () => {
+  describe("GET", () => {
+    it("should return paginated events", async () => {
       // Arrange
       const user = await testUtils.createMockUser();
       await Promise.all([
         testUtils.createMockEvent(),
         testUtils.createMockEvent(),
-        testUtils.createMockEvent()
+        testUtils.createMockEvent(),
       ]);
 
-      const request = createMockRequest('GET', '/api/events?page=1&limit=2');
+      const request = createMockRequest("GET", "/api/events?page=1&limit=2");
 
       // Act
       const response = await GET(request);
@@ -626,31 +644,31 @@ describe('/api/events', () => {
       expect(data.pagination.hasNext).toBe(true);
     });
 
-    it('should filter events by status', async () => {
+    it("should filter events by status", async () => {
       // Arrange
       const user = await testUtils.createMockUser();
       const category = await testPrisma.eventCategory.create({
-        data: createMockEventCategoryData()
+        data: createMockEventCategoryData(),
       });
 
       await testPrisma.event.createMany({
         data: [
           {
             ...createMockEventData(),
-            status: 'PUBLISHED',
+            status: "PUBLISHED",
             categoryId: category.id,
-            createdById: user.id
+            createdById: user.id,
           },
           {
             ...createMockEventData(),
-            status: 'DRAFT',
+            status: "DRAFT",
             categoryId: category.id,
-            createdById: user.id
-          }
-        ]
+            createdById: user.id,
+          },
+        ],
       });
 
-      const request = createMockRequest('GET', '/api/events?status=PUBLISHED');
+      const request = createMockRequest("GET", "/api/events?status=PUBLISHED");
 
       // Act
       const response = await GET(request);
@@ -659,37 +677,37 @@ describe('/api/events', () => {
       // Assert
       expect(response.status).toBe(200);
       expect(data.data).toHaveLength(1);
-      expect(data.data[0].status).toBe('PUBLISHED');
+      expect(data.data[0].status).toBe("PUBLISHED");
     });
 
-    it('should handle search queries', async () => {
+    it("should handle search queries", async () => {
       // Arrange
       const user = await testUtils.createMockUser();
       const category = await testPrisma.eventCategory.create({
-        data: createMockEventCategoryData()
+        data: createMockEventCategoryData(),
       });
 
       const searchableEvent = await testPrisma.event.create({
         data: {
           ...createMockEventData(),
-          title: 'React Workshop 2024',
-          description: 'Learn modern React patterns',
+          title: "React Workshop 2024",
+          description: "Learn modern React patterns",
           categoryId: category.id,
-          createdById: user.id
-        }
+          createdById: user.id,
+        },
       });
 
       await testPrisma.event.create({
         data: {
           ...createMockEventData(),
-          title: 'Vue Conference',
-          description: 'Vue.js latest features',
+          title: "Vue Conference",
+          description: "Vue.js latest features",
           categoryId: category.id,
-          createdById: user.id
-        }
+          createdById: user.id,
+        },
       });
 
-      const request = createMockRequest('GET', '/api/events?search=React');
+      const request = createMockRequest("GET", "/api/events?search=React");
 
       // Act
       const response = await GET(request);
@@ -698,31 +716,31 @@ describe('/api/events', () => {
       // Assert
       expect(response.status).toBe(200);
       expect(data.data).toHaveLength(1);
-      expect(data.data[0].title).toBe('React Workshop 2024');
+      expect(data.data[0].title).toBe("React Workshop 2024");
     });
   });
 
-  describe('POST', () => {
-    it('should create event with valid data', async () => {
+  describe("POST", () => {
+    it("should create event with valid data", async () => {
       // Arrange
       const user = await testUtils.createMockUser();
       const category = await testPrisma.eventCategory.create({
-        data: createMockEventCategoryData()
+        data: createMockEventCategoryData(),
       });
 
       const eventData = {
-        title: 'New Event',
-        description: 'Event description',
-        startDate: new Date('2025-06-01').toISOString(),
-        endDate: new Date('2025-06-02').toISOString(),
+        title: "New Event",
+        description: "Event description",
+        startDate: new Date("2025-06-01").toISOString(),
+        endDate: new Date("2025-06-02").toISOString(),
         categoryId: category.id,
         maxParticipants: 50,
-        price: 25.00
+        price: 25.0,
       };
 
       const token = testUtils.loginAs(user);
-      const request = createMockRequest('POST', '/api/events', eventData, {
-        Authorization: `Bearer ${token}`
+      const request = createMockRequest("POST", "/api/events", eventData, {
+        Authorization: `Bearer ${token}`,
       });
 
       // Act
@@ -736,17 +754,22 @@ describe('/api/events', () => {
       expect(data.data.createdById).toBe(user.id);
     });
 
-    it('should validate required fields', async () => {
+    it("should validate required fields", async () => {
       // Arrange
       const user = await testUtils.createMockUser();
       const invalidEventData = {
-        description: 'Missing title'
+        description: "Missing title",
       };
 
       const token = testUtils.loginAs(user);
-      const request = createMockRequest('POST', '/api/events', invalidEventData, {
-        Authorization: `Bearer ${token}`
-      });
+      const request = createMockRequest(
+        "POST",
+        "/api/events",
+        invalidEventData,
+        {
+          Authorization: `Bearer ${token}`,
+        }
+      );
 
       // Act
       const response = await POST(request);
@@ -755,14 +778,14 @@ describe('/api/events', () => {
       // Assert
       expect(response.status).toBe(422);
       expect(data.success).toBe(false);
-      expect(data.error.code).toBe('VALIDATION_ERROR');
+      expect(data.error.code).toBe("VALIDATION_ERROR");
       expect(data.error.details.fieldErrors.title).toBeDefined();
     });
 
-    it('should require authentication', async () => {
+    it("should require authentication", async () => {
       // Arrange
       const eventData = createMockEventData();
-      const request = createMockRequest('POST', '/api/events', eventData);
+      const request = createMockRequest("POST", "/api/events", eventData);
 
       // Act
       const response = await POST(request);
@@ -771,22 +794,22 @@ describe('/api/events', () => {
       // Assert
       expect(response.status).toBe(401);
       expect(data.success).toBe(false);
-      expect(data.error.code).toBe('UNAUTHORIZED');
+      expect(data.error.code).toBe("UNAUTHORIZED");
     });
 
-    it('should check permissions', async () => {
+    it("should check permissions", async () => {
       // Arrange
       const userWithoutPermissions = await testPrisma.user.create({
         data: {
           ...createMockUserData(),
           // No roles or permissions
-        }
+        },
       });
 
       const eventData = createMockEventData();
       const token = testUtils.loginAs(userWithoutPermissions);
-      const request = createMockRequest('POST', '/api/events', eventData, {
-        Authorization: `Bearer ${token}`
+      const request = createMockRequest("POST", "/api/events", eventData, {
+        Authorization: `Bearer ${token}`,
       });
 
       // Act
@@ -796,7 +819,7 @@ describe('/api/events', () => {
       // Assert
       expect(response.status).toBe(403);
       expect(data.success).toBe(false);
-      expect(data.error.code).toBe('FORBIDDEN');
+      expect(data.error.code).toBe("FORBIDDEN");
     });
   });
 });
@@ -808,8 +831,8 @@ describe('/api/events', () => {
 
 ```typescript
 // e2e/setup/global-setup.ts
-import { chromium, FullConfig } from '@playwright/test';
-import { setupTestDatabase } from '../utils/database';
+import { chromium, FullConfig } from "@playwright/test";
+import { setupTestDatabase } from "../utils/database";
 
 async function globalSetup(config: FullConfig) {
   // Setup test database
@@ -832,137 +855,150 @@ export default globalSetup;
 
 ```typescript
 // e2e/event-registration.spec.ts
-import { test, expect } from '@playwright/test';
-import { loginAs, createTestEvent } from './utils/helpers';
+import { test, expect } from "@playwright/test";
+import { loginAs, createTestEvent } from "./utils/helpers";
 
-test.describe('Event Registration Flow', () => {
-  test('user can successfully register for an event', async ({ page }) => {
+test.describe("Event Registration Flow", () => {
+  test("user can successfully register for an event", async ({ page }) => {
     // Arrange
     const event = await createTestEvent({
-      title: 'React Workshop',
+      title: "React Workshop",
       maxParticipants: 20,
-      price: 50
+      price: 50,
     });
 
-    await loginAs(page, 'user@example.com');
+    await loginAs(page, "user@example.com");
 
     // Act - Navigate to event page
     await page.goto(`/events/${event.id}`);
 
     // Verify event details are displayed
-    await expect(page.locator('h1')).toContainText('React Workshop');
-    await expect(page.locator('[data-testid=event-price]')).toContainText('€50');
+    await expect(page.locator("h1")).toContainText("React Workshop");
+    await expect(page.locator("[data-testid=event-price]")).toContainText(
+      "€50"
+    );
 
     // Start registration
-    await page.click('[data-testid=register-button]');
+    await page.click("[data-testid=register-button]");
 
     // Fill registration form
-    await page.fill('[data-testid=guest-count]', '2');
-    await page.fill('[data-testid=special-requirements]', 'Vegetarian meal');
+    await page.fill("[data-testid=guest-count]", "2");
+    await page.fill("[data-testid=special-requirements]", "Vegetarian meal");
 
     // Accept terms
-    await page.check('[data-testid=accept-terms]');
+    await page.check("[data-testid=accept-terms]");
 
     // Continue to payment
-    await page.click('[data-testid=continue-payment]');
+    await page.click("[data-testid=continue-payment]");
 
     // Select payment method
-    await page.click('[data-testid=payment-method-bank-transfer]');
+    await page.click("[data-testid=payment-method-bank-transfer]");
 
     // Complete registration
-    await page.click('[data-testid=complete-registration]');
+    await page.click("[data-testid=complete-registration]");
 
     // Assert - Verify success
-    await expect(page.locator('[data-testid=success-message]')).toBeVisible();
-    await expect(page.locator('[data-testid=registration-id]')).toBeVisible();
+    await expect(page.locator("[data-testid=success-message]")).toBeVisible();
+    await expect(page.locator("[data-testid=registration-id]")).toBeVisible();
 
     // Verify user receives confirmation email
     const emails = await getTestEmails();
     expect(emails).toContainEqual(
       expect.objectContaining({
-        to: 'user@example.com',
-        subject: expect.stringContaining('Registration Confirmation')
+        to: "user@example.com",
+        subject: expect.stringContaining("Registration Confirmation"),
       })
     );
   });
 
-  test('user cannot register when event is full', async ({ page }) => {
+  test("user cannot register when event is full", async ({ page }) => {
     // Arrange
     const event = await createTestEvent({
-      title: 'Limited Workshop',
-      maxParticipants: 1
+      title: "Limited Workshop",
+      maxParticipants: 1,
     });
 
     // Fill the event
     await createTestRegistration({
       eventId: event.id,
-      status: 'CONFIRMED'
+      status: "CONFIRMED",
     });
 
-    await loginAs(page, 'user@example.com');
+    await loginAs(page, "user@example.com");
 
     // Act
     await page.goto(`/events/${event.id}`);
 
     // Assert
-    await expect(page.locator('[data-testid=register-button]')).toBeDisabled();
-    await expect(page.locator('[data-testid=event-full-message]')).toBeVisible();
+    await expect(page.locator("[data-testid=register-button]")).toBeDisabled();
+    await expect(
+      page.locator("[data-testid=event-full-message]")
+    ).toBeVisible();
   });
 
-  test('user can join waiting list when event is full', async ({ page }) => {
+  test("user can join waiting list when event is full", async ({ page }) => {
     // Arrange
     const event = await createTestEvent({
-      title: 'Popular Workshop',
+      title: "Popular Workshop",
       maxParticipants: 1,
-      allowWaitingList: true
+      allowWaitingList: true,
     });
 
     await createTestRegistration({
       eventId: event.id,
-      status: 'CONFIRMED'
+      status: "CONFIRMED",
     });
 
-    await loginAs(page, 'user@example.com');
+    await loginAs(page, "user@example.com");
 
     // Act
     await page.goto(`/events/${event.id}`);
-    await page.click('[data-testid=join-waiting-list]');
+    await page.click("[data-testid=join-waiting-list]");
 
     // Assert
-    await expect(page.locator('[data-testid=waiting-list-success]')).toBeVisible();
-    await expect(page.locator('[data-testid=waiting-list-position]')).toContainText('1');
+    await expect(
+      page.locator("[data-testid=waiting-list-success]")
+    ).toBeVisible();
+    await expect(
+      page.locator("[data-testid=waiting-list-position]")
+    ).toContainText("1");
   });
 
-  test('user can cancel registration within deadline', async ({ page }) => {
+  test("user can cancel registration within deadline", async ({ page }) => {
     // Arrange
     const event = await createTestEvent({
-      title: 'Cancellable Event',
-      startDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days from now
+      title: "Cancellable Event",
+      startDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
     });
 
-    const user = await createTestUser('user@example.com');
+    const user = await createTestUser("user@example.com");
     const registration = await createTestRegistration({
       eventId: event.id,
       userId: user.id,
-      status: 'CONFIRMED'
+      status: "CONFIRMED",
     });
 
-    await loginAs(page, 'user@example.com');
+    await loginAs(page, "user@example.com");
 
     // Act
-    await page.goto('/my-registrations');
+    await page.goto("/my-registrations");
     await page.click(`[data-testid=cancel-registration-${registration.id}]`);
 
     // Confirm cancellation
-    await page.click('[data-testid=confirm-cancellation]');
+    await page.click("[data-testid=confirm-cancellation]");
 
     // Assert
-    await expect(page.locator('[data-testid=cancellation-success]')).toBeVisible();
+    await expect(
+      page.locator("[data-testid=cancellation-success]")
+    ).toBeVisible();
 
     // Verify registration status is updated
     await page.reload();
-    await expect(page.locator(`[data-testid=registration-${registration.id}] [data-testid=status]`))
-      .toContainText('Cancelled');
+    await expect(
+      page.locator(
+        `[data-testid=registration-${registration.id}] [data-testid=status]`
+      )
+    ).toContainText("Cancelled");
   });
 });
 ```
@@ -1055,18 +1091,18 @@ scenarios:
 
 ```typescript
 // src/lib/testing/performance/database.test.ts
-import { describe, it, expect } from 'vitest';
-import { performance } from 'perf_hooks';
-import { eventRepository } from '@/lib/repositories/event-repository';
-import { createBulkTestData } from '../utils/bulk-data';
+import { describe, it, expect } from "vitest";
+import { performance } from "perf_hooks";
+import { eventRepository } from "@/lib/repositories/event-repository";
+import { createBulkTestData } from "../utils/bulk-data";
 
-describe('Database Performance', () => {
-  it('should handle large dataset queries efficiently', async () => {
+describe("Database Performance", () => {
+  it("should handle large dataset queries efficiently", async () => {
     // Arrange - Create 10,000 events
     await createBulkTestData({
       events: 10000,
       users: 1000,
-      registrations: 50000
+      registrations: 50000,
     });
 
     // Act - Measure query performance
@@ -1074,8 +1110,8 @@ describe('Database Performance', () => {
 
     const result = await eventRepository.findManyPaginated({
       pagination: { page: 1, limit: 20 },
-      sort: { field: 'startDate', direction: 'desc' },
-      where: { status: 'PUBLISHED' }
+      sort: { field: "startDate", direction: "desc" },
+      where: { status: "PUBLISHED" },
     });
 
     const endTime = performance.now();
@@ -1087,7 +1123,7 @@ describe('Database Performance', () => {
     expect(result.pagination.total).toBeGreaterThan(0);
   });
 
-  it('should efficiently handle concurrent registrations', async () => {
+  it("should efficiently handle concurrent registrations", async () => {
     // Arrange
     const event = await testUtils.createMockEvent();
     const users = await Promise.all(
@@ -1097,11 +1133,11 @@ describe('Database Performance', () => {
     // Act - Simulate concurrent registrations
     const startTime = performance.now();
 
-    const registrationPromises = users.map(user =>
+    const registrationPromises = users.map((user) =>
       eventRepository.createRegistration({
         eventId: event.id,
         userId: user.id,
-        numberOfGuests: 0
+        numberOfGuests: 0,
       })
     );
 
@@ -1114,7 +1150,7 @@ describe('Database Performance', () => {
     expect(totalTime).toBeLessThan(5000); // 5 seconds for 100 concurrent registrations
 
     const successfulRegistrations = results.filter(
-      result => result.status === 'fulfilled'
+      (result) => result.status === "fulfilled"
     );
 
     expect(successfulRegistrations.length).toBeGreaterThan(0);
@@ -1128,66 +1164,66 @@ describe('Database Performance', () => {
 
 ```typescript
 // src/lib/security/__tests__/validation.test.ts
-import { describe, it, expect } from 'vitest';
-import { SecurityValidator } from '../validation';
+import { describe, it, expect } from "vitest";
+import { SecurityValidator } from "../validation";
 
-describe('SecurityValidator', () => {
-  describe('sanitizeInput', () => {
-    it('should remove SQL injection patterns', () => {
+describe("SecurityValidator", () => {
+  describe("sanitizeInput", () => {
+    it("should remove SQL injection patterns", () => {
       const maliciousInputs = [
         "'; DROP TABLE users; --",
         "1' OR '1'='1",
         "admin'/*",
-        "' UNION SELECT * FROM passwords--"
+        "' UNION SELECT * FROM passwords--",
       ];
 
-      maliciousInputs.forEach(input => {
+      maliciousInputs.forEach((input) => {
         const sanitized = SecurityValidator.sanitizeInput(input);
         expect(sanitized).not.toContain("'");
-        expect(sanitized).not.toContain(';');
-        expect(sanitized).not.toContain('--');
+        expect(sanitized).not.toContain(";");
+        expect(sanitized).not.toContain("--");
       });
     });
 
-    it('should remove XSS patterns', () => {
+    it("should remove XSS patterns", () => {
       const xssInputs = [
         '<script>alert("xss")</script>',
         '<img src="x" onerror="alert(1)">',
         'javascript:alert("xss")',
-        '<svg onload="alert(1)">'
+        '<svg onload="alert(1)">',
       ];
 
-      xssInputs.forEach(input => {
+      xssInputs.forEach((input) => {
         const sanitized = SecurityValidator.sanitizeHtml(input);
-        expect(sanitized).not.toContain('<script>');
-        expect(sanitized).not.toContain('onerror');
-        expect(sanitized).not.toContain('javascript:');
-        expect(sanitized).not.toContain('onload');
+        expect(sanitized).not.toContain("<script>");
+        expect(sanitized).not.toContain("onerror");
+        expect(sanitized).not.toContain("javascript:");
+        expect(sanitized).not.toContain("onload");
       });
     });
   });
 
-  describe('validateFile', () => {
-    it('should reject files that are too large', () => {
-      const largeFile = new File(['x'.repeat(11 * 1024 * 1024)], 'large.txt', {
-        type: 'text/plain'
+  describe("validateFile", () => {
+    it("should reject files that are too large", () => {
+      const largeFile = new File(["x".repeat(11 * 1024 * 1024)], "large.txt", {
+        type: "text/plain",
       });
 
       const result = SecurityValidator.validateFile(largeFile);
 
       expect(result.valid).toBe(false);
-      expect(result.error).toBe('File too large');
+      expect(result.error).toBe("File too large");
     });
 
-    it('should reject unauthorized file types', () => {
-      const executableFile = new File(['malicious'], 'virus.exe', {
-        type: 'application/octet-stream'
+    it("should reject unauthorized file types", () => {
+      const executableFile = new File(["malicious"], "virus.exe", {
+        type: "application/octet-stream",
       });
 
       const result = SecurityValidator.validateFile(executableFile);
 
       expect(result.valid).toBe(false);
-      expect(result.error).toBe('File type not allowed');
+      expect(result.error).toBe("File type not allowed");
     });
   });
 });
@@ -1197,34 +1233,35 @@ describe('SecurityValidator', () => {
 
 ```typescript
 // src/lib/auth/__tests__/security.test.ts
-import { describe, it, expect } from 'vitest';
-import { AuthService } from '../auth-service';
-import { createMockRequest } from '@/lib/testing/utils';
+import { describe, it, expect } from "vitest";
+import { AuthService } from "../auth-service";
+import { createMockRequest } from "@/lib/testing/utils";
 
-describe('Authentication Security', () => {
-  describe('token validation', () => {
-    it('should reject expired tokens', async () => {
+describe("Authentication Security", () => {
+  describe("token validation", () => {
+    it("should reject expired tokens", async () => {
       const expiredToken = generateTestToken({
-        exp: Math.floor(Date.now() / 1000) - 3600 // 1 hour ago
+        exp: Math.floor(Date.now() / 1000) - 3600, // 1 hour ago
       });
 
       const result = await AuthService.validateToken(expiredToken);
 
       expect(result.valid).toBe(false);
-      expect(result.error).toContain('expired');
+      expect(result.error).toContain("expired");
     });
 
-    it('should reject tokens with invalid signatures', async () => {
-      const tamperedToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.tampered.signature';
+    it("should reject tokens with invalid signatures", async () => {
+      const tamperedToken =
+        "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.tampered.signature";
 
       const result = await AuthService.validateToken(tamperedToken);
 
       expect(result.valid).toBe(false);
     });
 
-    it('should reject tokens from wrong issuer', async () => {
+    it("should reject tokens from wrong issuer", async () => {
       const maliciousToken = generateTestToken({
-        iss: 'https://malicious-issuer.com'
+        iss: "https://malicious-issuer.com",
       });
 
       const result = await AuthService.validateToken(maliciousToken);
@@ -1233,12 +1270,12 @@ describe('Authentication Security', () => {
     });
   });
 
-  describe('rate limiting', () => {
-    it('should block excessive login attempts', async () => {
+  describe("rate limiting", () => {
+    it("should block excessive login attempts", async () => {
       const requests = Array.from({ length: 6 }, () =>
-        createMockRequest('POST', '/api/auth/login', {
-          email: 'test@example.com',
-          password: 'wrongpassword'
+        createMockRequest("POST", "/api/auth/login", {
+          email: "test@example.com",
+          password: "wrongpassword",
         })
       );
 
@@ -1249,7 +1286,7 @@ describe('Authentication Security', () => {
       }
 
       // First 5 should be allowed (though fail authentication)
-      expect(responses.slice(0, 5).every(r => r.status !== 429)).toBe(true);
+      expect(responses.slice(0, 5).every((r) => r.status !== 429)).toBe(true);
 
       // 6th should be rate limited
       expect(responses[5].status).toBe(429);
@@ -1332,7 +1369,7 @@ export class TestDataFactory {
       isVerified: true,
       createdAt: new Date(),
       updatedAt: new Date(),
-      ...overrides
+      ...overrides,
     };
   }
 
@@ -1347,8 +1384,8 @@ export class TestDataFactory {
       description: `Description for test event ${this.eventCounter}`,
       startDate,
       endDate,
-      status: 'PUBLISHED',
-      currency: 'EUR',
+      status: "PUBLISHED",
+      currency: "EUR",
       isPrivate: false,
       requiresApproval: false,
       allowGuests: true,
@@ -1357,21 +1394,23 @@ export class TestDataFactory {
       metadata: {},
       createdAt: new Date(),
       updatedAt: new Date(),
-      ...overrides
+      ...overrides,
     };
   }
 
-  static createRegistration(overrides: Partial<Registration> = {}): Registration {
+  static createRegistration(
+    overrides: Partial<Registration> = {}
+  ): Registration {
     return {
       id: `reg-${Date.now()}`,
-      eventId: 'event-1',
-      userId: 'user-1',
-      status: 'CONFIRMED',
+      eventId: "event-1",
+      userId: "user-1",
+      status: "CONFIRMED",
       numberOfGuests: 0,
       metadata: {},
       createdAt: new Date(),
       updatedAt: new Date(),
-      ...overrides
+      ...overrides,
     };
   }
 
@@ -1382,4 +1421,5 @@ export class TestDataFactory {
 }
 ```
 
-This comprehensive testing framework ensures the GameOne application maintains high quality and reliability through systematic testing at all levels.
+This comprehensive testing framework ensures the GameOne application maintains
+high quality and reliability through systematic testing at all levels.

@@ -179,8 +179,8 @@ export class UserRepository {
         id: true,
         name: true,
         email: true,
-        createdAt: true
-      }
+        createdAt: true,
+      },
     });
   }
 
@@ -197,13 +197,13 @@ export class UserRepository {
             id: true,
             title: true,
             published: true,
-            createdAt: true
+            createdAt: true,
           },
           where: { published: true },
-          orderBy: { createdAt: 'desc' },
-          take: limit
-        }
-      }
+          orderBy: { createdAt: "desc" },
+          take: limit,
+        },
+      },
     });
   }
 
@@ -215,15 +215,15 @@ export class UserRepository {
       prisma.user.findMany({
         skip,
         take: limit,
-        orderBy: { createdAt: 'desc' },
+        orderBy: { createdAt: "desc" },
         select: {
           id: true,
           name: true,
           email: true,
-          createdAt: true
-        }
+          createdAt: true,
+        },
       }),
-      prisma.user.count()
+      prisma.user.count(),
     ]);
 
     return {
@@ -232,8 +232,8 @@ export class UserRepository {
         page,
         limit,
         total,
-        pages: Math.ceil(total / limit)
-      }
+        pages: Math.ceil(total / limit),
+      },
     };
   }
 
@@ -244,9 +244,9 @@ export class UserRepository {
         isActive: true,
         posts: {
           some: {
-            published: true
-          }
-        }
+            published: true,
+          },
+        },
       },
       select: {
         id: true,
@@ -255,23 +255,23 @@ export class UserRepository {
         _count: {
           select: {
             posts: {
-              where: { published: true }
-            }
-          }
-        }
+              where: { published: true },
+            },
+          },
+        },
       },
       having: {
         posts: {
           _count: {
-            gte: minPosts
-          }
-        }
+            gte: minPosts,
+          },
+        },
       },
       orderBy: {
         posts: {
-          _count: 'desc'
-        }
-      }
+          _count: "desc",
+        },
+      },
     });
   }
 }
@@ -293,19 +293,19 @@ export class EventService {
           _count: {
             select: {
               registrations: {
-                where: { status: 'confirmed' }
-              }
-            }
-          }
-        }
+                where: { status: "confirmed" },
+              },
+            },
+          },
+        },
       });
 
       if (!event) {
-        throw new Error('Event not found');
+        throw new Error("Event not found");
       }
 
       if (event._count.registrations >= event.maxRegistrations) {
-        throw new Error('Event is full');
+        throw new Error("Event is full");
       }
 
       // Check if user is already registered
@@ -313,13 +313,13 @@ export class EventService {
         where: {
           userId_eventId: {
             userId,
-            eventId
-          }
-        }
+            eventId,
+          },
+        },
       });
 
       if (existingRegistration) {
-        throw new Error('User already registered for this event');
+        throw new Error("User already registered for this event");
       }
 
       // Create registration
@@ -327,8 +327,8 @@ export class EventService {
         data: {
           userId,
           eventId,
-          status: 'confirmed'
-        }
+          status: "confirmed",
+        },
       });
 
       return registration;
@@ -341,22 +341,22 @@ export class EventService {
         where: {
           userId_eventId: {
             userId,
-            eventId
-          }
-        }
+            eventId,
+          },
+        },
       });
 
       if (!registration) {
-        throw new Error('Registration not found');
+        throw new Error("Registration not found");
       }
 
-      if (registration.status === 'cancelled') {
-        throw new Error('Registration already cancelled');
+      if (registration.status === "cancelled") {
+        throw new Error("Registration already cancelled");
       }
 
       return tx.eventRegistration.update({
         where: { id: registration.id },
-        data: { status: 'cancelled' }
+        data: { status: "cancelled" },
       });
     });
   }
@@ -370,7 +370,11 @@ export class EventService {
 ```typescript
 // Migration utilities
 export class MigrationManager {
-  async addColumnSafely(tableName: string, columnName: string, columnDef: string) {
+  async addColumnSafely(
+    tableName: string,
+    columnName: string,
+    columnDef: string
+  ) {
     // Step 1: Add column as nullable
     await prisma.$executeRawUnsafe(`
       ALTER TABLE ${tableName}
@@ -391,8 +395,12 @@ export class MigrationManager {
     `);
   }
 
-  async addIndexSafely(tableName: string, indexName: string, columns: string[]) {
-    const columnsList = columns.join(', ');
+  async addIndexSafely(
+    tableName: string,
+    indexName: string,
+    columns: string[]
+  ) {
+    const columnsList = columns.join(", ");
 
     await prisma.$executeRawUnsafe(`
       CREATE INDEX CONCURRENTLY ${indexName}
@@ -417,18 +425,18 @@ export class DataMigrationService {
     const users = await prisma.user.findMany({
       where: {
         email: {
-          contains: '@olddomain.com'
-        }
-      }
+          contains: "@olddomain.com",
+        },
+      },
     });
 
     for (const user of users) {
       await prisma.user.update({
         where: { id: user.id },
         data: {
-          email: user.email.replace('@olddomain.com', '@newdomain.com'),
-          updatedAt: new Date()
-        }
+          email: user.email.replace("@olddomain.com", "@newdomain.com"),
+          updatedAt: new Date(),
+        },
       });
     }
   }
@@ -437,15 +445,15 @@ export class DataMigrationService {
     // Delete registrations for non-existent events
     await prisma.eventRegistration.deleteMany({
       where: {
-        event: null
-      }
+        event: null,
+      },
     });
 
     // Delete registrations for non-existent users
     await prisma.eventRegistration.deleteMany({
       where: {
-        user: null
-      }
+        user: null,
+      },
     });
   }
 }
@@ -477,7 +485,10 @@ CREATE INDEX CONCURRENTLY idx_events_description_search ON events USING gin(to_t
 
 ```typescript
 // Performance monitoring middleware
-export const performanceMiddleware: Prisma.Middleware = async (params, next) => {
+export const performanceMiddleware: Prisma.Middleware = async (
+  params,
+  next
+) => {
   const start = Date.now();
   const result = await next(params);
   const end = Date.now();
@@ -486,12 +497,14 @@ export const performanceMiddleware: Prisma.Middleware = async (params, next) => 
 
   // Log slow queries
   if (duration > 1000) {
-    console.warn(`Slow query detected: ${params.model}.${params.action} - ${duration}ms`);
+    console.warn(
+      `Slow query detected: ${params.model}.${params.action} - ${duration}ms`
+    );
     console.warn(`Query:`, params);
   }
 
   // Log all queries in development
-  if (process.env.NODE_ENV === 'development') {
+  if (process.env.NODE_ENV === "development") {
     console.log(`${params.model}.${params.action} - ${duration}ms`);
   }
 
@@ -506,30 +519,35 @@ prisma.$use(performanceMiddleware);
 
 ```typescript
 // Prisma client with connection pooling
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from "@prisma/client";
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-export const prisma = globalForPrisma.prisma ?? new PrismaClient({
-  datasources: {
-    db: {
-      url: process.env.DATABASE_URL
-    }
-  },
-  log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
-});
+export const prisma =
+  globalForPrisma.prisma ??
+  new PrismaClient({
+    datasources: {
+      db: {
+        url: process.env.DATABASE_URL,
+      },
+    },
+    log:
+      process.env.NODE_ENV === "development"
+        ? ["query", "error", "warn"]
+        : ["error"],
+  });
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 
 // For serverless environments
 export const prismaEdge = new PrismaClient({
   datasources: {
     db: {
-      url: process.env.DATABASE_URL + '?connection_limit=1&pool_timeout=20'
-    }
-  }
+      url: process.env.DATABASE_URL + "?connection_limit=1&pool_timeout=20",
+    },
+  },
 });
 ```
 
@@ -558,35 +576,43 @@ CREATE POLICY public_events ON events
 
 ```typescript
 // Sensitive data encryption utilities
-import { createCipheriv, createDecipheriv, randomBytes } from 'crypto';
+import { createCipheriv, createDecipheriv, randomBytes } from "crypto";
 
 const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY!;
-const ALGORITHM = 'aes-256-gcm';
+const ALGORITHM = "aes-256-gcm";
 
 export class EncryptionService {
   static encrypt(text: string): string {
     const iv = randomBytes(16);
-    const cipher = createCipheriv(ALGORITHM, Buffer.from(ENCRYPTION_KEY, 'hex'), iv);
+    const cipher = createCipheriv(
+      ALGORITHM,
+      Buffer.from(ENCRYPTION_KEY, "hex"),
+      iv
+    );
 
-    let encrypted = cipher.update(text, 'utf8', 'hex');
-    encrypted += cipher.final('hex');
+    let encrypted = cipher.update(text, "utf8", "hex");
+    encrypted += cipher.final("hex");
 
     const authTag = cipher.getAuthTag();
 
-    return `${iv.toString('hex')}:${authTag.toString('hex')}:${encrypted}`;
+    return `${iv.toString("hex")}:${authTag.toString("hex")}:${encrypted}`;
   }
 
   static decrypt(encryptedText: string): string {
-    const [ivHex, authTagHex, encrypted] = encryptedText.split(':');
+    const [ivHex, authTagHex, encrypted] = encryptedText.split(":");
 
-    const iv = Buffer.from(ivHex, 'hex');
-    const authTag = Buffer.from(authTagHex, 'hex');
-    const decipher = createDecipheriv(ALGORITHM, Buffer.from(ENCRYPTION_KEY, 'hex'), iv);
+    const iv = Buffer.from(ivHex, "hex");
+    const authTag = Buffer.from(authTagHex, "hex");
+    const decipher = createDecipheriv(
+      ALGORITHM,
+      Buffer.from(ENCRYPTION_KEY, "hex"),
+      iv
+    );
 
     decipher.setAuthTag(authTag);
 
-    let decrypted = decipher.update(encrypted, 'hex', 'utf8');
-    decrypted += decipher.final('utf8');
+    let decrypted = decipher.update(encrypted, "hex", "utf8");
+    decrypted += decipher.final("utf8");
 
     return decrypted;
   }
@@ -600,8 +626,8 @@ export async function createUserWithEncryptedData(data: CreateUserInput) {
       email: data.email.toLowerCase(),
       // Encrypt sensitive fields
       ssn: data.ssn ? EncryptionService.encrypt(data.ssn) : null,
-      phone: data.phone ? EncryptionService.encrypt(data.phone) : null
-    }
+      phone: data.phone ? EncryptionService.encrypt(data.phone) : null,
+    },
   });
 }
 ```
@@ -631,16 +657,17 @@ model AuditLog {
 export const auditMiddleware: Prisma.Middleware = async (params, next) => {
   const result = await next(params);
 
-  if (['create', 'update', 'delete'].includes(params.action)) {
+  if (["create", "update", "delete"].includes(params.action)) {
     await prisma.auditLog.create({
       data: {
         table: params.model,
-        recordId: params.action === 'create' ? result.id : params.args.where?.id,
+        recordId:
+          params.action === "create" ? result.id : params.args.where?.id,
         action: params.action.toUpperCase(),
-        oldData: params.action === 'update' ? params.args.data : null,
-        newData: ['create', 'update'].includes(params.action) ? result : null,
-        userId: getCurrentUserId() // Implement based on your auth system
-      }
+        oldData: params.action === "update" ? params.args.data : null,
+        newData: ["create", "update"].includes(params.action) ? result : null,
+        userId: getCurrentUserId(), // Implement based on your auth system
+      },
     });
   }
 
@@ -699,11 +726,7 @@ export class RecoveryService {
   }
 
   async checkDatabaseHealth() {
-    const [
-      userCount,
-      activeConnections,
-      slowQueries
-    ] = await Promise.all([
+    const [userCount, activeConnections, slowQueries] = await Promise.all([
       prisma.user.count(),
       prisma.$queryRaw`SELECT count(*) FROM pg_stat_activity`,
       prisma.$queryRaw`
@@ -712,14 +735,14 @@ export class RecoveryService {
         WHERE mean_time > 100
         ORDER BY mean_time DESC
         LIMIT 10
-      `
+      `,
     ]);
 
     return {
       userCount,
       activeConnections,
       slowQueries,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   }
 }
@@ -754,7 +777,7 @@ model ModelName {
 export class ModelNameRepository {
   async findById(id: string) {
     return prisma.modelName.findUnique({
-      where: { id }
+      where: { id },
     });
   }
 
@@ -765,9 +788,9 @@ export class ModelNameRepository {
       prisma.modelName.findMany({
         skip,
         take: limit,
-        orderBy: { createdAt: 'desc' }
+        orderBy: { createdAt: "desc" },
       }),
-      prisma.modelName.count()
+      prisma.modelName.count(),
     ]);
 
     return {
@@ -776,27 +799,27 @@ export class ModelNameRepository {
         page,
         limit,
         total,
-        pages: Math.ceil(total / limit)
-      }
+        pages: Math.ceil(total / limit),
+      },
     };
   }
 
   async create(data: CreateModelNameInput) {
     return prisma.modelName.create({
-      data
+      data,
     });
   }
 
   async update(id: string, data: UpdateModelNameInput) {
     return prisma.modelName.update({
       where: { id },
-      data
+      data,
     });
   }
 
   async delete(id: string) {
     return prisma.modelName.delete({
-      where: { id }
+      where: { id },
     });
   }
 }
@@ -847,22 +870,22 @@ export class SoftDeleteRepository {
   async findActive() {
     return prisma.softDeleteExample.findMany({
       where: {
-        deletedAt: null
-      }
+        deletedAt: null,
+      },
     });
   }
 
   async softDelete(id: string) {
     return prisma.softDeleteExample.update({
       where: { id },
-      data: { deletedAt: new Date() }
+      data: { deletedAt: new Date() },
     });
   }
 
   async restore(id: string) {
     return prisma.softDeleteExample.update({
       where: { id },
-      data: { deletedAt: null }
+      data: { deletedAt: null },
     });
   }
 }
@@ -894,9 +917,9 @@ export class CommentRepository {
     return prisma.comment.findMany({
       where: {
         commentableType: type,
-        commentableId: id
+        commentableId: id,
       },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: "desc" },
     });
   }
 
@@ -905,15 +928,13 @@ export class CommentRepository {
       data: {
         content,
         commentableType: type,
-        commentableId: id
-      }
+        commentableId: id,
+      },
     });
   }
 }
 ```
 
-description:
-globs:
-alwaysApply: false
+description: globs: alwaysApply: false
 
 ---

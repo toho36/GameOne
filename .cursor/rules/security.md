@@ -6,7 +6,10 @@ alwaysApply: true
 
 ## Overview
 
-This document defines comprehensive security and privacy guidelines for the GameOne event management system. These rules ensure data protection, regulatory compliance (GDPR, PCI DSS), and robust security practices throughout the application.
+This document defines comprehensive security and privacy guidelines for the
+GameOne event management system. These rules ensure data protection, regulatory
+compliance (GDPR, PCI DSS), and robust security practices throughout the
+application.
 
 ## Security Principles
 
@@ -39,7 +42,7 @@ This document defines comprehensive security and privacy guidelines for the Game
 
 ```typescript
 // src/lib/auth/kinde.ts
-import { KindeApi } from '@kinde-oss/kinde-typescript-sdk';
+import { KindeApi } from "@kinde-oss/kinde-typescript-sdk";
 
 export class AuthService {
   private kindeClient: KindeApi;
@@ -49,7 +52,7 @@ export class AuthService {
       domain: process.env.KINDE_ISSUER_URL!,
       clientId: process.env.KINDE_CLIENT_ID!,
       clientSecret: process.env.KINDE_CLIENT_SECRET!,
-      logLevel: process.env.NODE_ENV === 'development' ? 'debug' : 'error'
+      logLevel: process.env.NODE_ENV === "development" ? "debug" : "error",
     });
   }
 
@@ -60,16 +63,16 @@ export class AuthService {
 
       // Additional custom validation
       if (!this.isValidTokenClaims(decoded)) {
-        throw new AuthError('Invalid token claims');
+        throw new AuthError("Invalid token claims");
       }
 
       return {
         valid: true,
         user: await this.getUserFromToken(decoded),
-        permissions: decoded.permissions || []
+        permissions: decoded.permissions || [],
       };
     } catch (error) {
-      logger.warn('Token validation failed', { error: error.message });
+      logger.warn("Token validation failed", { error: error.message });
       return { valid: false, error: error.message };
     }
   }
@@ -90,8 +93,8 @@ export class AuthService {
 
 ```typescript
 // src/lib/auth/session.ts
-import { cookies } from 'next/headers';
-import { JWTPayload, SignJWT, jwtVerify } from 'jose';
+import { cookies } from "next/headers";
+import { JWTPayload, SignJWT, jwtVerify } from "jose";
 
 const SESSION_TIMEOUT = 24 * 60 * 60 * 1000; // 24 hours
 const REFRESH_THRESHOLD = 4 * 60 * 60 * 1000; // 4 hours
@@ -107,15 +110,17 @@ export class SessionManager {
       email: user.email,
       roles: user.roles,
       iat: Math.floor(Date.now() / 1000),
-      exp: Math.floor((Date.now() + SESSION_TIMEOUT) / 1000)
+      exp: Math.floor((Date.now() + SESSION_TIMEOUT) / 1000),
     };
 
     return new SignJWT(payload)
-      .setProtectedHeader({ alg: 'HS256' })
+      .setProtectedHeader({ alg: "HS256" })
       .sign(this.SECRET);
   }
 
-  static async validateSession(token: string): Promise<SessionValidationResult> {
+  static async validateSession(
+    token: string
+  ): Promise<SessionValidationResult> {
     try {
       const { payload } = await jwtVerify(token, this.SECRET);
 
@@ -126,7 +131,7 @@ export class SessionManager {
         valid: true,
         payload,
         needsRefresh,
-        user: await this.getUserFromPayload(payload)
+        user: await this.getUserFromPayload(payload),
       };
     } catch (error) {
       return { valid: false, error: error.message };
@@ -135,21 +140,21 @@ export class SessionManager {
 
   static needsRefresh(payload: JWTPayload): boolean {
     const expiresAt = payload.exp! * 1000;
-    return (expiresAt - Date.now()) < REFRESH_THRESHOLD;
+    return expiresAt - Date.now() < REFRESH_THRESHOLD;
   }
 
   static setSecureCookie(token: string): void {
-    cookies().set('session', token, {
+    cookies().set("session", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
       maxAge: SESSION_TIMEOUT / 1000,
-      path: '/'
+      path: "/",
     });
   }
 
   static clearSession(): void {
-    cookies().delete('session');
+    cookies().delete("session");
   }
 }
 ```
@@ -162,29 +167,29 @@ export class SessionManager {
 // src/lib/auth/permissions.ts
 export enum Permission {
   // Event permissions
-  EVENT_CREATE = 'event:create',
-  EVENT_READ = 'event:read',
-  EVENT_UPDATE = 'event:update',
-  EVENT_DELETE = 'event:delete',
-  EVENT_PUBLISH = 'event:publish',
+  EVENT_CREATE = "event:create",
+  EVENT_READ = "event:read",
+  EVENT_UPDATE = "event:update",
+  EVENT_DELETE = "event:delete",
+  EVENT_PUBLISH = "event:publish",
 
   // Registration permissions
-  REGISTRATION_CREATE = 'registration:create',
-  REGISTRATION_READ = 'registration:read',
-  REGISTRATION_UPDATE = 'registration:update',
-  REGISTRATION_DELETE = 'registration:delete',
-  REGISTRATION_APPROVE = 'registration:approve',
+  REGISTRATION_CREATE = "registration:create",
+  REGISTRATION_READ = "registration:read",
+  REGISTRATION_UPDATE = "registration:update",
+  REGISTRATION_DELETE = "registration:delete",
+  REGISTRATION_APPROVE = "registration:approve",
 
   // User permissions
-  USER_READ = 'user:read',
-  USER_UPDATE = 'user:update',
-  USER_DELETE = 'user:delete',
-  USER_IMPERSONATE = 'user:impersonate',
+  USER_READ = "user:read",
+  USER_UPDATE = "user:update",
+  USER_DELETE = "user:delete",
+  USER_IMPERSONATE = "user:impersonate",
 
   // Admin permissions
-  ADMIN_FULL_ACCESS = 'admin:*',
-  SYSTEM_CONFIG = 'system:config',
-  AUDIT_LOGS = 'audit:logs'
+  ADMIN_FULL_ACCESS = "admin:*",
+  SYSTEM_CONFIG = "system:config",
+  AUDIT_LOGS = "audit:logs",
 }
 
 export class PermissionChecker {
@@ -203,7 +208,7 @@ export class PermissionChecker {
     }
 
     // Check wildcard permissions
-    const [resource, action] = requiredPermission.split(':');
+    const [resource, action] = requiredPermission.split(":");
     const wildcardPermission = `${resource}:*`;
 
     return userPermissions.includes(wildcardPermission);
@@ -213,7 +218,7 @@ export class PermissionChecker {
     userPermissions: string[],
     requiredPermissions: Permission[]
   ): boolean {
-    return requiredPermissions.some(permission =>
+    return requiredPermissions.some((permission) =>
       this.hasPermission(userPermissions, permission)
     );
   }
@@ -222,7 +227,7 @@ export class PermissionChecker {
     userPermissions: string[],
     requiredPermissions: Permission[]
   ): boolean {
-    return requiredPermissions.every(permission =>
+    return requiredPermissions.every((permission) =>
       this.hasPermission(userPermissions, permission)
     );
   }
@@ -231,10 +236,10 @@ export class PermissionChecker {
   static canAccessEvent(
     user: User,
     event: Event,
-    action: 'read' | 'update' | 'delete'
+    action: "read" | "update" | "delete"
   ): boolean {
     // Public events are readable by all
-    if (action === 'read' && !event.isPrivate) {
+    if (action === "read" && !event.isPrivate) {
       return true;
     }
 
@@ -247,7 +252,7 @@ export class PermissionChecker {
     const permissionMap = {
       read: Permission.EVENT_READ,
       update: Permission.EVENT_UPDATE,
-      delete: Permission.EVENT_DELETE
+      delete: Permission.EVENT_DELETE,
     };
 
     return this.hasPermission(user.permissions, permissionMap[action]);
@@ -256,18 +261,18 @@ export class PermissionChecker {
   static canAccessUserData(
     currentUser: User,
     targetUserId: string,
-    action: 'read' | 'update' | 'delete'
+    action: "read" | "update" | "delete"
   ): boolean {
     // Users can access their own data
     if (currentUser.id === targetUserId) {
-      return action !== 'delete'; // Users can't delete themselves
+      return action !== "delete"; // Users can't delete themselves
     }
 
     // Check admin permissions
     const permissionMap = {
       read: Permission.USER_READ,
       update: Permission.USER_UPDATE,
-      delete: Permission.USER_DELETE
+      delete: Permission.USER_DELETE,
     };
 
     return this.hasPermission(currentUser.permissions, permissionMap[action]);
@@ -279,7 +284,7 @@ export class PermissionChecker {
 
 ```typescript
 // src/lib/auth/middleware.ts
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from "next/server";
 
 export interface RouteProtectionConfig {
   permissions?: Permission[];
@@ -317,7 +322,7 @@ export function withAuth(
 
       // Check permissions
       if (config.permissions && user) {
-        const hasPermission = config.permissions.some(permission =>
+        const hasPermission = config.permissions.some((permission) =>
           PermissionChecker.hasPermission(user.permissions, permission)
         );
         if (!hasPermission) {
@@ -327,9 +332,7 @@ export function withAuth(
 
       // Check roles
       if (config.roles && user) {
-        const hasRole = config.roles.some(role =>
-          user.roles.includes(role)
-        );
+        const hasRole = config.roles.some((role) => user.roles.includes(role));
         if (!hasRole) {
           return createForbiddenResponse();
         }
@@ -357,32 +360,42 @@ export function withAuth(
 
       return handler(request, context);
     } catch (error) {
-      logger.error('Auth middleware error', { error: error.message });
-      return createErrorResponse('INTERNAL_ERROR', 'Authentication failed', 500);
+      logger.error("Auth middleware error", { error: error.message });
+      return createErrorResponse(
+        "INTERNAL_ERROR",
+        "Authentication failed",
+        500
+      );
     }
   };
 }
 
 // Usage examples
-export const GET = withAuth(async (request) => {
-  // Handler implementation
-}, {
-  requiresAuth: true,
-  permissions: [Permission.EVENT_READ]
-});
-
-export const DELETE = withAuth(async (request, { params }) => {
-  // Handler implementation
-}, {
-  requiresAuth: true,
-  permissions: [Permission.EVENT_DELETE],
-  customCheck: async (user, request) => {
-    const event = await prisma.event.findUnique({
-      where: { id: params.id }
-    });
-    return event?.createdById === user.id;
+export const GET = withAuth(
+  async (request) => {
+    // Handler implementation
+  },
+  {
+    requiresAuth: true,
+    permissions: [Permission.EVENT_READ],
   }
-});
+);
+
+export const DELETE = withAuth(
+  async (request, { params }) => {
+    // Handler implementation
+  },
+  {
+    requiresAuth: true,
+    permissions: [Permission.EVENT_DELETE],
+    customCheck: async (user, request) => {
+      const event = await prisma.event.findUnique({
+        where: { id: params.id },
+      });
+      return event?.createdById === user.id;
+    },
+  }
+);
 ```
 
 ## Data Protection & Privacy
@@ -394,20 +407,20 @@ export const DELETE = withAuth(async (request, { params }) => {
 ```typescript
 // src/lib/privacy/gdpr.ts
 export enum DataProcessingPurpose {
-  REGISTRATION = 'registration',
-  COMMUNICATION = 'communication',
-  PAYMENT = 'payment',
-  ANALYTICS = 'analytics',
-  MARKETING = 'marketing'
+  REGISTRATION = "registration",
+  COMMUNICATION = "communication",
+  PAYMENT = "payment",
+  ANALYTICS = "analytics",
+  MARKETING = "marketing",
 }
 
 export enum LegalBasis {
-  CONSENT = 'consent',
-  CONTRACT = 'contract',
-  LEGAL_OBLIGATION = 'legal_obligation',
-  VITAL_INTERESTS = 'vital_interests',
-  PUBLIC_TASK = 'public_task',
-  LEGITIMATE_INTERESTS = 'legitimate_interests'
+  CONSENT = "consent",
+  CONTRACT = "contract",
+  LEGAL_OBLIGATION = "legal_obligation",
+  VITAL_INTERESTS = "vital_interests",
+  PUBLIC_TASK = "public_task",
+  LEGITIMATE_INTERESTS = "legitimate_interests",
 }
 
 export interface DataProcessingRecord {
@@ -427,10 +440,10 @@ export class GDPRComplianceService {
   // Data mapping and inventory
   static getPersonalDataFields(): Record<string, string[]> {
     return {
-      user: ['email', 'name', 'phone', 'picture', 'givenName', 'familyName'],
-      profile: ['bio', 'website', 'socialLinks', 'emergencyContact', 'address'],
-      registration: ['specialRequirements', 'dietaryRestrictions'],
-      payment: ['billingAddress', 'paymentMethod']
+      user: ["email", "name", "phone", "picture", "givenName", "familyName"],
+      profile: ["bio", "website", "socialLinks", "emergencyContact", "address"],
+      registration: ["specialRequirements", "dietaryRestrictions"],
+      payment: ["billingAddress", "paymentMethod"],
     };
   }
 
@@ -442,13 +455,13 @@ export class GDPRComplianceService {
   ): Promise<void> {
     await prisma.dataProcessingRecord.upsert({
       where: {
-        userId_purpose: { userId, purpose }
+        userId_purpose: { userId, purpose },
       },
       update: {
         consentGiven,
         consentDate: consentGiven ? new Date() : undefined,
         consentWithdrawn: !consentGiven,
-        consentWithdrawalDate: !consentGiven ? new Date() : undefined
+        consentWithdrawalDate: !consentGiven ? new Date() : undefined,
       },
       create: {
         userId,
@@ -458,20 +471,21 @@ export class GDPRComplianceService {
         processingStartDate: new Date(),
         retentionPeriod: this.getRetentionPeriod(purpose),
         consentGiven,
-        consentDate: consentGiven ? new Date() : undefined
-      }
+        consentDate: consentGiven ? new Date() : undefined,
+      },
     });
   }
 
   // Data subject rights
   static async exportUserData(userId: string): Promise<UserDataExport> {
-    const [user, profile, registrations, payments, activities] = await Promise.all([
-      prisma.user.findUnique({ where: { id: userId } }),
-      prisma.profile.findUnique({ where: { userId } }),
-      prisma.registration.findMany({ where: { userId } }),
-      prisma.payment.findMany({ where: { userId } }),
-      prisma.auditLog.findMany({ where: { userId } })
-    ]);
+    const [user, profile, registrations, payments, activities] =
+      await Promise.all([
+        prisma.user.findUnique({ where: { id: userId } }),
+        prisma.profile.findUnique({ where: { userId } }),
+        prisma.registration.findMany({ where: { userId } }),
+        prisma.payment.findMany({ where: { userId } }),
+        prisma.auditLog.findMany({ where: { userId } }),
+      ]);
 
     return {
       exportDate: new Date(),
@@ -479,7 +493,7 @@ export class GDPRComplianceService {
       profile: this.sanitizeProfileData(profile),
       registrations: registrations.map(this.sanitizeRegistrationData),
       payments: payments.map(this.sanitizePaymentData),
-      activities: activities.map(this.sanitizeActivityData)
+      activities: activities.map(this.sanitizeActivityData),
     };
   }
 
@@ -491,9 +505,9 @@ export class GDPRComplianceService {
       data: {
         userId,
         requestDate: new Date(),
-        status: 'PROCESSING',
-        retainForLegal
-      }
+        status: "PROCESSING",
+        retainForLegal,
+      },
     });
 
     try {
@@ -508,9 +522,9 @@ export class GDPRComplianceService {
       await prisma.dataDeletion.update({
         where: { id: deletionRecord.id },
         data: {
-          status: 'COMPLETED',
-          completedDate: new Date()
-        }
+          status: "COMPLETED",
+          completedDate: new Date(),
+        },
       });
 
       return { success: true, deletionId: deletionRecord.id };
@@ -518,9 +532,9 @@ export class GDPRComplianceService {
       await prisma.dataDeletion.update({
         where: { id: deletionRecord.id },
         data: {
-          status: 'FAILED',
-          errorMessage: error.message
-        }
+          status: "FAILED",
+          errorMessage: error.message,
+        },
       });
 
       throw error;
@@ -529,7 +543,7 @@ export class GDPRComplianceService {
 
   private static async anonymizeUserData(userId: string): Promise<void> {
     const anonymizedEmail = `deleted-${userId}@anonymized.local`;
-    const anonymizedName = 'Deleted User';
+    const anonymizedName = "Deleted User";
 
     await prisma.user.update({
       where: { id: userId },
@@ -542,8 +556,8 @@ export class GDPRComplianceService {
         picture: null,
         isVerified: false,
         locale: null,
-        timezone: null
-      }
+        timezone: null,
+      },
     });
 
     // Anonymize related data
@@ -554,8 +568,8 @@ export class GDPRComplianceService {
         website: null,
         socialLinks: {},
         emergencyContact: {},
-        address: {}
-      }
+        address: {},
+      },
     });
   }
 
@@ -574,7 +588,7 @@ export class GDPRComplianceService {
 
     return {
       totalCleaned: cleanupResults.reduce((sum, r) => sum + r.count, 0),
-      details: cleanupResults
+      details: cleanupResults,
     };
   }
 }
@@ -586,60 +600,65 @@ export class GDPRComplianceService {
 
 ```typescript
 // src/lib/security/encryption.ts
-import { createCipheriv, createDecipheriv, randomBytes, scryptSync } from 'crypto';
+import {
+  createCipheriv,
+  createDecipheriv,
+  randomBytes,
+  scryptSync,
+} from "crypto";
 
 export class FieldEncryption {
-  private static readonly ALGORITHM = 'aes-256-gcm';
+  private static readonly ALGORITHM = "aes-256-gcm";
   private static readonly KEY_LENGTH = 32;
   private static readonly IV_LENGTH = 16;
   private static readonly TAG_LENGTH = 16;
 
   private static getKey(purpose: string): Buffer {
     const secret = process.env.ENCRYPTION_SECRET!;
-    return scryptSync(secret + purpose, 'salt', this.KEY_LENGTH);
+    return scryptSync(secret + purpose, "salt", this.KEY_LENGTH);
   }
 
-  static encrypt(plaintext: string, purpose: string = 'default'): string {
+  static encrypt(plaintext: string, purpose: string = "default"): string {
     try {
       const key = this.getKey(purpose);
       const iv = randomBytes(this.IV_LENGTH);
       const cipher = createCipheriv(this.ALGORITHM, key, iv);
 
-      let encrypted = cipher.update(plaintext, 'utf8', 'hex');
-      encrypted += cipher.final('hex');
+      let encrypted = cipher.update(plaintext, "utf8", "hex");
+      encrypted += cipher.final("hex");
 
       const tag = cipher.getAuthTag();
 
       // Combine iv, tag, and encrypted data
-      return `${iv.toString('hex')}:${tag.toString('hex')}:${encrypted}`;
+      return `${iv.toString("hex")}:${tag.toString("hex")}:${encrypted}`;
     } catch (error) {
-      logger.error('Encryption failed', { purpose, error: error.message });
-      throw new SecurityError('Encryption failed');
+      logger.error("Encryption failed", { purpose, error: error.message });
+      throw new SecurityError("Encryption failed");
     }
   }
 
-  static decrypt(encryptedData: string, purpose: string = 'default'): string {
+  static decrypt(encryptedData: string, purpose: string = "default"): string {
     try {
-      const [ivHex, tagHex, encrypted] = encryptedData.split(':');
+      const [ivHex, tagHex, encrypted] = encryptedData.split(":");
 
       if (!ivHex || !tagHex || !encrypted) {
-        throw new Error('Invalid encrypted data format');
+        throw new Error("Invalid encrypted data format");
       }
 
       const key = this.getKey(purpose);
-      const iv = Buffer.from(ivHex, 'hex');
-      const tag = Buffer.from(tagHex, 'hex');
+      const iv = Buffer.from(ivHex, "hex");
+      const tag = Buffer.from(tagHex, "hex");
 
       const decipher = createDecipheriv(this.ALGORITHM, key, iv);
       decipher.setAuthTag(tag);
 
-      let decrypted = decipher.update(encrypted, 'hex', 'utf8');
-      decrypted += decipher.final('utf8');
+      let decrypted = decipher.update(encrypted, "hex", "utf8");
+      decrypted += decipher.final("utf8");
 
       return decrypted;
     } catch (error) {
-      logger.error('Decryption failed', { purpose, error: error.message });
-      throw new SecurityError('Decryption failed');
+      logger.error("Decryption failed", { purpose, error: error.message });
+      throw new SecurityError("Decryption failed");
     }
   }
 
@@ -651,14 +670,14 @@ export class FieldEncryption {
       },
       set: (value: string | null) => {
         return value ? this.encrypt(value, purpose) : value;
-      }
+      },
     };
   }
 }
 
 // Usage in Prisma schema
-export const encryptedPhone = FieldEncryption.createEncryptedField('phone');
-export const encryptedAddress = FieldEncryption.createEncryptedField('address');
+export const encryptedPhone = FieldEncryption.createEncryptedField("phone");
+export const encryptedAddress = FieldEncryption.createEncryptedField("address");
 ```
 
 ## Input Validation & Sanitization
@@ -667,14 +686,14 @@ export const encryptedAddress = FieldEncryption.createEncryptedField('address');
 
 ```typescript
 // src/lib/security/validation.ts
-import { z } from 'zod';
-import DOMPurify from 'isomorphic-dompurify';
+import { z } from "zod";
+import DOMPurify from "isomorphic-dompurify";
 
 export class SecurityValidator {
   // SQL Injection prevention
   static sanitizeInput(input: string): string {
     return input
-      .replace(/[';\\x00\\n\\r\\x08\\x09\\x1a]/g, '') // Remove dangerous chars
+      .replace(/[';\\x00\\n\\r\\x08\\x09\\x1a]/g, "") // Remove dangerous chars
       .trim()
       .slice(0, 10000); // Limit length
   }
@@ -682,8 +701,8 @@ export class SecurityValidator {
   // XSS prevention
   static sanitizeHtml(html: string): string {
     return DOMPurify.sanitize(html, {
-      ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 'ol', 'ul', 'li'],
-      ALLOWED_ATTR: []
+      ALLOWED_TAGS: ["p", "br", "strong", "em", "u", "ol", "ul", "li"],
+      ALLOWED_ATTR: [],
     });
   }
 
@@ -691,24 +710,24 @@ export class SecurityValidator {
   static validateFile(file: File): FileValidationResult {
     const MAX_SIZE = 10 * 1024 * 1024; // 10MB
     const ALLOWED_TYPES = [
-      'image/jpeg',
-      'image/png',
-      'image/webp',
-      'application/pdf',
-      'text/plain'
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+      "application/pdf",
+      "text/plain",
     ];
 
     if (file.size > MAX_SIZE) {
-      return { valid: false, error: 'File too large' };
+      return { valid: false, error: "File too large" };
     }
 
     if (!ALLOWED_TYPES.includes(file.type)) {
-      return { valid: false, error: 'File type not allowed' };
+      return { valid: false, error: "File type not allowed" };
     }
 
     // Check file signature
     if (!this.validateFileSignature(file)) {
-      return { valid: false, error: 'Invalid file signature' };
+      return { valid: false, error: "Invalid file signature" };
     }
 
     return { valid: true };
@@ -720,9 +739,9 @@ export class SecurityValidator {
 
     // Check magic numbers for common file types
     const signatures = {
-      'image/jpeg': [0xFF, 0xD8, 0xFF],
-      'image/png': [0x89, 0x50, 0x4E, 0x47],
-      'application/pdf': [0x25, 0x50, 0x44, 0x46]
+      "image/jpeg": [0xff, 0xd8, 0xff],
+      "image/png": [0x89, 0x50, 0x4e, 0x47],
+      "application/pdf": [0x25, 0x50, 0x44, 0x46],
     };
 
     const signature = signatures[file.type as keyof typeof signatures];
@@ -732,10 +751,7 @@ export class SecurityValidator {
   }
 
   // Rate limiting validation
-  static createRateLimitValidator(
-    windowMs: number,
-    maxRequests: number
-  ) {
+  static createRateLimitValidator(windowMs: number, maxRequests: number) {
     const requests = new Map<string, number[]>();
 
     return (identifier: string): boolean => {
@@ -746,7 +762,7 @@ export class SecurityValidator {
       const userRequests = requests.get(identifier) || [];
 
       // Remove old requests outside the window
-      const validRequests = userRequests.filter(time => time > windowStart);
+      const validRequests = userRequests.filter((time) => time > windowStart);
 
       // Check if under limit
       if (validRequests.length >= maxRequests) {
@@ -764,24 +780,28 @@ export class SecurityValidator {
 
 // Schema validation with security checks
 export const secureEventSchema = z.object({
-  title: z.string()
-    .min(1, 'Title is required')
-    .max(255, 'Title too long')
+  title: z
+    .string()
+    .min(1, "Title is required")
+    .max(255, "Title too long")
     .transform(SecurityValidator.sanitizeInput),
 
-  description: z.string()
-    .min(1, 'Description is required')
-    .max(5000, 'Description too long')
+  description: z
+    .string()
+    .min(1, "Description is required")
+    .max(5000, "Description too long")
     .transform(SecurityValidator.sanitizeHtml),
 
-  price: z.number()
-    .min(0, 'Price cannot be negative')
-    .max(100000, 'Price too high'),
+  price: z
+    .number()
+    .min(0, "Price cannot be negative")
+    .max(100000, "Price too high"),
 
-  maxParticipants: z.number()
-    .min(1, 'Must allow at least 1 participant')
-    .max(10000, 'Too many participants')
-    .optional()
+  maxParticipants: z
+    .number()
+    .min(1, "Must allow at least 1 participant")
+    .max(10000, "Too many participants")
+    .optional(),
 });
 ```
 
@@ -794,10 +814,10 @@ export const secureEventSchema = z.object({
 export class PaymentSecurity {
   // Never store sensitive payment data
   static readonly PROHIBITED_FIELDS = [
-    'cardNumber',
-    'cvv',
-    'expiryDate',
-    'cardHolderName'
+    "cardNumber",
+    "cvv",
+    "expiryDate",
+    "cardHolderName",
   ];
 
   // Tokenize payment methods
@@ -808,7 +828,7 @@ export class PaymentSecurity {
     const token = await paymentProcessor.tokenize({
       type: paymentData.type,
       // Only send allowed fields to processor
-      ...this.sanitizePaymentData(paymentData)
+      ...this.sanitizePaymentData(paymentData),
     });
 
     // Store only the token and minimal metadata
@@ -818,7 +838,7 @@ export class PaymentSecurity {
       brand: token.brand,
       expiryMonth: token.expiryMonth,
       expiryYear: token.expiryYear,
-      fingerprint: token.fingerprint
+      fingerprint: token.fingerprint,
     };
   }
 
@@ -826,7 +846,7 @@ export class PaymentSecurity {
     const sanitized = { ...data };
 
     // Remove prohibited fields
-    this.PROHIBITED_FIELDS.forEach(field => {
+    this.PROHIBITED_FIELDS.forEach((field) => {
       delete sanitized[field];
     });
 
@@ -842,11 +862,11 @@ export class PaymentSecurity {
   ): Promise<PaymentResult> {
     try {
       // Log payment attempt
-      logger.info('Payment processing started', {
+      logger.info("Payment processing started", {
         amount,
         currency,
         eventId: metadata.eventId,
-        userId: metadata.userId
+        userId: metadata.userId,
       });
 
       const result = await paymentProcessor.charge({
@@ -857,57 +877,58 @@ export class PaymentSecurity {
         metadata: {
           eventId: metadata.eventId,
           userId: metadata.userId,
-          registrationId: metadata.registrationId
-        }
+          registrationId: metadata.registrationId,
+        },
       });
 
       // Create audit trail
       await this.createPaymentAudit({
-        action: 'PAYMENT_PROCESSED',
+        action: "PAYMENT_PROCESSED",
         paymentIntentId: result.id,
         amount,
         currency,
         status: result.status,
-        metadata
+        metadata,
       });
 
       return {
         success: true,
         paymentIntentId: result.id,
-        status: result.status
+        status: result.status,
       };
-
     } catch (error) {
-      logger.error('Payment processing failed', {
+      logger.error("Payment processing failed", {
         amount,
         currency,
         error: error.message,
-        metadata
+        metadata,
       });
 
       await this.createPaymentAudit({
-        action: 'PAYMENT_FAILED',
+        action: "PAYMENT_FAILED",
         amount,
         currency,
         error: error.message,
-        metadata
+        metadata,
       });
 
       return {
         success: false,
-        error: error.message
+        error: error.message,
       };
     }
   }
 
-  private static async createPaymentAudit(data: PaymentAuditData): Promise<void> {
+  private static async createPaymentAudit(
+    data: PaymentAuditData
+  ): Promise<void> {
     await prisma.paymentAudit.create({
       data: {
         ...data,
         timestamp: new Date(),
         ipAddress: data.metadata.ipAddress,
-        userAgent: data.metadata.userAgent
-      }
+        userAgent: data.metadata.userAgent,
+      },
     });
   }
 }
@@ -922,85 +943,71 @@ export class PaymentSecurity {
 export function getSecurityHeaders(): Record<string, string> {
   return {
     // XSS Protection
-    'X-XSS-Protection': '1; mode=block',
+    "X-XSS-Protection": "1; mode=block",
 
     // Content Type Options
-    'X-Content-Type-Options': 'nosniff',
+    "X-Content-Type-Options": "nosniff",
 
     // Frame Options
-    'X-Frame-Options': 'DENY',
+    "X-Frame-Options": "DENY",
 
     // Referrer Policy
-    'Referrer-Policy': 'strict-origin-when-cross-origin',
+    "Referrer-Policy": "strict-origin-when-cross-origin",
 
     // Permissions Policy
-    'Permissions-Policy': [
-      'camera=()',
-      'microphone=()',
-      'geolocation=()',
-      'payment=(self)',
-      'usb=()',
-      'bluetooth=()'
-    ].join(', '),
+    "Permissions-Policy": [
+      "camera=()",
+      "microphone=()",
+      "geolocation=()",
+      "payment=(self)",
+      "usb=()",
+      "bluetooth=()",
+    ].join(", "),
 
     // Strict Transport Security
-    'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
+    "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
 
     // Content Security Policy
-    'Content-Security-Policy': getCSPDirectives()
+    "Content-Security-Policy": getCSPDirectives(),
   };
 }
 
 function getCSPDirectives(): string {
   const directives = {
-    'default-src': ["'self'"],
-    'script-src': [
+    "default-src": ["'self'"],
+    "script-src": [
       "'self'",
       "'unsafe-inline'", // For Next.js inline scripts
-      'https://cdn.kinde.com',
-      'https://js.stripe.com',
-      process.env.NODE_ENV === 'development' ? "'unsafe-eval'" : ''
+      "https://cdn.kinde.com",
+      "https://js.stripe.com",
+      process.env.NODE_ENV === "development" ? "'unsafe-eval'" : "",
     ].filter(Boolean),
-    'style-src': [
+    "style-src": [
       "'self'",
       "'unsafe-inline'", // For Tailwind CSS
-      'https://fonts.googleapis.com'
+      "https://fonts.googleapis.com",
     ],
-    'img-src': [
+    "img-src": ["'self'", "data:", "blob:", "https:", "*.vercel-storage.com"],
+    "font-src": ["'self'", "https://fonts.gstatic.com"],
+    "connect-src": [
       "'self'",
-      'data:',
-      'blob:',
-      'https:',
-      '*.vercel-storage.com'
-    ],
-    'font-src': [
-      "'self'",
-      'https://fonts.gstatic.com'
-    ],
-    'connect-src': [
-      "'self'",
-      'https://api.kinde.com',
-      'https://api.stripe.com',
-      'wss:',
-      process.env.NODE_ENV === 'development' ? 'http://localhost:*' : ''
+      "https://api.kinde.com",
+      "https://api.stripe.com",
+      "wss:",
+      process.env.NODE_ENV === "development" ? "http://localhost:*" : "",
     ].filter(Boolean),
-    'frame-src': [
-      'https://js.stripe.com',
-      'https://hooks.stripe.com'
-    ],
-    'object-src': ["'none'"],
-    'base-uri': ["'self'"],
-    'form-action': ["'self'"],
-    'upgrade-insecure-requests': []
+    "frame-src": ["https://js.stripe.com", "https://hooks.stripe.com"],
+    "object-src": ["'none'"],
+    "base-uri": ["'self'"],
+    "form-action": ["'self'"],
+    "upgrade-insecure-requests": [],
   };
 
   return Object.entries(directives)
     .map(([directive, sources]) =>
-      sources.length > 0
-        ? `${directive} ${sources.join(' ')}`
-        : directive
+      sources.length > 0 ? `${directive} ${sources.join(" ")}` : directive
     )
-    .join('; ');
+    .join("; ");
 }
 ```
 
@@ -1011,14 +1018,14 @@ function getCSPDirectives(): string {
 ```typescript
 // src/lib/security/monitoring.ts
 export enum SecurityEventType {
-  AUTHENTICATION_FAILURE = 'auth_failure',
-  AUTHORIZATION_FAILURE = 'authz_failure',
-  SUSPICIOUS_ACTIVITY = 'suspicious_activity',
-  DATA_ACCESS = 'data_access',
-  PRIVILEGE_ESCALATION = 'privilege_escalation',
-  RATE_LIMIT_EXCEEDED = 'rate_limit_exceeded',
-  INVALID_INPUT = 'invalid_input',
-  FILE_UPLOAD_VIOLATION = 'file_upload_violation'
+  AUTHENTICATION_FAILURE = "auth_failure",
+  AUTHORIZATION_FAILURE = "authz_failure",
+  SUSPICIOUS_ACTIVITY = "suspicious_activity",
+  DATA_ACCESS = "data_access",
+  PRIVILEGE_ESCALATION = "privilege_escalation",
+  RATE_LIMIT_EXCEEDED = "rate_limit_exceeded",
+  INVALID_INPUT = "invalid_input",
+  FILE_UPLOAD_VIOLATION = "file_upload_violation",
 }
 
 export class SecurityMonitor {
@@ -1036,14 +1043,14 @@ export class SecurityMonitor {
       resource: details.resource,
       action: details.action,
       details: details.additionalData,
-      riskScore: this.calculateRiskScore(eventType, details)
+      riskScore: this.calculateRiskScore(eventType, details),
     };
 
     // Log to database
     await prisma.securityEvent.create({ data: event });
 
     // High-severity events trigger immediate alerts
-    if (event.severity === 'HIGH' || event.severity === 'CRITICAL') {
+    if (event.severity === "HIGH" || event.severity === "CRITICAL") {
       await this.triggerSecurityAlert(event);
     }
 
@@ -1053,17 +1060,17 @@ export class SecurityMonitor {
 
   private static getSeverity(eventType: SecurityEventType): string {
     const severityMap = {
-      [SecurityEventType.AUTHENTICATION_FAILURE]: 'MEDIUM',
-      [SecurityEventType.AUTHORIZATION_FAILURE]: 'HIGH',
-      [SecurityEventType.SUSPICIOUS_ACTIVITY]: 'HIGH',
-      [SecurityEventType.DATA_ACCESS]: 'LOW',
-      [SecurityEventType.PRIVILEGE_ESCALATION]: 'CRITICAL',
-      [SecurityEventType.RATE_LIMIT_EXCEEDED]: 'MEDIUM',
-      [SecurityEventType.INVALID_INPUT]: 'LOW',
-      [SecurityEventType.FILE_UPLOAD_VIOLATION]: 'MEDIUM'
+      [SecurityEventType.AUTHENTICATION_FAILURE]: "MEDIUM",
+      [SecurityEventType.AUTHORIZATION_FAILURE]: "HIGH",
+      [SecurityEventType.SUSPICIOUS_ACTIVITY]: "HIGH",
+      [SecurityEventType.DATA_ACCESS]: "LOW",
+      [SecurityEventType.PRIVILEGE_ESCALATION]: "CRITICAL",
+      [SecurityEventType.RATE_LIMIT_EXCEEDED]: "MEDIUM",
+      [SecurityEventType.INVALID_INPUT]: "LOW",
+      [SecurityEventType.FILE_UPLOAD_VIOLATION]: "MEDIUM",
     };
 
-    return severityMap[eventType] || 'LOW';
+    return severityMap[eventType] || "LOW";
   }
 
   private static calculateRiskScore(
@@ -1078,7 +1085,7 @@ export class SecurityMonitor {
       [SecurityEventType.AUTHORIZATION_FAILURE]: 50,
       [SecurityEventType.SUSPICIOUS_ACTIVITY]: 60,
       [SecurityEventType.PRIVILEGE_ESCALATION]: 90,
-      [SecurityEventType.RATE_LIMIT_EXCEEDED]: 30
+      [SecurityEventType.RATE_LIMIT_EXCEEDED]: 30,
     };
 
     score += baseScores[eventType] || 10;
@@ -1092,7 +1099,10 @@ export class SecurityMonitor {
       score += 15;
     }
 
-    if (details.deviceFingerprint && this.isNewDevice(details.deviceFingerprint)) {
+    if (
+      details.deviceFingerprint &&
+      this.isNewDevice(details.deviceFingerprint)
+    ) {
       score += 10;
     }
 
@@ -1102,17 +1112,17 @@ export class SecurityMonitor {
   static async triggerSecurityAlert(event: SecurityEvent): Promise<void> {
     const alert = {
       eventId: event.id,
-      type: 'SECURITY_INCIDENT',
+      type: "SECURITY_INCIDENT",
       severity: event.severity,
       message: this.generateAlertMessage(event),
-      createdAt: new Date()
+      createdAt: new Date(),
     };
 
     // Send to security team
     await notificationService.sendSecurityAlert(alert);
 
     // Auto-block if necessary
-    if (event.severity === 'CRITICAL') {
+    if (event.severity === "CRITICAL") {
       await this.autoBlockUser(event.userId, event.ipAddress);
     }
   }
@@ -1125,28 +1135,30 @@ export class SecurityMonitor {
     await prisma.user.update({
       where: { id: userId },
       data: {
-        status: 'SUSPENDED',
+        status: "SUSPENDED",
         suspendedAt: new Date(),
-        suspensionReason: 'Automatic security block'
-      }
+        suspensionReason: "Automatic security block",
+      },
     });
 
     // Block IP address
     await prisma.blockedIp.create({
       data: {
         ipAddress,
-        reason: 'Security incident',
+        reason: "Security incident",
         blockedAt: new Date(),
-        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
-      }
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
+      },
     });
 
-    logger.warn('User and IP blocked due to security incident', {
+    logger.warn("User and IP blocked due to security incident", {
       userId,
-      ipAddress
+      ipAddress,
     });
   }
 }
 ```
 
-This comprehensive security and privacy framework ensures that the GameOne event registration system maintains the highest standards of data protection and security compliance.
+This comprehensive security and privacy framework ensures that the GameOne event
+registration system maintains the highest standards of data protection and
+security compliance.

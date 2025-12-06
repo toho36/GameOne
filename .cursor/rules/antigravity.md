@@ -11,18 +11,18 @@ description: Main rules index linking to specialized rule files
 
 ## 📚 Rule Files
 
-| File | Focus |
-|------|-------|
-| [typescript-safety.md](mdc:.agent/rules/typescript-safety.md) | No `any`, type guards, API validation |
-| [file-structure.md](mdc:.agent/rules/file-structure.md) | Organization, imports, 300-line limit |
-| [documentation-lookup.md](mdc:.agent/rules/documentation-lookup.md) | MCP Context7, check docs first |
-| [common-mistakes.md](mdc:.agent/rules/common-mistakes.md) | AI pitfalls to avoid |
-| [frontend.md](mdc:.agent/rules/frontend.md) | React components, hooks, UI patterns |
-| [backend.md](mdc:.agent/rules/backend.md) | API routes, Prisma, server actions |
-| [data-fetching.md](mdc:.agent/rules/data-fetching.md) | Ky client, React Query patterns |
-| [database.md](mdc:.agent/rules/database.md) | Prisma patterns, migrations, queries |
-| [testing.md](mdc:.agent/rules/testing.md) | Vitest, testing patterns, mocks |
-| [security.md](mdc:.agent/rules/security.md) | Auth, RBAC, input validation |
+| File                                                                | Focus                                 |
+| ------------------------------------------------------------------- | ------------------------------------- |
+| [typescript-safety.md](mdc:.agent/rules/typescript-safety.md)       | No `any`, type guards, API validation |
+| [file-structure.md](mdc:.agent/rules/file-structure.md)             | Organization, imports, 300-line limit |
+| [documentation-lookup.md](mdc:.agent/rules/documentation-lookup.md) | MCP Context7, check docs first        |
+| [common-mistakes.md](mdc:.agent/rules/common-mistakes.md)           | AI pitfalls to avoid                  |
+| [frontend.md](mdc:.agent/rules/frontend.md)                         | React components, hooks, UI patterns  |
+| [backend.md](mdc:.agent/rules/backend.md)                           | API routes, Prisma, server actions    |
+| [data-fetching.md](mdc:.agent/rules/data-fetching.md)               | Ky client, React Query patterns       |
+| [database.md](mdc:.agent/rules/database.md)                         | Prisma patterns, migrations, queries  |
+| [testing.md](mdc:.agent/rules/testing.md)                           | Vitest, testing patterns, mocks       |
+| [security.md](mdc:.agent/rules/security.md)                         | Auth, RBAC, input validation          |
 
 ---
 
@@ -43,6 +43,11 @@ description: Main rules index linking to specialized rule files
 ## 🔧 KEY IMPORTS
 
 ```typescript
-import type { Event, Registration, User, RegistrationStatus } from '@prisma/client';
-import type { EventCreationFormData } from '@/types/event/event-creation.types';
+import type {
+  Event,
+  Registration,
+  User,
+  RegistrationStatus,
+} from "@prisma/client";
+import type { EventCreationFormData } from "@/types/event/event-creation.types";
 ```
