@@ -2,7 +2,7 @@
 description: Create a new API route with proper validation
 ---
 
-# New API Route t
+# New API Route test
 
 Create a new API route following Next.js App Router conventions with Zod
 validation.
