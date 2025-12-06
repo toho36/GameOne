@@ -209,3 +209,10 @@ prisma/migrations/
 # Temporary folders
 tmp/
 temp/
+
+# AI Agent Rules (allow tracking)
+!.agent/
+!.agent/rules/
+!.agent/rules/*
+!.agent/workflows/
+!.agent/workflows/*
