@@ -15,7 +15,7 @@ interface EventPaymentSettingsProps {
   bankAccounts: BankAccountOption[];
   isLoading: boolean;
   isBankAccountsLoading: boolean;
-  // eslint-disable-next-line no-unused-vars
+   
   updateFormData: (data: Partial<EventCreationFormData>) => void;
 }
 

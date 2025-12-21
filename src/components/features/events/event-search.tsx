@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 interface EventSearchProps {
-  // eslint-disable-next-line no-unused-vars
+   
   onSearch: (query: string) => void;
   onClear: () => void;
   placeholder?: string;

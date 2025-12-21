@@ -80,7 +80,7 @@ export function EventDashboard({ className }: EventDashboardProps) {
 
   const deleteEvent = useDeleteEvent();
   const handleDeleteEvent = async (eventId: string) => {
-    // eslint-disable-next-line no-alert
+     
     if (!confirm(t("deleteEvent") + "?")) return;
 
     try {
@@ -89,7 +89,7 @@ export function EventDashboard({ className }: EventDashboardProps) {
     } catch (error) {
       const message = normalizeApiError(error);
       logger.error("Event deletion failed", message);
-      // eslint-disable-next-line no-alert
+       
       alert(message);
     }
   };
@@ -103,7 +103,7 @@ export function EventDashboard({ className }: EventDashboardProps) {
     } catch (error) {
       const message = normalizeApiError(error);
       logger.error(`Event ${action} operation failed`, message);
-      // eslint-disable-next-line no-alert
+       
       alert(message);
     }
   };

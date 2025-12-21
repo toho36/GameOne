@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-vars */
+ 
 import type { Event, EventStatus, EventType, User } from "@prisma/client";
 
 // Event with related data for listing/management

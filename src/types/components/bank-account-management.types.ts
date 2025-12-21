@@ -20,9 +20,9 @@ export interface UseBankAccountsReturn {
   isLoading: boolean;
   error: string | null;
   refetch: () => void;
-  // eslint-disable-next-line no-unused-vars
+   
   setFilters: (filters: { search?: string; isActive?: boolean; ownerId?: string }) => void;
-  // eslint-disable-next-line no-unused-vars
+   
   setPage: (page: number) => void;
 }
 
@@ -33,29 +33,29 @@ export interface BankAccountManagementProps {
 export interface BankAccountListProps {
   bankAccounts: BankAccount[];
   isLoading: boolean;
-  // eslint-disable-next-line no-unused-vars
+   
   onEdit: (bankAccountId: string) => void;
-  // eslint-disable-next-line no-unused-vars
+   
   onDelete: (bankAccountId: string) => void;
-  // eslint-disable-next-line no-unused-vars
+   
   onToggleActive: (bankAccountId: string, isActive: boolean) => void;
-  // eslint-disable-next-line no-unused-vars
+   
   onSetDefault: (bankAccountId: string) => void;
 }
 
 export interface BankAccountFiltersProps {
   search: string;
-  // eslint-disable-next-line no-unused-vars
+   
   onSearchChange: (search: string) => void;
   isActive?: boolean;
-  // eslint-disable-next-line no-unused-vars
+   
   onActiveFilterChange: (isActive?: boolean) => void;
   onClear: () => void;
 }
 
 export interface BankAccountFormProps {
   initialData?: Partial<BankAccountFormData>;
-  // eslint-disable-next-line no-unused-vars
+   
   onSubmit: (data: BankAccountFormData) => Promise<void>;
   onCancel: () => void;
   isLoading?: boolean;
@@ -65,13 +65,13 @@ export interface BankAccountFormProps {
 
 export interface BankAccountCardProps {
   bankAccount: BankAccount;
-  // eslint-disable-next-line no-unused-vars
+   
   onEdit: (bankAccountId: string) => void;
-  // eslint-disable-next-line no-unused-vars
+   
   onDelete: (bankAccountId: string) => void;
-  // eslint-disable-next-line no-unused-vars
+   
   onToggleActive: (bankAccountId: string, isActive: boolean) => void;
-  // eslint-disable-next-line no-unused-vars
+   
   onSetDefault: (bankAccountId: string) => void;
   isUpdating?: boolean;
 }
@@ -81,7 +81,7 @@ export interface BankAccountModalProps {
   onClose: () => void;
   mode: "create" | "edit";
   initialData?: Partial<BankAccountFormData>;
-  // eslint-disable-next-line no-unused-vars
+   
   onSubmit: (data: BankAccountFormData) => Promise<void>;
   isLoading?: boolean;
   errors?: BankAccountFormErrors;

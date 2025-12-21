@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-vars */
+ 
 export interface EventListItem {
   id: string;
   title: string;

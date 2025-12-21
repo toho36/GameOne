@@ -93,6 +93,14 @@ export default [
     },
   },
 
+  // Allow console in scripts and seed files
+  {
+    files: ["scripts/**/*.{ts,js}", "prisma/seed.ts"],
+    rules: {
+      "no-console": "off",
+    },
+  },
+
   // Next.js config compatibility
   ...compat.extends("next/core-web-vitals"),
 

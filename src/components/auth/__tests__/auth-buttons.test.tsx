@@ -1,4 +1,3 @@
-import React from 'react'
 import { describe, it, expect, beforeEach } from 'vitest'
 import { render } from '@/test/utils'
 import { AuthButtons, LoginButton, RegisterButton, LogoutButton } from '@/components/auth/auth-buttons'

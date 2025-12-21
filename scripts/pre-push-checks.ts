@@ -1,6 +1,4 @@
 #!/usr/bin/env bun
-/* eslint-disable no-console */
-
 // Load environment variables from .env file
 import { readFileSync } from "fs";
 import { resolve } from "path";

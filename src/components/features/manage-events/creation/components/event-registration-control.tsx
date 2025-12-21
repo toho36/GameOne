@@ -8,7 +8,7 @@ interface EventRegistrationControlProps {
   formData: EventCreationFormData;
   errors: EventCreationFormErrors;
   isLoading: boolean;
-  // eslint-disable-next-line no-unused-vars
+   
   updateFormData: (data: Partial<EventCreationFormData>) => void;
 }
 

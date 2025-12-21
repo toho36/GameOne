@@ -61,7 +61,7 @@ export function AdminBulkActions({
     } catch (error) {
       const message = normalizeApiError(error);
       logger.error(`Bulk ${actionType} failed`, message);
-      // eslint-disable-next-line no-alert
+       
       alert(`Bulk ${actionType} failed: ${message}`);
     } finally {
       setIsProcessing(false);
@@ -123,7 +123,7 @@ export function AdminBulkActions({
             size="sm"
             onClick={() => {
               if (
-                // eslint-disable-next-line no-alert
+                 
                 confirm(
                   `Are you sure you want to delete ${selectedEvents.length} events? This action cannot be undone.`
                 )
