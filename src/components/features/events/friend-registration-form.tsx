@@ -22,7 +22,7 @@ interface FriendRegistrationFormProps {
     price?: number;
     currency: string;
   };
-   
+
   onSubmit: (formData: CreateRegistrationRequest) => Promise<void>;
   onCancel: () => void;
 }

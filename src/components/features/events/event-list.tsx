@@ -11,7 +11,7 @@ interface EventListProps {
   error?: string | null;
   emptyMessage?: string;
   variant?: "grid" | "list";
-   
+
   onEventSelect?: (event: PublicEvent) => void;
   onLoadMore?: () => void;
   hasMore?: boolean;

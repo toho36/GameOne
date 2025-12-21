@@ -9,7 +9,7 @@ interface EventBasicFieldsProps {
   formData: EventCreationFormData;
   errors: EventCreationFormErrors;
   isLoading: boolean;
-   
+
   updateFormData: (data: Partial<EventCreationFormData>) => void;
 }
 

@@ -1,4 +1,3 @@
- 
 export interface EventListItem {
   id: string;
   title: string;

@@ -1,4 +1,3 @@
- 
 import type { EventStatus as PrismaEventStatus } from "@prisma/client";
 
 // Event registration types for the public registration system

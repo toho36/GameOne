@@ -1,6 +1,5 @@
 #!/usr/bin/env bun
 
-
 /**
  * Project Structure Validation Script
  *
@@ -147,7 +146,7 @@ class ProjectStructureValidator {
         // All other components should be in organized subdirectories
         this.warnings.push(
           `Component not in organized subdirectory: ${file.relativePath}. ` +
-          "Should be in ui/, features/, layout/, auth/, providers/, or shared/"
+            "Should be in ui/, features/, layout/, auth/, providers/, or shared/"
         );
       }
     }
@@ -172,7 +171,7 @@ class ProjectStructureValidator {
         if (file.name !== "route.ts") {
           this.errors.push(
             `API file should be named 'route.ts': ${file.relativePath}. ` +
-            "App Router requires API routes to be named 'route.ts'"
+              "App Router requires API routes to be named 'route.ts'"
           );
         }
       }
@@ -208,7 +207,7 @@ class ProjectStructureValidator {
         } else {
           this.warnings.push(
             `Type file not in organized subdirectory: ${file.relativePath}. ` +
-            "Consider organizing in api/, features/, ui/, global/, or domain-specific folders"
+              "Consider organizing in api/, features/, ui/, global/, or domain-specific folders"
           );
         }
       }

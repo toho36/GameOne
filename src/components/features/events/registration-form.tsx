@@ -17,7 +17,7 @@ interface RegistrationFormProps {
     price?: number;
     currency: string;
   };
-   
+
   onSubmit: (formData: CreateRegistrationRequest) => Promise<void>;
 }
 

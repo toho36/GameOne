@@ -15,7 +15,7 @@ interface EventPaymentSettingsProps {
   bankAccounts: BankAccountOption[];
   isLoading: boolean;
   isBankAccountsLoading: boolean;
-   
+
   updateFormData: (data: Partial<EventCreationFormData>) => void;
 }
 

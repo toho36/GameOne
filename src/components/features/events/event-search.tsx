@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 interface EventSearchProps {
-   
   onSearch: (query: string) => void;
   onClear: () => void;
   placeholder?: string;

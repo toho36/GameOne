@@ -80,7 +80,6 @@ export function EventDashboard({ className }: EventDashboardProps) {
 
   const deleteEvent = useDeleteEvent();
   const handleDeleteEvent = async (eventId: string) => {
-     
     if (!confirm(t("deleteEvent") + "?")) return;
 
     try {
@@ -89,7 +88,7 @@ export function EventDashboard({ className }: EventDashboardProps) {
     } catch (error) {
       const message = normalizeApiError(error);
       logger.error("Event deletion failed", message);
-       
+
       alert(message);
     }
   };
@@ -103,7 +102,7 @@ export function EventDashboard({ className }: EventDashboardProps) {
     } catch (error) {
       const message = normalizeApiError(error);
       logger.error(`Event ${action} operation failed`, message);
-       
+
       alert(message);
     }
   };

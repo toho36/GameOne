@@ -18,11 +18,13 @@ bun run pre-deploy
 This runs:
 
 1. Format check (Prettier)
-2. Type safety (ESLint + TypeScript)
+2. Type safety (ESLint + TypeScript) - **Catches unused imports/variables**,
+   syntax errors, and type mismatches.
 3. Unit tests (Vitest)
 
 **Note:** This matches the same checks that run in GitHub Actions CI, ensuring
-that if `pre-deploy` passes locally, your code should pass CI as well.
+that if `pre-deploy` passes locally, your code should pass CI as well. Running
+this command before pushing prevents build failures in production.
 
 ## Manual Steps
 

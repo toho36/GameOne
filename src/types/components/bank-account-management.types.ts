@@ -20,9 +20,9 @@ export interface UseBankAccountsReturn {
   isLoading: boolean;
   error: string | null;
   refetch: () => void;
-   
+
   setFilters: (filters: { search?: string; isActive?: boolean; ownerId?: string }) => void;
-   
+
   setPage: (page: number) => void;
 }
 
@@ -33,29 +33,29 @@ export interface BankAccountManagementProps {
 export interface BankAccountListProps {
   bankAccounts: BankAccount[];
   isLoading: boolean;
-   
+
   onEdit: (bankAccountId: string) => void;
-   
+
   onDelete: (bankAccountId: string) => void;
-   
+
   onToggleActive: (bankAccountId: string, isActive: boolean) => void;
-   
+
   onSetDefault: (bankAccountId: string) => void;
 }
 
 export interface BankAccountFiltersProps {
   search: string;
-   
+
   onSearchChange: (search: string) => void;
   isActive?: boolean;
-   
+
   onActiveFilterChange: (isActive?: boolean) => void;
   onClear: () => void;
 }
 
 export interface BankAccountFormProps {
   initialData?: Partial<BankAccountFormData>;
-   
+
   onSubmit: (data: BankAccountFormData) => Promise<void>;
   onCancel: () => void;
   isLoading?: boolean;
@@ -65,13 +65,13 @@ export interface BankAccountFormProps {
 
 export interface BankAccountCardProps {
   bankAccount: BankAccount;
-   
+
   onEdit: (bankAccountId: string) => void;
-   
+
   onDelete: (bankAccountId: string) => void;
-   
+
   onToggleActive: (bankAccountId: string, isActive: boolean) => void;
-   
+
   onSetDefault: (bankAccountId: string) => void;
   isUpdating?: boolean;
 }
@@ -81,7 +81,7 @@ export interface BankAccountModalProps {
   onClose: () => void;
   mode: "create" | "edit";
   initialData?: Partial<BankAccountFormData>;
-   
+
   onSubmit: (data: BankAccountFormData) => Promise<void>;
   isLoading?: boolean;
   errors?: BankAccountFormErrors;

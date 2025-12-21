@@ -35,7 +35,7 @@ export async function getValidationMessages() {
 }
 
 // Client-side validation messages using useTranslations hook
- 
+
 export function createValidationMessages(t: (key: string) => string) {
   return {
     bankAccount: {

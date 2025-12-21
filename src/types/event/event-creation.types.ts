@@ -1,4 +1,3 @@
- 
 import type { EventType, EventStatus } from "@prisma/client";
 
 // Registration control types

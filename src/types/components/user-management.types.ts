@@ -73,9 +73,9 @@ export interface UseUsersReturn {
   isLoading: boolean;
   error: string | null;
   refetch: () => void;
-   
+
   setFilters: (filters: UserFilters) => void;
-   
+
   setPage: (page: number) => void;
 }
 
@@ -93,15 +93,15 @@ export interface UserManagementProps {
 export interface UserListProps {
   users: User[];
   isLoading: boolean;
-   
+
   onEdit: (userId: string) => void;
-   
+
   onUpdateRole: (userId: string, roleId: string) => void;
 }
 
 export interface UserFiltersProps {
   filters: UserFilters;
-   
+
   onFiltersChange: (filters: UserFilters) => void;
   onClear: () => void;
 }
