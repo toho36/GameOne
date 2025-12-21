@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { useRegister } from "@/components/features/registration/hooks/use-register";
 import type { RegistrationFormProps } from "./registration-form.types";
 

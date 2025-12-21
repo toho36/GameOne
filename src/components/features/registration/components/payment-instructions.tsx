@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import type { PaymentInstructionsProps } from "./payment-instructions.types";
 import { generateQRCodeURL } from "@/lib/qr-code";
 import { useTranslations } from "next-intl";

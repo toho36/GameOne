@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { useTranslations } from "next-intl";
 
@@ -117,11 +116,10 @@ export function DeleteBankAccountModal({
                 <span>{t("Common.status")}:</span>
                 <div className="flex items-center gap-2">
                   <span
-                    className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
-                      bankAccount.isActive
+                    className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${bankAccount.isActive
                         ? "bg-green-100 text-green-800"
                         : "bg-gray-100 text-gray-800"
-                    }`}
+                      }`}
                   >
                     {t(bankAccount.isActive ? "status.active" : "status.inactive")}
                   </span>

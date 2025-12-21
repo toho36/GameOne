@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { useTranslations } from "next-intl";
 
 import type { EventCreationFormData, EventCreationFormErrors } from "@/types/event";
@@ -34,10 +33,10 @@ export function EventScheduleFields({
           value={
             formData.startDate
               ? new Date(
-                  formData.startDate.getTime() - formData.startDate.getTimezoneOffset() * 60000
-                )
-                  .toISOString()
-                  .slice(0, 16)
+                formData.startDate.getTime() - formData.startDate.getTimezoneOffset() * 60000
+              )
+                .toISOString()
+                .slice(0, 16)
               : ""
           }
           onChange={(e) => updateFormData({ startDate: new Date(e.target.value) })}
@@ -58,8 +57,8 @@ export function EventScheduleFields({
           value={
             formData.endDate
               ? new Date(formData.endDate.getTime() - formData.endDate.getTimezoneOffset() * 60000)
-                  .toISOString()
-                  .slice(0, 16)
+                .toISOString()
+                .slice(0, 16)
               : ""
           }
           onChange={(e) =>

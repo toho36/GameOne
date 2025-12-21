@@ -1,7 +1,5 @@
 "use client";
 
-import React from "react";
-
 import type { EventCreationFormData, EventCreationFormErrors } from "@/types/event";
 
 interface EventRegistrationControlProps {
@@ -113,11 +111,11 @@ export function EventRegistrationControl({
                   value={
                     formData.registrationStartDate
                       ? new Date(
-                          formData.registrationStartDate.getTime() -
-                            formData.registrationStartDate.getTimezoneOffset() * 60000
-                        )
-                          .toISOString()
-                          .slice(0, 16)
+                        formData.registrationStartDate.getTime() -
+                        formData.registrationStartDate.getTimezoneOffset() * 60000
+                      )
+                        .toISOString()
+                        .slice(0, 16)
                       : ""
                   }
                   onChange={(e) =>
@@ -146,11 +144,11 @@ export function EventRegistrationControl({
                   value={
                     formData.registrationEndDate
                       ? new Date(
-                          formData.registrationEndDate.getTime() -
-                            formData.registrationEndDate.getTimezoneOffset() * 60000
-                        )
-                          .toISOString()
-                          .slice(0, 16)
+                        formData.registrationEndDate.getTime() -
+                        formData.registrationEndDate.getTimezoneOffset() * 60000
+                      )
+                        .toISOString()
+                        .slice(0, 16)
                       : ""
                   }
                   onChange={(e) =>

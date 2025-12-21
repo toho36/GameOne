@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import React from "react";
 
 vi.mock("next-intl", () => ({
   useTranslations: () => (key: string, values?: Record<string, any>) => {
@@ -28,11 +27,13 @@ describe("RegisteredUsersList", () => {
   });
 
   it("shows count and names when authorized payload includes participants", async () => {
-    (getJson as any).mockResolvedValue({ count: 3, participants: [
-      { id: "u1", name: "John Doe" },
-      { id: "u2", name: "Jane Smith" },
-      { id: "u3", name: "Mike Johnson" },
-    ]});
+    (getJson as any).mockResolvedValue({
+      count: 3, participants: [
+        { id: "u1", name: "John Doe" },
+        { id: "u2", name: "Jane Smith" },
+        { id: "u3", name: "Mike Johnson" },
+      ]
+    });
 
     renderWithRQ(<RegisteredUsersList eventId="e1" />);
 

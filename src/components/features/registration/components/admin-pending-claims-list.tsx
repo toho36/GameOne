@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import type { AdminPendingClaimsListProps } from "./admin-pending-claims-list.types";
 import { usePendingClaims } from "@/components/features/registration/hooks/use-pending-claims";
 import { useVerifyRegistration } from "@/components/features/registration/hooks/use-verify-registration";
