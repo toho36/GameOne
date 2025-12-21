@@ -21,7 +21,7 @@ import type { EventFilters, EventCategory } from "@/types/features/event-registr
 
 interface EventFiltersProps {
   categories: EventCategory[];
-  // eslint-disable-next-line no-unused-vars
+
   onFiltersChange: (filters: EventFilters) => void;
   onClearFilters: () => void;
 }

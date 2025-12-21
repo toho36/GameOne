@@ -2,7 +2,6 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import en from "../../../../../../messages/en.json";
-import React from "react";
 
 const { current } = vi.hoisted(() => ({
   current: { value: { data: undefined, isLoading: false, isError: false } } as { value: any },

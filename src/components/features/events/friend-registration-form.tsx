@@ -22,7 +22,7 @@ interface FriendRegistrationFormProps {
     price?: number;
     currency: string;
   };
-  // eslint-disable-next-line no-unused-vars
+
   onSubmit: (formData: CreateRegistrationRequest) => Promise<void>;
   onCancel: () => void;
 }

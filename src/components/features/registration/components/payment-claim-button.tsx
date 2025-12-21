@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { useClaimPayment } from "@/components/features/registration/hooks/use-claim-payment";
 import type { PaymentClaimButtonProps } from "./payment-claim-button.types";
 import { useTranslations } from "next-intl";

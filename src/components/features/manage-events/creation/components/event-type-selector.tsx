@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { EventType } from "@prisma/client";
 
 import { cn } from "@/lib/utils";

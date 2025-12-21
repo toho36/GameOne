@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import type { RegistrationStatusCardProps } from "./registration-status-card.types";
 
 export function RegistrationStatusCard({

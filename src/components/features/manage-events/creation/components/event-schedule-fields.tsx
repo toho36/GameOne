@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { useTranslations } from "next-intl";
 
 import type { EventCreationFormData, EventCreationFormErrors } from "@/types/event";
@@ -9,7 +8,7 @@ interface EventScheduleFieldsProps {
   formData: EventCreationFormData;
   errors: EventCreationFormErrors;
   isLoading: boolean;
-  // eslint-disable-next-line no-unused-vars
+
   updateFormData: (data: Partial<EventCreationFormData>) => void;
 }
 

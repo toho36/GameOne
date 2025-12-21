@@ -1,4 +1,3 @@
-import React from "react";
 import { notFound } from "next/navigation";
 import { RegistrationConfirmation } from "@/components/features/registration/components/registration-confirmation";
 

@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { useTranslations } from "next-intl";
 
 import type {
@@ -15,7 +14,7 @@ interface EventPaymentSettingsProps {
   bankAccounts: BankAccountOption[];
   isLoading: boolean;
   isBankAccountsLoading: boolean;
-  // eslint-disable-next-line no-unused-vars
+
   updateFormData: (data: Partial<EventCreationFormData>) => void;
 }
 

@@ -9,7 +9,6 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 
 interface AdminFiltersProps {
-  // eslint-disable-next-line no-unused-vars
   onFiltersChange: (filterOptions: AdminFilterOptions) => void;
   isAdmin: boolean;
   availableCreators: { id: string; name: string }[];

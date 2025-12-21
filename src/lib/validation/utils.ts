@@ -35,7 +35,7 @@ export async function getValidationMessages() {
 }
 
 // Client-side validation messages using useTranslations hook
-// eslint-disable-next-line no-unused-vars
+
 export function createValidationMessages(t: (key: string) => string) {
   return {
     bankAccount: {

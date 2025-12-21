@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import type { EventType, EventStatus } from "@prisma/client";
 
 // Registration control types

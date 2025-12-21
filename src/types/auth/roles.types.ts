@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 export enum RoleName {
   ADMIN = "ADMIN",
   MODERATOR = "MODERATOR",

@@ -1,4 +1,3 @@
-import React from 'react'
 import { describe, it, expect, beforeEach } from 'vitest'
 import { render, screen } from '@/test/utils'
 import { LanguageSwitcher } from '@/components/layout/language-switcher'

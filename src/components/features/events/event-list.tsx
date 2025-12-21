@@ -11,7 +11,7 @@ interface EventListProps {
   error?: string | null;
   emptyMessage?: string;
   variant?: "grid" | "list";
-  // eslint-disable-next-line no-unused-vars
+
   onEventSelect?: (event: PublicEvent) => void;
   onLoadMore?: () => void;
   hasMore?: boolean;

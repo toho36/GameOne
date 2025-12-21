@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import type { RegistrationConfirmationProps } from "./registration-confirmation.types";
 import { useRegistrationStatus } from "@/components/features/registration/hooks/use-registration-status";
 import { PaymentInstructions } from "@/components/features/registration/components/payment-instructions";

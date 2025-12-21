@@ -73,9 +73,9 @@ export interface UseUsersReturn {
   isLoading: boolean;
   error: string | null;
   refetch: () => void;
-  // eslint-disable-next-line no-unused-vars
+
   setFilters: (filters: UserFilters) => void;
-  // eslint-disable-next-line no-unused-vars
+
   setPage: (page: number) => void;
 }
 
@@ -93,15 +93,15 @@ export interface UserManagementProps {
 export interface UserListProps {
   users: User[];
   isLoading: boolean;
-  // eslint-disable-next-line no-unused-vars
+
   onEdit: (userId: string) => void;
-  // eslint-disable-next-line no-unused-vars
+
   onUpdateRole: (userId: string, roleId: string) => void;
 }
 
 export interface UserFiltersProps {
   filters: UserFilters;
-  // eslint-disable-next-line no-unused-vars
+
   onFiltersChange: (filters: UserFilters) => void;
   onClear: () => void;
 }
