@@ -11,7 +11,7 @@ vi.mock("next-intl", () => ({
   useTranslations: (ns?: string) => {
     return (key: string, values?: Record<string, any>) => {
       const resolve = (obj: any, path: string) => path.split(".").reduce((a: any, p: string) => (a ? a[p] : undefined), obj);
-      const fullKey = ns ? `${ns}.${key} ` : key;
+      const fullKey = ns ? `${ns}.${key}` : key;
       let tpl = resolve(en as any, fullKey) ?? key;
       if (typeof tpl !== "string") tpl = String(tpl);
       return tpl.replace(/\{(\w+)\}/g, (_: string, k: string) => String(values?.[k] ?? ""));
