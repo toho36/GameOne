@@ -1,5 +1,7 @@
 ---
+trigger: always_on
 alwaysApply: true
+description: Security and Privacy Rules
 ---
 
 # Security and Privacy Rules

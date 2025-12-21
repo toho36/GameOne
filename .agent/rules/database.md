@@ -1,5 +1,7 @@
 ---
+trigger: always_on
 alwaysApply: true
+description: Database Development
 ---
 
 database Development
@@ -935,6 +937,6 @@ export class CommentRepository {
 }
 ```
 
-description: globs: alwaysApply: false
 
+---
 ---

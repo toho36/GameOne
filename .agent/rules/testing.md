@@ -1,4 +1,5 @@
 ---
+trigger: always_on
 description: Testing and Quality Assurance Rules
 alwaysApply: false
 ---

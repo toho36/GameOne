@@ -1,5 +1,7 @@
 ---
+trigger: always_on
 alwaysApply: true
+description: Data Fetching Architecture (Ky + React Query)
 ---
 
 # Data Fetching Architecture (Ky + React Query)
