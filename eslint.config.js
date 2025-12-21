@@ -49,8 +49,7 @@ export default [
           jsx: true,
         },
       },
-      globals: {
-      },
+      globals: {},
     },
     plugins: {
       "@typescript-eslint": typescriptPlugin,
